@@ -56,6 +56,7 @@ def get_pixels_hu(scans):
 
 def generate_markers(image):
     # Creation of the internal Marker
+    # print(image)
     marker_internal = image < -400
     marker_internal = segmentation.clear_border(marker_internal)
     marker_internal_labels = measure.label(marker_internal)
@@ -72,6 +73,7 @@ def generate_markers(image):
     external_b = ndimage.binary_dilation(marker_internal, iterations=55)
     marker_external = external_b ^ external_a
     # Creation of the Watershed Marker matrix
+    # print(np.shape(image))
     h, w = np.shape(image)
     marker_watershed = np.zeros((h, w), dtype=np.int)
     marker_watershed += marker_internal * 255
@@ -116,12 +118,12 @@ def seperate_lungs(image):
     segmented = np.where(lungfilter == 1, image, -2000 * np.ones((512, 512)))
     return lungfilter, segmented
 
-def LungMaskVessel(path, tag):
-    temppath = path + '/' + '*vessel.nii*'
-    path_vessel = glob.glob(temppath)
-    path_vessel = path_vessel[0]
-    path_ct = path_vessel[0:len(path_vessel)-11]
-    path_ct = path_ct + '.nii'
+def LungMask(path_ct):
+    # temppath = path + '/' + '*vessel.nii*'
+    # path_vessel = glob.glob(temppath)
+    # path_vessel = path_vessel[0]
+    # path_ct = path_vessel[0:len(path_vessel)-11]
+    # path_ct = path_ct + '.nii'
     # filename, extension = os.path.splitext(path_vessel[0])
     # path_ct = filename.split("_")
     # path_ct = path_ct[0] + '_' + path_ct[1] + extension
@@ -129,32 +131,33 @@ def LungMaskVessel(path, tag):
     ct = load_nifti(path_ct)
     slope = ct.dataobj.slope
     intercept = ct.dataobj.inter
-    vessels = load_nifti(path_vessel)
+    # vessels = load_nifti(path_vessel)
     ct_hu = get_pixels_hu(ct)
-    vessels_hu = get_pixels_hu(vessels)
+    # vessels_hu = get_pixels_hu(vessels)
     # change here to select starting and end points
     start_slice = 20
     end_slice = np.shape(ct_hu)[2] - 20
     for slice_in in range(start_slice, end_slice):
         # axial plane:
         ct_slice_axial = ct_hu[:, :, slice_in]
-        vessel_slice_axial = vessels_hu[:, :, slice_in]
+        # vessel_slice_axial = vessels_hu[:, :, slice_in]
         lungfilter_axial, _ = seperate_lungs(ct_slice_axial)
-        new_vessel_axial = lungfilter_axial * vessel_slice_axial
+        new_ct_axial = lungfilter_axial * ct_slice_axial
         if (slice_in == start_slice):
-            vessels_masked = np.array(new_vessel_axial)
-            selected_ct = np.array(vessel_slice_axial)
+            ct_masked = np.array(new_ct_axial)
+            selected_ct = np.array(ct_slice_axial)
         else:
-            vessels_masked = np.dstack((vessels_masked, new_vessel_axial))
-            selected_ct = np.dstack((selected_ct, vessel_slice_axial))
+            ct_masked = np.dstack((ct_masked, new_ct_axial))
+            selected_ct = np.dstack((selected_ct, ct_slice_axial))
         print('slice ' + str(slice_in) + ' is done')
         print('\n')
-    vessels_masked = (vessels_masked.astype(np.float64) - np.int16(intercept)) / slope
+
+    cts_masked = (ct_masked.astype(np.float64) - np.int16(intercept)) / slope
     selected_ct = (selected_ct.astype(np.float64) - np.int16(intercept)) / slope
-    store_path = filename1 + '_vessel_masked_' + tag + '.nii'
-    store_path_selected_ct = filename1 + '_lung_selected_' + tag + '.nii'
+    store_path = filename1 + '_ct_masked.nii'
+    store_path_selected_ct = filename1 + '_lung_selected.nii'
     nib.save(nib.Nifti1Image(selected_ct, ct.affine, ct.header), store_path_selected_ct)
-    nib.save(nib.Nifti1Image(vessels_masked, ct.affine, ct.header), store_path)
+    nib.save(nib.Nifti1Image(cts_masked, ct.affine, ct.header), store_path)
     print('case ' + filename1 + 'lung masked vessel is done')
     print('\n')
     print('\n')
@@ -170,14 +173,19 @@ def run_all_cases(path, tag):
         fff = os.listdir(full_f)
         for ffff in fff:
             full_ffff = os.path.join(full_f, ffff)
-            LungMaskVessel(full_ffff, tag)
+            LungMask(full_ffff, tag)
             print('case is done...')
             print('\n')
 
 
 if __name__ == '__main__':
     data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRaw/1841A.nii.gz'
-    _, segmented = seperate_lungs(data_path)
+    # ct = load_nifti(data_path)
+    # slope = ct.dataobj.slope
+    # intercept = ct.dataobj.inter
+    # ct_hu = get_pixels_hu(ct)
+    # _, segmented = seperate_lungs(ct_hu)
+    LungMask(data_path)
     # path = '/home/moucheng/projects data/Pulmonary data/sarcoid patients CT/HRCT nii'
     # # path = '/home/moucheng/projects data/Pulmonary data/IPF patients/Contrast Enhanced CT/contrast enhanced cases'
     # print('calculation started..')

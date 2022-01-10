@@ -10,17 +10,16 @@ import numpy as np
 from torch.utils import data
 import shutil
 import torch.nn.functional as F
-# import Image
-# from scipy.spatial.distance import cdist
 
 from Metrics import segmentation_scores
-from Utils import CustomDataset
+from dataloaders.Dataloader import CT_Dataset
 from tensorboardX import SummaryWriter
 
 from Utils import evaluate, test
 from Loss import SoftDiceLoss
 # =================================
 from Baselines import Unet3D
+from SpatialConsistencyConstraints import GlobalLocal, HighLow
 
 
 def trainModels(dataset_tag,
@@ -35,9 +34,9 @@ def trainModels(dataset_tag,
                 learning_rate,
                 width,
                 log_tag,
-                data_augmentation='none',
-                dilation=1,
-                lr_decay='poly'
+                new_resolution=64,
+                # lr_decay='poly',
+                spatial_consistency='global_local'
                 ):
 
     for j in range(1, repeat + 1):
@@ -46,25 +45,16 @@ def trainModels(dataset_tag,
 
         Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
         Exp_name = 'sup_unet3d' + \
-                   '_r_' + str(repeat_str) + \
-                   '_lr_' + str(learning_rate) + \
-                   '_b_' + str(train_batchsize) + \
-                   '_w_' + str(width) + \
-                   '_s_' + str(num_steps) + \
-                   '_di_' + str(dilation) + \
-                   '_d_' + str(downsample) + \
-                   '_aug_' + str(data_augmentation) + \
-                   '_decay_' + str(lr_decay)
+                   '_e_' + str(repeat_str) + \
+                   '_l' + str(learning_rate) + \
+                   '_b' + str(train_batchsize) + \
+                   '_w' + str(width) + \
+                   '_s' + str(num_steps) + \
+                   '_d' + str(downsample) + \
+                   '_r' + str(new_resolution) + \
+                   '_restriction_' + str(spatial_consistency)
 
-        if class_no > 2:
-            multi_class = True
-        else:
-            multi_class = False
-
-        if dataset_name == 'carve':
-            trainloader_withlabels, validateloader, testloader, train_dataset_with_labels, validate_dataset, test_dataset = getData_carve(data_directory, dataset_name, dataset_tag, train_batchsize, data_augmentation, multi_class)
-        else:
-            trainloader_withlabels, validateloader, testloader, train_dataset_with_labels, validate_dataset, test_dataset = getData(data_directory, dataset_name, dataset_tag, train_batchsize, data_augmentation, multi_class)
+        trainloader_withlabels, validateloader, testloader, train_dataset_with_labels, validate_dataset, test_dataset = getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_resolution)
 
         # ===================
         trainSingleModel(model=Exp,
@@ -80,96 +70,21 @@ def trainModels(dataset_tag,
                          testdata=testloader,
                          class_no=class_no,
                          log_tag=log_tag,
-                         dilation=dilation,
-                         lr_decay=lr_decay)
+                         dilation=1,
+                         # lr_decay=lr_decay,
+                         spatial_consistency=spatial_consistency)
 
 
-def getData_carve(data_directory, dataset_name, dataset_tag, train_batchsize, data_augmentation='none', multi_class=True):
+def getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_resolution):
 
-    if multi_class is True:
-        data_set_tag = '3d_multi'
-    else:
-        data_set_tag = '3d_binary'
-
-    all_underline_pos = [pos for pos, char in enumerate(dataset_tag) if char == '_']
-
-    # resolution
-    resolution_imgs_start = dataset_tag.find('R')
-    resolution_imgs_end = resolution_imgs_start + len('R')
-    resolution_imgs = dataset_tag[resolution_imgs_end:all_underline_pos[0]]
-
-    # case index as training
-    case_start = dataset_tag.find('C')
-    case_end = case_start + len('C')
-    case_no = dataset_tag[case_end:all_underline_pos[1]]
-
-    # depth
-    new_depth_of_img_start = dataset_tag.find('D')
-    new_depth_of_img_end = new_depth_of_img_start + len('D')
-    new_depth_of_img = dataset_tag[new_depth_of_img_end:all_underline_pos[2]]
-
-    # step/gap between each patch
-    gap_between_imgs_start = dataset_tag.find('S')
-    gap_between_imgs_end = gap_between_imgs_start + len('S')
-    gap_between_imgs = dataset_tag[gap_between_imgs_end:all_underline_pos[3]]
-
-    # number of labelled samples
-    no_labelled_samples_start = dataset_tag.find('N')
-    no_labelled_samples_end = no_labelled_samples_start + len('N')
-    no_labelled_samples = dataset_tag[no_labelled_samples_end:all_underline_pos[4]]
-
-    save_folder_dataset = data_directory + dataset_name + '/' + data_set_tag
-    save_folder_resolution = save_folder_dataset + '/R' + resolution_imgs
-    save_folder_case_no = save_folder_resolution + '/C' + case_no
-    save_folder_patch_size = save_folder_case_no + '/D' + new_depth_of_img + '_S' + gap_between_imgs
-    save_folder_patch_no = save_folder_patch_size + '/N' + no_labelled_samples
-    save_folder_labelled = save_folder_patch_no + '/labelled'
-
-    # unlabelled data
-    # volume_string_start = dataset_tag.find('unlabelled')
-    # volume_string_end = volume_string_start + len('unlabelled')
-    # unlabelled_no = dataset_tag[volume_string_end:]
-
-    train_image_folder_labelled = save_folder_labelled + '/patches'
-    train_label_folder_labelled = save_folder_labelled + '/labels'
-    train_dataset_labelled = CustomDataset(train_image_folder_labelled, train_label_folder_labelled, data_augmentation, labelled=True)
-
-    # train_image_folder_unlabelled = save_folder_patch_size + '/unlabelled' + unlabelled_no + '/patches'
-    # train_label_folder_unlabelled = save_folder_patch_size + '/unlabelled' + unlabelled_no + '/labels'
-    # train_dataset_unlabelled = CustomDataset(train_image_folder_unlabelled, train_label_folder_unlabelled, 'none', labelled=True)
-
-    trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=False)
-    # trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=train_batchsize*ratio, shuffle=True, num_workers=0, drop_last=False)
-
-    validate_image_folder = save_folder_patch_size + '/validate/patches'
-    validate_label_folder = save_folder_patch_size + '/validate/labels'
-    test_image_folder = save_folder_patch_size + '/test/patches'
-    test_label_folder = save_folder_patch_size + '/test/labels'
-
-    validate_dataset = CustomDataset(validate_image_folder, validate_label_folder, 'none', labelled=True)
-    test_dataset = CustomDataset(test_image_folder, test_label_folder, 'none', labelled=True)
-
-    validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=False)
-    testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=False)
-
-    return trainloader_labelled, validateloader, testloader, train_dataset_labelled, validate_dataset, test_dataset
-
-
-def getData(data_directory, dataset_name, dataset_tag, train_batchsize, data_augmentation='none', multi_class=False):
-
-    if multi_class is True:
-        multi_class_tag = '3d_multi'
-    else:
-        multi_class_tag = '3d_binary'
-
-    data_directory = data_directory + dataset_name + '/' + dataset_tag + '/' + multi_class_tag
+    data_directory = data_directory + dataset_name + '/' + dataset_tag
     data_directory_eval_test = data_directory + dataset_name
 
-    folder_labelled = data_directory + '/train'
+    folder_labelled = data_directory + '/labelled'
 
     train_image_folder_labelled = folder_labelled + '/patches'
     train_label_folder_labelled = folder_labelled + '/labels'
-    train_dataset_labelled = CustomDataset(train_image_folder_labelled, train_label_folder_labelled, data_augmentation, labelled=True)
+    train_dataset_labelled = CT_Dataset(train_image_folder_labelled, train_label_folder_labelled, new_resolution, labelled=True)
 
     # train_image_folder_unlabelled = data_directory + '/unlabelled/patches'
     # train_label_folder_unlabelled = data_directory + '/unlabelled/labels'
@@ -183,8 +98,8 @@ def getData(data_directory, dataset_name, dataset_tag, train_batchsize, data_aug
     test_image_folder = data_directory + '/test/patches'
     test_label_folder = data_directory + '/test/labels'
 
-    validate_dataset = CustomDataset(validate_image_folder, validate_label_folder, 'none', labelled=True)
-    test_dataset = CustomDataset(test_image_folder, test_label_folder, 'none', labelled=True)
+    validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, new_resolution, labelled=True)
+    test_dataset = CT_Dataset(test_image_folder, test_label_folder, new_resolution, labelled=True)
 
     validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
     testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
@@ -207,16 +122,23 @@ def trainSingleModel(model,
                      testdata,
                      log_tag,
                      class_no,
-                     lr_decay):
+                     # lr_decay,
+                     spatial_consistency):
 
     device = torch.device('cuda')
     save_model_name = model_name
     saved_information_path = '../Results/' + dataset_name + '/' + dataset_tag + '/' + log_tag
-    os.mkdir(saved_information_path, exist_ok=True)
+    if not os.path.exists(saved_information_path):
+        os.makedirs(saved_information_path)
+    # os.mkdir(saved_information_path, exist_ok=True)
     saved_log_path = saved_information_path + '/Logs'
-    os.mkdir(saved_log_path, exist_ok=True)
+    # os.mkdir(saved_log_path, exist_ok=True)
+    if not os.path.exists(saved_log_path):
+        os.makedirs(saved_log_path)
     saved_model_path = saved_information_path + '/' + save_model_name + '/trained_models'
-    os.mkdir(saved_model_path, exist_ok=True)
+    # os.mkdir(saved_model_path, exist_ok=True)
+    if not os.path.exists(saved_model_path):
+        os.makedirs(saved_model_path)
 
     print('The current model is:')
     print(save_model_name)
@@ -270,36 +192,68 @@ def trainSingleModel(model,
 
         validate_iou, validate_h_dist = evaluate(validateloader, model, device, model_name, class_no, dilation)
 
+        # Adding Spatial Constraints:
+        regularisation = 0.0
+        if spatial_consistency == 'global_local':
+            Cropping = GlobalLocal([0.5, 0.5, 0.5])
+            # Cropping = GlobalLocal([random.uniform(0.4, 0.8), random.uniform(0.4, 0.8), random.uniform(0.4, 0.8)])
+            local_train_img, local_seg = Cropping.crop(train_imgs, class_outputs)
+            outputs2 = model(local_train_img.detach(), [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
+            if class_no == 2:
+                prob_outputs2 = torch.sigmoid(outputs2)
+                outputs2 = (prob_outputs2 > 0.5).float()
+            else:
+                prob_outputs2 = F.softmax(outputs2, dim=1)
+                _, outputs2 = torch.max(prob_outputs2, dim=1)
+            regularisation = nn.MSELoss(reduction='mean')(outputs2, local_seg)
+            loss += 0.1*regularisation
+
+        elif spatial_consistency == 'high_low':
+            # Cropping = HighLow([random.choice([1, 2]), random.choice([1, 2]), random.choice([1, 2])])
+            Cropping = HighLow([2, 2, 2])
+            local_train_img, local_seg = Cropping.crop(train_imgs, class_outputs)
+            outputs2 = model(local_train_img.detach(), [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
+            if class_no == 2:
+                prob_outputs2 = torch.sigmoid(outputs2)
+                outputs2 = (prob_outputs2 > 0.5).float()
+            else:
+                prob_outputs2 = F.softmax(outputs2, dim=1)
+                _, outputs2 = torch.max(prob_outputs2, dim=1)
+            regularisation = nn.MSELoss(reduction='mean')(outputs2, local_seg)
+            loss += 0.1*regularisation
+
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        if lr_decay == 'poly':
-            for param_group in optimizer.param_groups:
-                param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
-        elif lr_decay == 'steps:':
-            for param_group in optimizer.param_groups:
-                if step % (num_steps // 4) == 0:
-                    param_group["lr"] = param_group["lr"] * 0.5
-        elif lr_decay == 'warmup':
-            warm_up_lr = 0.8
-            for param_group in optimizer.param_groups:
-                if step < num_steps*warm_up_lr:
-                    param_group["lr"] = step * learning_rate / (num_steps*warm_up_lr)
-                else:
-                    param_group["lr"] = learning_rate
-        else:
-            pass
+        # if lr_decay == 'poly':
+        for param_group in optimizer.param_groups:
+            param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
+        # elif lr_decay == 'steps:':
+        #     for param_group in optimizer.param_groups:
+        #         if step % (num_steps // 4) == 0:
+        #             param_group["lr"] = param_group["lr"] * 0.5
+        # elif lr_decay == 'warmup':
+        #     warm_up_lr = 0.8
+        #     for param_group in optimizer.param_groups:
+        #         if step < num_steps*warm_up_lr:
+        #             param_group["lr"] = step * learning_rate / (num_steps*warm_up_lr)
+        #         else:
+        #             param_group["lr"] = learning_rate
+        # else:
+        #     pass
 
         print(
             'Step [{}/{}], '
             'lr: {:.4f},'
             'Train sup loss: {:.4f}, '
             'Train iou: {:.4f}, '
+            'Train regularisation: {:.4f}, '
             'val iou:{:.4f}, '.format(step + 1, num_steps,
                                       optimizer.param_groups[0]["lr"],
                                       np.nanmean(train_sup_loss),
                                       np.nanmean(train_iou),
+                                      regularisation,
                                       np.nanmean(validate_iou)))
 
         # # # ================================================================== #

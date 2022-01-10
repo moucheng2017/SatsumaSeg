@@ -24,32 +24,21 @@ if __name__ == '__main__':
     # 'all_filp', 'gaussian' or 'none'.
     # 9. The results will be genereted in a new folder called Results.
 
-    # trainModels(data_directory='./datasets/',
-    #             dataset_name='multiclass',
-    #             input_dim=4,
-    #             class_no=4,
-    #             repeat=1,
-    #             train_batchsize=4,
-    #             validate_batchsize=1,
-    #             num_epochs=1,
-    #             learning_rate=1e-3,
-    #             width=64,
-    #             network='unet',
-    #             augmentation='full'
-    #             )
-
-    trainModels(data_directory='/cluster/project2/Neuroblastoma/',
-                dataset_name='data',
-                input_dim=3,
+    trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data/',
+                dataset_name='airway',
+                dataset_tag='mismatch_exp',
+                downsample=3,
+                input_dim=1,
                 class_no=2,
                 repeat=1,
-                train_batchsize=2,
-                validate_batchsize=1,
-                num_epochs=100,
-                learning_rate=1e-3,
-                width=32,
-                network='unet',
-                augmentation='full'
+                train_batchsize=1,
+                num_steps=50,
+                learning_rate=1e-4,
+                width=16,
+                log_tag='sup',
+                new_resolution=192,
+                # lr_decay='poly',
+                spatial_consistency='global_local'
                 )
 
 

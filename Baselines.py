@@ -117,6 +117,13 @@ class Unet3D(nn.Module):
         # print(x4.size())
         y = self.upsample0(x4)
         # print(y.size())
+        # print(y.size())
+        # print(x3.size())
+        # if y.size()[3] != x3.size()[3]:
+        #     diffY = torch.tensor([x3.size()[4] - y.size()[4]])
+        #     diffX = torch.tensor([x3.size()[3] - y.size()[3]])
+        #     y = F.pad(y, [0, diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+
         y3 = torch.cat([y, x3], dim=1)
         y3 = self.dconv3(y3, dilation_decoder[0])
         y2 = self.upsample1(y3)
