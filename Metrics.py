@@ -131,7 +131,7 @@ def f1_score(label_gt, label_pred, n_class):
     # TP = CM[1][1]
     # FP = CM[0][1]
     #
-    TN, FP, FN, TP = confusion_matrix(img_A, img_B, labels=[0.0, 1.0]).ravel()
+    # TN, FP, FN, TP = confusion_matrix(img_A, img_B, labels=[0.0, 1.0]).ravel()
     #
     # TP = np.sum(label_gt[label_gt == 1.0] == label_pred[label_pred == 1.0])
     # TN = np.sum(label_gt[label_gt == 0.0] == label_pred[label_pred == 0.0])
@@ -145,14 +145,14 @@ def f1_score(label_gt, label_pred, n_class):
     # FPs_Ns = (FP + 1e-8) / ((img_A == float(0.0)).sum() + 1e-8)
     # FNs_Ps = (FN + 1e-8) / ((img_A == float(1.0)).sum() + 1e-8)
     #
-    N = TN + FP
-    P = TP + FN
+    # N = TN + FP
+    # P = TP + FN
     #
     # FPs_Ns = (FP + 1e-10) / (Negatives + 1e-10)
     # FNs_Ps = (FN + 1e-10) / (Positives + 1e-10)
     # CM = np.zeros((2, 2), dtype=np.float32)
     #
-    return f1_metric.mean(), recall.mean(), precision.mean(), TP / size, TN / size, FP / size, FN / size, P / size, N / size
+    return f1_metric.mean(), recall.mean(), precision.mean()
 
 ##==========================================================================================
 

@@ -33,12 +33,12 @@ if __name__ == '__main__':
                 repeat=1,
                 train_batchsize=1,
                 num_steps=50,
-                learning_rate=1e-4,
+                learning_rate=2e-4,
                 width=16,
                 log_tag='sup',
                 new_resolution=192,
                 # lr_decay='poly',
-                spatial_consistency='global_local'
+                spatial_consistency='none'
                 )
 
 

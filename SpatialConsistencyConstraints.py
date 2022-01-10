@@ -61,12 +61,14 @@ class HighLow(object):
     def crop(self, global_input, global_seg):
         local_input = global_input[
                       :,
+                      :,
                       ::self.high_low_ratios[0],
                       ::self.high_low_ratios[1],
                       ::self.high_low_ratios[2]
                       ]
 
         local_seg = global_seg[
+                      :,
                       :,
                       ::self.high_low_ratios[0],
                       ::self.high_low_ratios[1],
