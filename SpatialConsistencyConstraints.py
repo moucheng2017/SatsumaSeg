@@ -31,9 +31,20 @@ class GlobalLocal(object):
         new_h = int(h * self.global_local_ratios[1])
         new_w = int(w * self.global_local_ratios[2])
 
-        top_h = np.random.randint(0, h - new_h)
-        top_w = np.random.randint(0, w - new_w)
-        top_d = np.random.randint(0, d - new_d)
+        if new_h < h:
+            top_h = np.random.randint(0, h - new_h)
+        else:
+            top_h = 0
+
+        if new_w < w:
+            top_w = np.random.randint(0, w - new_w)
+        else:
+            top_w = 0
+
+        if new_d < d:
+            top_d = np.random.randint(0, d - new_d)
+        else:
+            top_d = 0
 
         local_input = global_input[
                       :,

@@ -24,21 +24,34 @@ if __name__ == '__main__':
     # 'all_filp', 'gaussian' or 'none'.
     # 9. The results will be genereted in a new folder called Results.
 
+    # trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data/',
+    #             dataset_name='airway',
+    #             dataset_tag='mismatch_exp',
+    #             downsample=3,
+    #             input_dim=1,
+    #             class_no=2,
+    #             repeat=3,
+    #             train_batchsize=1,
+    #             num_steps=100,
+    #             learning_rate=2e-4,
+    #             width=16,
+    #             log_tag='test_random_crop',
+    #             new_resolution=192,
+    #             spatial_consistency='global_local'
+    #             )
+
     trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data/',
                 dataset_name='airway',
                 dataset_tag='mismatch_exp',
                 downsample=3,
                 input_dim=1,
                 class_no=2,
-                repeat=1,
+                repeat=3,
                 train_batchsize=1,
-                num_steps=50,
+                num_steps=100,
                 learning_rate=2e-4,
                 width=16,
-                log_tag='sup',
+                log_tag='test_random_crop',
                 new_resolution=192,
-                # lr_decay='poly',
                 spatial_consistency='none'
                 )
-
-

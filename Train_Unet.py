@@ -206,7 +206,7 @@ def trainSingleModel(model,
                 prob_outputs2 = F.softmax(outputs2, dim=1)
                 _, outputs2 = torch.max(prob_outputs2, dim=1)
             regularisation = nn.MSELoss(reduction='mean')(outputs2, local_seg)
-            loss += 0.1*regularisation
+            loss += 0.01 * regularisation
 
         elif spatial_consistency == 'high_low':
             # Cropping = HighLow([random.choice([1, 2]), random.choice([1, 2]), random.choice([1, 2])])
@@ -220,15 +220,15 @@ def trainSingleModel(model,
                 prob_outputs2 = F.softmax(outputs2, dim=1)
                 _, outputs2 = torch.max(prob_outputs2, dim=1)
             regularisation = nn.MSELoss(reduction='mean')(outputs2, local_seg)
-            loss += 0.1*regularisation
+            loss += 0.01*regularisation
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         # if lr_decay == 'poly':
-        for param_group in optimizer.param_groups:
-            param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
+        # for param_group in optimizer.param_groups:
+        #     param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
         # elif lr_decay == 'steps:':
         #     for param_group in optimizer.param_groups:
         #         if step % (num_steps // 4) == 0:
@@ -266,34 +266,33 @@ def trainSingleModel(model,
 
         writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss)}, step + 1)
 
-        # if step > num_steps - 10:
-        #     save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
-        #     path_model = save_model_name_full
-        #     torch.save(model, path_model)
+        if step > num_steps - 10:
+            save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
+            path_model = save_model_name_full
+            torch.save(model, path_model)
 
-    save_model_name_full = saved_model_path + '/' + save_model_name + '.pt'
-    path_model = save_model_name_full
-    torch.save(model, path_model)
+    # save_model_name_full = saved_model_path + '/' + save_model_name + '.pt'
+    # path_model = save_model_name_full
+    # torch.save(model, path_model)
 
     stop = timeit.default_timer()
     training_time = stop - start
     print('Training Time: ', training_time)
 
-    test_iou, test_h_dist, test_recall, test_precision = test(saved_information_path, saved_model_path, testdata, device, model_name, class_no, training_time)
+    test_iou, test_h_dist, test_recall, test_precision = test(saved_information_path + '/' + save_model_name, saved_model_path, testdata, device, model_name, class_no)
 
     print('Test IoU: ' + str(np.nanmean(test_iou)) + '\n')
     print('Test IoU std: ' + str(np.nanstd(test_iou)) + '\n')
-    print('Test H-dist: ' + str(np.nanmean(test_h_dist)) + '\n')
-    print('Test H-dist std: ' + str(np.nanstd(test_h_dist)) + '\n')
-    print('Test recall: ' + str(np.nanmean(test_recall)) + '\n')
-    print('Test recall std: ' + str(np.nanstd(test_recall)) + '\n')
-    print('Test precision: ' + str(np.nanmean(test_precision)) + '\n')
-    print('Test precision std: ' + str(np.nanstd(test_precision)) + '\n')
+    # print('Test H-dist: ' + str(np.nanmean(test_h_dist)) + '\n')
+    # print('Test H-dist std: ' + str(np.nanstd(test_h_dist)) + '\n')
+    # print('Test recall: ' + str(np.nanmean(test_recall)) + '\n')
+    # print('Test recall std: ' + str(np.nanstd(test_recall)) + '\n')
+    # print('Test precision: ' + str(np.nanmean(test_precision)) + '\n')
+    # print('Test precision std: ' + str(np.nanstd(test_precision)) + '\n')
 
     print('\nTraining finished and model saved\n')
     # zip all models:
-    saved_information_path_all_models = saved_information_path + '/all_models'
-    shutil.make_archive(saved_information_path_all_models, 'zip', saved_model_path)
+    shutil.make_archive(saved_model_path, 'zip', saved_model_path)
     shutil.rmtree(saved_model_path)
 
     return model
