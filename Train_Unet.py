@@ -279,7 +279,7 @@ def trainSingleModel(model,
     training_time = stop - start
     print('Training Time: ', training_time)
 
-    test_iou, test_h_dist, test_recall, test_precision = test(saved_information_path + '/' + save_model_name, saved_model_path, testdata, device, model_name, class_no)
+    test_iou = test(saved_information_path + '/' + save_model_name, saved_model_path, testdata, device, model_name, class_no)
 
     print('Test IoU: ' + str(np.nanmean(test_iou)) + '\n')
     print('Test IoU std: ' + str(np.nanstd(test_iou)) + '\n')
