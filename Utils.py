@@ -170,7 +170,9 @@ def test(saved_information_path, saved_model_path, test_data_path, test_label_pa
         pass
 
     all_cases = [os.path.join(test_data_path, f) for f in listdir(test_data_path)]
+    all_cases.sort()
     all_labels = [os.path.join(test_label_path, f) for f in listdir(test_label_path)]
+    all_labels.sort()
 
     test_iou = []
 
