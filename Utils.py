@@ -64,7 +64,7 @@ def segment_whole_volume(model, volume, train_size=[192, 192, 192], class_no=2):
 
 
 def ensemble_segmentation(model_path, volume, train_size=[192, 192, 192], class_no=2):
-    segmentation = np.zeros_like(volume)
+    segmentation = []
     all_models = [os.path.join(model_path, f) for f in listdir(model_path) if os.path.isfile(os.path.join(model_path, f))]
     all_models.sort()
     for i, model in enumerate(all_models):
@@ -72,17 +72,14 @@ def ensemble_segmentation(model_path, volume, train_size=[192, 192, 192], class_
         model.eval()
         with torch.no_grad:
             current_seg = segment_whole_volume(model, volume, train_size, class_no)
-            segmentation += current_seg
-    segmentation = segmentation / (i+1)
+            segmentation.append(current_seg)
+            # segmentation += current_seg
+    segmentation = sum(segmentation) / len(segmentation)
     if class_no == 2:
         segmentation = (segmentation > 0.5).float()
     else:
         _, segmentation = torch.max(segmentation, dim=1)
     return segmentation
-
-
-# def ensemble_test_all():
-
 
 
 def sigmoid_rampup(current, rampup_length, limit):
@@ -159,7 +156,15 @@ def evaluate(validateloader, model, device, model_name, class_no, dilation):
     return validate_iou, validate_h_dist
 
 
-def test(saved_information_path, saved_model_path, test_data_path, test_label_path, device, model_name, class_no, size=[192, 192, 192], dilation=1):
+def test(saved_information_path,
+         saved_model_path,
+         test_data_path,
+         test_label_path,
+         device,
+         model_name,
+         class_no,
+         size=[192, 192, 192],
+         dilation=1):
 
     save_path = saved_information_path + '/results'
     try:

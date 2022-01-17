@@ -54,7 +54,7 @@ def trainModels(dataset_tag,
                    '_r' + str(new_resolution) + \
                    '_restriction_' + str(spatial_consistency)
 
-        trainloader_withlabels, validateloader, testloader, train_dataset_with_labels, validate_dataset, test_dataset = getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_resolution)
+        trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset, test_dataset = getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_resolution)
 
         # ===================
         trainSingleModel(model=Exp,
@@ -67,7 +67,7 @@ def trainModels(dataset_tag,
                          train_batchsize=train_batchsize,
                          trainloader_with_labels=trainloader_withlabels,
                          validateloader=validateloader,
-                         testdata=testloader,
+                         testdata_path=test_data_path,
                          class_no=class_no,
                          log_tag=log_tag,
                          dilation=1,
@@ -95,6 +95,9 @@ def getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_reso
 
     validate_image_folder = data_directory + '/validate/patches'
     validate_label_folder = data_directory + '/validate/labels'
+
+    testdata_path = data_directory + '/test'
+
     test_image_folder = data_directory + '/test/patches'
     test_label_folder = data_directory + '/test/labels'
 
@@ -104,7 +107,7 @@ def getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_reso
     validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
     testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
-    return trainloader_labelled, validateloader, testloader, train_dataset_labelled, validate_dataset, test_dataset
+    return trainloader_labelled, validateloader, testdata_path, train_dataset_labelled, validate_dataset, test_dataset
 # =====================================================================================================================================
 
 
@@ -119,7 +122,7 @@ def trainSingleModel(model,
                      trainloader_with_labels,
                      validateloader,
                      dilation,
-                     testdata,
+                     testdata_path,
                      log_tag,
                      class_no,
                      # lr_decay,
@@ -279,7 +282,17 @@ def trainSingleModel(model,
     training_time = stop - start
     print('Training Time: ', training_time)
 
-    test_iou = test(saved_information_path + '/' + save_model_name, saved_model_path, testdata, device, model_name, class_no)
+    test_image_path = os.path.join(testdata_path, 'patches')
+    test_label_path = os.path.join(testdata_path, 'labels')
+    test_iou = test(saved_information_path + '/' + save_model_name,
+                    saved_model_path,
+                    test_image_path,
+                    test_label_path,
+                    device,
+                    model_name,
+                    class_no,
+                    [192, 192, 192],
+                    1)
 
     print('Test IoU: ' + str(np.nanmean(test_iou)) + '\n')
     print('Test IoU std: ' + str(np.nanstd(test_iou)) + '\n')
