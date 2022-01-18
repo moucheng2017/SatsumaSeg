@@ -34,6 +34,7 @@ def segment_whole_volume(model, volume, train_size=[192, 192, 192], class_no=2):
     no_h = h // train_size[1]
     no_w = w // train_size[2]
     segmentation = np.zeros_like(volume)
+    # segmentation = torch.from_numpy(segmentation).to(device='cuda', dtype=torch.float32)
 
     # Loop through the whole volume of the lung mask
     for i in range(0, no_d-1):
@@ -41,25 +42,27 @@ def segment_whole_volume(model, volume, train_size=[192, 192, 192], class_no=2):
             for k in range(0, no_w-1):
                 subvolume = volume[:, i*train_size[0]:(i+1)*train_size[0], j*train_size[1]:(j+1)*train_size[1], k*train_size[2]:(k+1)*train_size[2]]
                 subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
-                subseg = model(subvolume)
+                subseg = model(subvolume.unsqueeze(0))
                 if class_no == 2:
                     subseg = torch.sigmoid(subseg)
                     # subseg = (subseg > 0.5).float()
                 else:
                     subseg = torch.softmax(subseg, dim=1)
                     # _, subseg = torch.max(subseg, dim=1)
-                segmentation[:, i*train_size[0]:(i+1)*train_size[0], j*train_size[1]:(j+1)*train_size[1], k*train_size[2]:(k+1)*train_size[2]] = subseg
+                segmentation[:, i*train_size[0]:(i+1)*train_size[0], j*train_size[1]:(j+1)*train_size[1], k*train_size[2]:(k+1)*train_size[2]] = subseg.detach().cpu().numpy()
 
+    # corner case:
     subvolume = volume[:, d-train_size[0]:d, h-train_size[1]:h, w-train_size[2]:w]
     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
-    subseg = model(subvolume)
+
+    # print(subvolume.unsqueeze(0).size())
+    subseg = model(subvolume.unsqueeze(0))
     if class_no == 2:
         subseg = torch.sigmoid(subseg)
-        # subseg = (subseg > 0.5).float()
     else:
         subseg = torch.softmax(subseg, dim=1)
-        # _, subseg = torch.max(subseg, dim=1)
-    segmentation[:, d-train_size[0]:d, h-train_size[1]:h, w-train_size[2]:w] = subseg
+    segmentation[:, d-train_size[0]:d, h-train_size[1]:h, w-train_size[2]:w] = subseg.squeeze(0).detach().cpu().numpy()
+    # segmentation[:, d-train_size[0]:d, h-train_size[1]:h, w-train_size[2]:w] = subseg.squeeze(0)
     return segmentation
 
 
@@ -70,13 +73,15 @@ def ensemble_segmentation(model_path, volume, train_size=[192, 192, 192], class_
     for i, model in enumerate(all_models):
         model = torch.load(model)
         model.eval()
-        with torch.no_grad:
-            current_seg = segment_whole_volume(model, volume, train_size, class_no)
-            segmentation.append(current_seg)
-            # segmentation += current_seg
+        # with torch.no_grad:
+        current_seg = segment_whole_volume(model, volume, train_size, class_no)
+        segmentation.append(current_seg)
+        # segmentation += current_seg
+
     segmentation = sum(segmentation) / len(segmentation)
     if class_no == 2:
-        segmentation = (segmentation > 0.5).float()
+        # segmentation = (segmentation > 0.5).float()
+        segmentation = np.where(segmentation > 0.5, 1.0, 0.0)
     else:
         _, segmentation = torch.max(segmentation, dim=1)
     return segmentation
@@ -186,7 +191,9 @@ def test(saved_information_path,
         volume = np.load(each_case)
         label = np.load(each_label)
 
+        label = torch.from_numpy(label).to(device='cuda', dtype=torch.float32)
         segmentation = ensemble_segmentation(saved_model_path, volume, train_size=size, class_no=class_no)
+        # print(segmentation.size())
         test_mean_iu_ = segmentation_scores(label.squeeze(), segmentation.squeeze(), class_no)
         test_iou.append(test_mean_iu_)
 

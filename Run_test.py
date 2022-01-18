@@ -48,10 +48,10 @@ if __name__ == '__main__':
                 class_no=2,
                 repeat=3,
                 train_batchsize=1,
-                num_steps=100,
+                num_steps=1,
                 learning_rate=2e-4,
                 width=16,
-                log_tag='test_random_crop',
+                log_tag='test_whole',
                 new_resolution=192,
                 spatial_consistency='none'
                 )

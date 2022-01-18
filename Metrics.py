@@ -47,16 +47,27 @@ from scipy import ndimage
 
 
 def preprocessing_accuracy(label_true, label_pred, n_class):
-    if n_class == 2:
-    # thresholding predictions:
-        output_zeros = torch.zeros_like(label_pred)
-        output_ones = torch.ones_like(label_pred)
-        label_pred = torch.where((label_pred > 0.5), output_ones, output_zeros)
-    label_pred = label_pred.cpu().detach()
-    label_true = label_true.cpu().detach()
-    label_pred = np.asarray(label_pred, dtype='int32')
-    label_true = np.asarray(label_true, dtype='int32')
-    #
+
+    # print(type(label_pred).__module__)
+    # print(type(label_true))
+
+    if type(label_pred).__module__ == np.__name__:
+        pass
+    else:
+        if n_class == 2:
+        # thresholding predictions:
+            output_zeros = torch.zeros_like(label_pred)
+            output_ones = torch.ones_like(label_pred)
+            label_pred = torch.where((label_pred > 0.5), output_ones, output_zeros)
+        label_pred = label_pred.cpu().detach()
+        label_pred = np.asarray(label_pred, dtype='int32')
+
+    if type(label_true).__module__ == np.__name__:
+        pass
+    else:
+        label_true = label_true.cpu().detach()
+        label_true = np.asarray(label_true, dtype='int32')
+        #
     return label_pred, label_true
 
 # https://github.com/wkentaro/pytorch-fcn/blob/master/torchfcn/utils.py
