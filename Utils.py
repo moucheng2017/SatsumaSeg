@@ -24,10 +24,14 @@ from PIL import Image
 from torch.utils import data
 
 
+# def stitch_subvolumes():
+# this function is to stich up all subvolume into the whole
+
 def segment_whole_volume(model, volume, train_size=[192, 192, 192], class_no=2):
     '''
-    volume: c x d x h x w
+    volume (numpy): c x d x h x w
     model: loaded model
+    calculate iou for each subvolume then sum them up then average, don't ensemble the volumes in gpu
     '''
     c, d, h, w = np.shape(volume)
     no_d = d // train_size[0]
@@ -36,7 +40,7 @@ def segment_whole_volume(model, volume, train_size=[192, 192, 192], class_no=2):
     segmentation = np.zeros_like(volume)
     # segmentation = torch.from_numpy(segmentation).to(device='cuda', dtype=torch.float32)
 
-    # Loop through the whole volume of the lung mask
+    # Loop through the whole volume:
     for i in range(0, no_d-1):
         for j in range(0, no_h-1):
             for k in range(0, no_w-1):

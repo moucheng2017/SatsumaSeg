@@ -14,66 +14,27 @@ from skimage.transform import resize
 from tifffile import imsave
 
 
-# def crop_slice(ct_scan, label_scan, left, right, top, bottom, input_dim, sample_position, ):
-#     label = label_scan[sample_position:sample_position+input_dim, top:bottom, left:right]
-#     label = np.transpose(label, (2, 0, 1))
-#
-#     scan = ct_scan[sample_position:sample_position+input_dim, top:bottom, left:right]
-#     scan = np.transpose(scan, (2, 0, 1))
-#
-#     return scan, label
-
-
-# def segment_all_patches(image, label, new_size, new_dim, height, width, slice_location, labelled_flag):
-#
-#     left = (width - new_size) // 2
-#     right = left + new_size
-#     top = (height - new_size) // 2
-#     bottom = (height - new_size) // 2 + new_size
-#     img, lbl = crop_slice(image, label, left, right, top, bottom, new_dim, slice_location)
-#     segment_patch(img, lbl, slice_location, 6, labelled_flag)
-
-
-# def segment_patch(image, label, slice_location, patch_lodation, labelled_flag):
-#     if labelled_flag is True:
-#         foreground_pixels = np.sum(label)
-#         if foreground_pixels > 10:
-#             img_slice_store_name = case_index + '_slice_' + str(slice_location) + '_' + str(patch_lodation) + '.npy'
-#             gt_slice_store_name = case_index + '_gt_' + str(slice_location) + '_' + str(patch_lodation) + '.npy'
-#             img_slice_store_name = save_img_path + '/' + img_slice_store_name
-#             gt_slice_store_name = save_lbl_path + '/' + gt_slice_store_name
-#             np.save(img_slice_store_name, image)
-#             np.save(gt_slice_store_name, label)
-#         else:
-#             pass
-#     else:
-#         img_slice_store_name = case_index + '_slice_' + str(slice_location) + '_' + str(patch_lodation) + '.npy'
-#         gt_slice_store_name = case_index + '_gt_' + str(slice_location) + '_' + str(patch_lodation) + '.npy'
-#         img_slice_store_name = save_img_path + '/' + img_slice_store_name
-#         gt_slice_store_name = save_lbl_path + '/' + gt_slice_store_name
-#         np.save(img_slice_store_name, image)
-#         np.save(gt_slice_store_name, label)
-
-
 def prepare_data(data_path, lbl_path, save_img_path, save_lbl_path, case_index, labelled=True):
     # make directory first:
     os.makedirs(save_img_path, exist_ok=True)
     os.makedirs(save_lbl_path, exist_ok=True)
 
-    # clean up the directory:
-    files = os.listdir(save_img_path)
-    if len(files) > 0:
-        for f in files:
-            os.remove(os.path.join(save_img_path, f))
-
-    files = os.listdir(save_lbl_path)
-    if len(files) > 0:
-        for f in files:
-            os.remove(os.path.join(save_lbl_path, f))
+    # # clean up the directory:
+    # files = os.listdir(save_img_path)
+    # if len(files) > 0:
+    #     for f in files:
+    #         os.remove(os.path.join(save_img_path, f))
+    #
+    # files = os.listdir(save_lbl_path)
+    # if len(files) > 0:
+    #     for f in files:
+    #         os.remove(os.path.join(save_lbl_path, f))
 
     #  normalising intensities:
     data = nib.load(data_path)
     data = data.get_fdata()
+
+    # applying lung window:
     data[data < -1000.0] = -1000.0
     data[data > 500.0] = 500.0
     data = (data - np.nanmean(data)) / np.nanstd(data)
@@ -103,45 +64,26 @@ def prepare_data(data_path, lbl_path, save_img_path, save_lbl_path, case_index, 
 
 if __name__ == '__main__':
 
-    # labelled train:
-    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRaw/1841A.nii.gz'
-    lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllSeg/1841A_seg.nii.gz'
-    save_img_path = '/home/moucheng/projects_data/Pulmonary_data/airway/mismatch_exp/labelled/patches/'
-    save_lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/mismatch_exp/labelled/labels/'
-    case_index = '1841A'
-    prepare_data(data_path, lbl_path, save_img_path, save_lbl_path, case_index, labelled=True)
+    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRaw'
+    lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllSeg'
+    save_img_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRawNP/'
+    save_lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllSegNP/'
 
-    # unlabelled train:
-    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRaw/6357A.nii.gz'
-    lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllSeg/6357A_seg.nii.gz'
-    save_img_path = '/home/moucheng/projects_data/Pulmonary_data/airway/mismatch_exp/unlabelled/patches/'
-    save_lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/mismatch_exp/unlabelled/labels/'
-    case_index = '6357A'
-    prepare_data(data_path, lbl_path, save_img_path, save_lbl_path, case_index, labelled=False)
+    all_volumes = [os.path.join(data_path, i) for i in os.listdir(data_path)]
+    all_lbls = [os.path.join(lbl_path, i) for i in os.listdir(lbl_path)]
 
-    # # unlabelled train:
-    # data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRaw/9731A.nii.gz'
-    # lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllSeg/9731A_seg.nii.gz'
-    # save_img_path = '/home/moucheng/projects_data/Pulmonary_data/airway/mismatch_exp/unlabelled/patches'
-    # save_lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/mismatch_exp/unlabelled/labels'
-    # case_index = '9731A'
-    # prepare_data(data_path, lbl_path, new_dim, save_img_path, save_lbl_path, case_index, labelled=False)
+    assert len(all_volumes) == len(all_lbls)
+    print(str(len(all_volumes)) + ' cases are here.\n')
 
-    # validate:
-    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRaw/6357B.nii.gz'
-    lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllSeg/6357B_seg.nii.gz'
-    save_img_path = '/home/moucheng/projects_data/Pulmonary_data/airway/mismatch_exp/validate/patches/'
-    save_lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/mismatch_exp/validate/labels/'
-    case_index = '6357B'
-    prepare_data(data_path, lbl_path, save_img_path, save_lbl_path, case_index, labelled=True)
+    all_volumes.sort()
+    all_lbls.sort()
 
-    # test:
-    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRaw/6610A.nii.gz'
-    lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllSeg/6610A_seg.nii.gz'
-    save_img_path = '/home/moucheng/projects_data/Pulmonary_data/airway/mismatch_exp/test/patches/'
-    save_lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/mismatch_exp/test/labels/'
-    case_index = '6610A'
-    prepare_data(data_path, lbl_path, save_img_path, save_lbl_path, case_index, labelled=True)
+    for (img, lbl) in zip(all_volumes, all_lbls):
+        # print(img)
+        # print(lbl)
+        case_index = os.path.split(img)[1].split('.')[0]
+        prepare_data(img, lbl, save_img_path, save_lbl_path, case_index, labelled=True)
+        print(case_index + ' is done.\n')
 
 print('End')
 

@@ -52,7 +52,7 @@ def preprocessing_accuracy(label_true, label_pred, n_class):
     # print(type(label_true))
 
     if type(label_pred).__module__ == np.__name__:
-        pass
+        label_pred = np.asarray(label_pred, dtype='int32')
     else:
         if n_class == 2:
         # thresholding predictions:
@@ -63,11 +63,11 @@ def preprocessing_accuracy(label_true, label_pred, n_class):
         label_pred = np.asarray(label_pred, dtype='int32')
 
     if type(label_true).__module__ == np.__name__:
-        pass
+        label_true = np.asarray(label_true, dtype='int32')
     else:
         label_true = label_true.cpu().detach()
         label_true = np.asarray(label_true, dtype='int32')
-        #
+
     return label_pred, label_true
 
 # https://github.com/wkentaro/pytorch-fcn/blob/master/torchfcn/utils.py
@@ -76,8 +76,13 @@ def preprocessing_accuracy(label_true, label_pred, n_class):
 
 
 def _fast_hist(label_true, label_pred, n_class):
-    label_pred, label_true = preprocessing_accuracy(label_true, label_pred, n_class)
+    # label_pred, label_true = preprocessing_accuracy(label_true, label_pred, n_class)
     mask = (label_true >= 0) & (label_true < n_class)
+
+    # print(np.shape(mask))
+    # print(np.shape(label_true))
+    # print(np.shape(label_pred))
+
     hist = np.bincount(
         n_class * label_true[mask].astype(int) +
         label_pred[mask], minlength=n_class**2).reshape(n_class, n_class)
@@ -91,7 +96,7 @@ def segmentation_scores(label_trues, label_preds, n_class):
       - mean IU
       - fwavacc
     """
-    # label_preds, label_trues = preprocessing_accuracy(label_trues, label_preds)
+    label_preds, label_trues = preprocessing_accuracy(label_trues, label_preds, n_class)
     hist = np.zeros((n_class, n_class))
     for lt, lp in zip(label_trues, label_preds):
         hist += _fast_hist(lt.flatten(), lp.flatten(), n_class)

@@ -34,6 +34,7 @@ class RandomCropping(object):
             assert d > self.output_size
             assert h > self.output_size
             assert w > self.output_size
+
         top_h = np.random.randint(0, h - self.output_size)
         top_w = np.random.randint(0, w - self.output_size)
         top_d = np.random.randint(0, d - self.output_size)
@@ -113,17 +114,19 @@ class CT_Dataset(torch.utils.data.Dataset):
         _, imagename = os.path.split(imagename)
         imagename, imagetxt = os.path.splitext(imagename)
 
-        # return image, label, imagename
-
         if self.labelled_flag is True:
             [image, label] = self.augmentation_cropping.crop(image, label)
-            # image = self.augmentation_contrast.randomintensity(image)
-            # image = self.augmentation_gaussian.gaussiannoise(image)
+            image1 = self.augmentation_contrast.randomintensity(image)
+            # image2 = self.augmentation_gaussian.gaussiannoise(image)
+            weights = np.random.dirichlet((1, 1), 1)
+            image = weights[0][0]*image + weights[0][1]*image1
             return image, label, imagename
         else:
             [image] = self.augmentation_cropping.crop(image)
-            # image = self.augmentation_contrast.randomintensity(image)
-            # image = self.augmentation_gaussian.gaussiannoise(image)
+            image1 = self.augmentation_contrast.randomintensity(image)
+            # image2 = self.augmentation_gaussian.gaussiannoise(image)
+            weights = np.random.dirichlet((1, 1), 1)
+            image = weights[0][0]*image + weights[0][1]*image1
             return image, imagename
 
     def __len__(self):
