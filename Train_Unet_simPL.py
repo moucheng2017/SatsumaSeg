@@ -171,6 +171,9 @@ def trainSingleModel(model,
         train_imgs_u = unlabelled_img.to(device=device, dtype=torch.float32)
         b_u, d, c, h, w = train_imgs_u.size()
 
+        # print(train_imgs_u.size())
+        # print(train_imgs_l.size())
+
         train_imgs = torch.cat((train_imgs_l, train_imgs_u), dim=0)
 
         labels = labelled_label.to(device=device, dtype=torch.float32)
@@ -225,6 +228,9 @@ def trainSingleModel(model,
             loss.backward()
             optimizer.step()
 
+            for param_group in optimizer.param_groups:
+                param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
+
             print(
                 'Step [{}/{}], '
                 'lr: {:.4f},'
@@ -246,7 +252,7 @@ def trainSingleModel(model,
 
             writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss)}, step + 1)
 
-        if step > num_steps - 20:
+        if step > num_steps - 10:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
             torch.save(model, path_model)

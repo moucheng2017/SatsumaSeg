@@ -1,5 +1,7 @@
 import glob
 import os
+import random
+
 import torch
 # import gzip
 # import shutil
@@ -29,25 +31,42 @@ class RandomCropping(object):
     def crop(self, *volumes):
         # for supervised learning, we need to crop both volume and the label, arg1: volume, arg2: label
         # for unsupervised learning, we only need to crop the volume, arg1: volume
+        new_resolution = 512
+        skip_slices = random.choice([1, 2, 3, 4, 5])
+
         for volume in volumes:
             c, d, h, w = np.shape(volume)
             assert d > self.output_size
-            assert h > self.output_size
-            assert w > self.output_size
+            assert h >= new_resolution
+            assert w >= new_resolution
 
-        top_h = np.random.randint(0, h - self.output_size)
-        top_w = np.random.randint(0, w - self.output_size)
-        top_d = np.random.randint(0, d - self.output_size)
+        # print(np.shape(volume))
 
+        if h > new_resolution:
+            top_h = np.random.randint(0, h - new_resolution)
+            top_w = np.random.randint(0, w - new_resolution)
+
+        top_d = np.random.randint(0, d - skip_slices*self.output_size)
         outputs = []
+
         for each_input in volumes:
-             each_output = each_input[
-                           :,
-                           top_d:top_d+self.output_size,
-                           top_h:top_h+self.output_size,
-                           top_w:top_w+self.output_size
-                           ]
-             outputs.append(each_output)
+            # skip every 3 slices, so equivalently, we look at longer span:
+            # each_input = each_input[:, ::ratio, :, :]
+            if h > new_resolution:
+                 each_output = each_input[
+                               :,
+                               top_d:top_d+skip_slices*self.output_size:skip_slices,
+                               top_h:top_h+new_resolution,
+                               top_w:top_w+new_resolution
+                               ]
+            else:
+                 each_output = each_input[
+                               :,
+                               top_d:top_d+skip_slices*self.output_size:skip_slices,
+                               :,
+                               :
+                               ]
+            outputs.append(each_output)
 
         return outputs
 
