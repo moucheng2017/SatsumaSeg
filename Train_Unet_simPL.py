@@ -91,7 +91,7 @@ def getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_reso
 
     validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, new_resolution, labelled=True)
 
-    validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
+    validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
 
     return trainloader_labelled, trainloader_unlabelled, validateloader, testdata_path
 # =====================================================================================================================================
