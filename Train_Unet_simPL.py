@@ -111,7 +111,7 @@ def trainSingleModel(model,
                      log_tag,
                      class_no):
 
-    alpha = 0.1
+    alpha = 1.0
 
     device = torch.device('cuda')
     save_model_name = model_name
@@ -204,16 +204,21 @@ def trainSingleModel(model,
 
             # unlabelled training:
             side_threshold = torch.sigmoid(F.softplus(model.threshold) + torch.rand(1, device=device))
+
             if class_no == 2:
-                prob_outputs_u = torch.sigmoid(outputs_u)
+                prob_outputs_u_main = torch.sigmoid(outputs_u)
+                prob_outputs_u_side = torch.sigmoid(outputs_u)
             else:
-                prob_outputs_u = F.softmax(outputs_u, dim=1)
+                prob_outputs_u_main = F.softmax(outputs_u, dim=1)
+                prob_outputs_u_side = F.softmax(outputs_u, dim=1)
+
             if class_no == 2:
-                class_outputs_u_main = (prob_outputs_u > side_threshold).float()
+                class_outputs_u_main = (prob_outputs_u_main > side_threshold).float()
+                class_outputs_u_side = (prob_outputs_u_side > 0.5).float()
+
             if class_no == 2:
-                loss_u = 0.5*SoftDiceLoss()(prob_outputs_u, class_outputs_u_main) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_main.squeeze())
-            else:
-                loss_u = nn.CrossEntropyLoss(reduction='mean', ignore_index=8)(prob_outputs_u, class_outputs_u_main.long().squeeze(1))
+                loss_u = 0.5*SoftDiceLoss()(prob_outputs_u_main, class_outputs_u_main) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs_u_main.squeeze(), class_outputs_u_main.squeeze())
+                loss_u += 0.5*SoftDiceLoss()(prob_outputs_u_side, class_outputs_u_side) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs_u_side.squeeze(), class_outputs_u_side.squeeze())
 
             loss += alpha_current*loss_u
             optimizer.zero_grad()
@@ -241,7 +246,7 @@ def trainSingleModel(model,
 
             writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss)}, step + 1)
 
-        if step > num_steps - 10:
+        if step > num_steps - 20:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
             torch.save(model, path_model)
@@ -254,20 +259,20 @@ def trainSingleModel(model,
     training_time = stop - start
     print('Training Time: ', training_time)
 
-    test_image_path = os.path.join(testdata_path, 'imgs')
-    test_label_path = os.path.join(testdata_path, 'lbls')
-    test_iou = test(saved_information_path + '/' + save_model_name,
-                    saved_model_path,
-                    test_image_path,
-                    test_label_path,
-                    device,
-                    model_name,
-                    class_no,
-                    [192, 192, 192],
-                    1)
+    # test_image_path = os.path.join(testdata_path, 'imgs')
+    # test_label_path = os.path.join(testdata_path, 'lbls')
+    # test_iou = test(saved_information_path + '/' + save_model_name,
+    #                 saved_model_path,
+    #                 test_image_path,
+    #                 test_label_path,
+    #                 device,
+    #                 model_name,
+    #                 class_no,
+    #                 [192, 192, 192],
+    #                 1)
 
-    print('Test IoU: ' + str(np.nanmean(test_iou)) + '\n')
-    print('Test IoU std: ' + str(np.nanstd(test_iou)) + '\n')
+    # print('Test IoU: ' + str(np.nanmean(test_iou)) + '\n')
+    # print('Test IoU std: ' + str(np.nanstd(test_iou)) + '\n')
 
     print('\nTraining finished and model saved\n')
 
