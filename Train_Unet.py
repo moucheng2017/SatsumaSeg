@@ -33,8 +33,7 @@ def trainModels(dataset_tag,
                 learning_rate,
                 width,
                 log_tag,
-                new_resolution=64,
-                # lr_decay='poly',
+                new_resolution=[12, 224, 224]
                 ):
 
     for j in range(1, repeat + 1):
@@ -42,14 +41,15 @@ def trainModels(dataset_tag,
         repeat_str = str(j)
 
         Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
-        Exp_name = 'sup_unet3d' + \
-                   '_e_' + str(repeat_str) + \
+        Exp_name = 'sup_unet' + \
+                   '_e' + str(repeat_str) + \
                    '_l' + str(learning_rate) + \
                    '_b' + str(train_batchsize) + \
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_d' + str(downsample) + \
-                   '_r' + str(new_resolution)
+                   '_z' + str(new_resolution[0]) + \
+                   '_x' + str(new_resolution[1])
 
         trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset, test_dataset = getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_resolution)
 
@@ -172,7 +172,7 @@ def trainSingleModel(model,
             prob_outputs = F.softmax(outputs, dim=1)
 
         if class_no == 2:
-            loss = SoftDiceLoss()(prob_outputs, labels)
+            loss = SoftDiceLoss()(prob_outputs, labels) + nn.BCELoss(reduction='mean')(prob_outputs.squeeze(), labels.squeeze())
         else:
             loss = nn.CrossEntropyLoss(reduction='mean', ignore_index=8)(prob_outputs, labels.long().squeeze(1))
 

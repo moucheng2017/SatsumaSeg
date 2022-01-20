@@ -1,24 +1,18 @@
-import torch
-# sys.path.append("..")
-
+import sys
+sys.path.append("..")
 from Train_Unet_simPL import trainModels
-# from Train_Unet import trainModels
-torch.manual_seed(0)
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
-# ====================================
 
 if __name__ == '__main__':
 
-    trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data/',
+    trainModels(data_directory='/SAN/medic/PerceptronHead/data/lung/public/',
                 dataset_name='airway',
                 dataset_tag='mismatch_exp',
                 downsample=0,
                 input_dim=1,
                 class_no=2,
-                repeat=1,
+                repeat=3,
                 train_batchsize=1,
-                num_steps=3200,
+                num_steps=1600,
                 learning_rate=1e-3,
                 width=12,
                 log_tag='20220120',

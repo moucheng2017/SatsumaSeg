@@ -25,45 +25,45 @@ from tifffile import imsave
 
 
 class RandomCropping(object):
-    def __init__(self, output_size):
+    def __init__(self, output_size, skip_slices):
+        # output_size: d x h x w
         self.output_size = output_size
+        self.skip_slices = skip_slices
 
     def crop(self, *volumes):
         # for supervised learning, we need to crop both volume and the label, arg1: volume, arg2: label
         # for unsupervised learning, we only need to crop the volume, arg1: volume
-        new_resolution = 224
-        skip_slices = random.choice([1, 2])
+        # new_resolution = 224
+        new_d = self.output_size[0]
+        new_h = self.output_size[1]
+        new_w = self.output_size[2]
+        skip = random.choice(self.skip_slices)
 
         for volume in volumes:
             c, d, h, w = np.shape(volume)
-            assert d > self.output_size
-            assert h >= new_resolution
-            assert w >= new_resolution
-            assert h == w
+            assert d > new_d
 
-        # print(np.shape(volume))
+        if h > new_h:
+            top_h = np.random.randint(0, h - new_h)
+            top_w = np.random.randint(0, w - new_w)
 
-        if h > new_resolution:
-            top_h = np.random.randint(0, h - new_resolution)
-            top_w = np.random.randint(0, w - new_resolution)
-
-        top_d = np.random.randint(0, d - skip_slices*self.output_size)
+        top_d = np.random.randint(0, d - skip*new_d)
         outputs = []
 
         for each_input in volumes:
             # skip every 3 slices, so equivalently, we look at longer span:
             # each_input = each_input[:, ::ratio, :, :]
-            if h > new_resolution:
+            if h > new_h:
                  each_output = each_input[
                                :,
-                               top_d:top_d+skip_slices*self.output_size:skip_slices,
-                               top_h:top_h+new_resolution,
-                               top_w:top_w+new_resolution
+                               top_d:top_d+skip*new_d:skip,
+                               top_h:top_h+new_h,
+                               top_w:top_w+new_w
                                ]
             else:
                  each_output = each_input[
                                :,
-                               top_d:top_d+skip_slices*self.output_size:skip_slices,
+                               top_d:top_d+skip*new_d:skip,
                                :,
                                :
                                ]
@@ -109,12 +109,12 @@ class CT_Dataset(torch.utils.data.Dataset):
     '''
     Each volume should be at: Dimension X Height X Width
     '''
-    def __init__(self, imgs_folder, labels_folder, new_size, labelled=True):
+    def __init__(self, imgs_folder, labels_folder, new_size, labelled):
         self.imgs_folder = imgs_folder
         self.labels_folder = labels_folder
         self.labelled_flag = labelled
         self.augmentation_contrast = RandomContrast()
-        self.augmentation_cropping = RandomCropping(new_size)
+        self.augmentation_cropping = RandomCropping(new_size, [1])
         self.augmentation_gaussian = RandomGaussian()
 
     def __getitem__(self, index):
@@ -156,7 +156,7 @@ class CT_Dataset(torch.utils.data.Dataset):
 
 if __name__ == '__main__':
     dummy_input = np.random.rand(512, 512, 480)
-    cropping_augmentation = RandomCropping(64)
+    cropping_augmentation = RandomCropping(64, [1])
     output = cropping_augmentation.crop(dummy_input, dummy_input)
     print(np.shape(output))
 
