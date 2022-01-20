@@ -210,18 +210,18 @@ def trainSingleModel(model,
 
             if class_no == 2:
                 prob_outputs_u_main = torch.sigmoid(outputs_u)
-                prob_outputs_u_side = torch.sigmoid(outputs_u)
+                # prob_outputs_u_side = torch.sigmoid(outputs_u)
             else:
                 prob_outputs_u_main = F.softmax(outputs_u, dim=1)
-                prob_outputs_u_side = F.softmax(outputs_u, dim=1)
+                # prob_outputs_u_side = F.softmax(outputs_u, dim=1)
 
             if class_no == 2:
                 class_outputs_u_main = (prob_outputs_u_main > side_threshold).float()
-                class_outputs_u_side = (prob_outputs_u_side > 0.5).float()
+                # class_outputs_u_side = (prob_outputs_u_side > 0.5).float()
 
             if class_no == 2:
                 loss_u = 0.5*SoftDiceLoss()(prob_outputs_u_main, class_outputs_u_main) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs_u_main.squeeze(), class_outputs_u_main.squeeze())
-                loss_u += 0.5*SoftDiceLoss()(prob_outputs_u_side, class_outputs_u_side) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs_u_side.squeeze(), class_outputs_u_side.squeeze())
+                # loss_u += 0.5*SoftDiceLoss()(prob_outputs_u_side, class_outputs_u_side) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs_u_side.squeeze(), class_outputs_u_side.squeeze())
 
             loss += alpha_current*loss_u
             optimizer.zero_grad()
