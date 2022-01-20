@@ -31,14 +31,15 @@ class RandomCropping(object):
     def crop(self, *volumes):
         # for supervised learning, we need to crop both volume and the label, arg1: volume, arg2: label
         # for unsupervised learning, we only need to crop the volume, arg1: volume
-        new_resolution = 512
-        skip_slices = random.choice([1, 2, 3, 4, 5])
+        new_resolution = 224
+        skip_slices = random.choice([1, 2, 3])
 
         for volume in volumes:
             c, d, h, w = np.shape(volume)
             assert d > self.output_size
             assert h >= new_resolution
             assert w >= new_resolution
+            assert h == w
 
         # print(np.shape(volume))
 
