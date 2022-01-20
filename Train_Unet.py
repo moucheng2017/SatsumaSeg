@@ -142,7 +142,7 @@ def trainSingleModel(model,
 
     model.to(device)
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=2e-4)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.05)
 
     start = timeit.default_timer()
 
