@@ -33,7 +33,7 @@ def trainModels(dataset_tag,
                 learning_rate,
                 width,
                 log_tag,
-                new_resolution=64
+                new_resolution=[12, 224, 224]
                 ):
 
     for j in range(1, repeat + 1):
@@ -41,14 +41,15 @@ def trainModels(dataset_tag,
         repeat_str = str(j)
 
         Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
-        Exp_name = 'simPL_unet3d' + \
-                   '_e_' + str(repeat_str) + \
+        Exp_name = 'simPL_unet' + \
+                   '_e' + str(repeat_str) + \
                    '_l' + str(learning_rate) + \
                    '_b' + str(train_batchsize) + \
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_d' + str(downsample) + \
-                   '_r' + str(new_resolution)
+                   '_z' + str(new_resolution[0]) + \
+                   '_x' + str(new_resolution[1])
 
         trainloader_withlabels, trainloader_withoutlabels, validateloader, test_data_path = getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_resolution)
 
@@ -148,6 +149,7 @@ def trainSingleModel(model,
         model.train()
         train_iou = []
         train_sup_loss = []
+        train_unsup_loss = []
 
         if step <= int(0.8 * num_steps):
             scale = sigmoid_rampup(step, int(0.8 * num_steps), 1.0)
@@ -189,7 +191,7 @@ def trainSingleModel(model,
                 prob_outputs = F.softmax(outputs, dim=1)
 
             if class_no == 2:
-                loss = 0.5*SoftDiceLoss()(prob_outputs, labels) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs.squeeze(), labels.squeeze())
+                loss = SoftDiceLoss()(prob_outputs, labels) + nn.BCELoss(reduction='mean')(prob_outputs.squeeze(), labels.squeeze())
             else:
                 loss = nn.CrossEntropyLoss(reduction='mean', ignore_index=8)(prob_outputs, labels.long().squeeze(1))
 
@@ -209,21 +211,21 @@ def trainSingleModel(model,
             side_threshold = torch.sigmoid(F.softplus(model.threshold) + torch.rand(1, device=device))
 
             if class_no == 2:
-                prob_outputs_u_main = torch.sigmoid(outputs_u)
-                # prob_outputs_u_side = torch.sigmoid(outputs_u)
+                prob_outputs_u = torch.sigmoid(outputs_u)
             else:
-                prob_outputs_u_main = F.softmax(outputs_u, dim=1)
-                # prob_outputs_u_side = F.softmax(outputs_u, dim=1)
+                prob_outputs_u = F.softmax(outputs_u, dim=1)
 
             if class_no == 2:
-                class_outputs_u_main = (prob_outputs_u_main > side_threshold).float()
-                # class_outputs_u_side = (prob_outputs_u_side > 0.5).float()
+                class_outputs_u_main = (prob_outputs_u > side_threshold).float()
+                class_outputs_u_side = (prob_outputs_u > 0.5).float()
 
             if class_no == 2:
-                loss_u = 0.5*SoftDiceLoss()(prob_outputs_u_main, class_outputs_u_main) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs_u_main.squeeze(), class_outputs_u_main.squeeze())
-                # loss_u += 0.5*SoftDiceLoss()(prob_outputs_u_side, class_outputs_u_side) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs_u_side.squeeze(), class_outputs_u_side.squeeze())
+                loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_main) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_main.squeeze())
+                loss_u += SoftDiceLoss()(prob_outputs_u, class_outputs_u_side) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_side.squeeze())
 
-            loss += alpha_current*loss_u
+            train_unsup_loss.append(alpha_current*0.5*loss_u.item())
+
+            loss += alpha_current*loss_u*0.5
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -235,10 +237,12 @@ def trainSingleModel(model,
                 'Step [{}/{}], '
                 'lr: {:.4f},'
                 'Train sup loss: {:.4f}, '
+                'Train unsup loss: {:.4f}, '
                 'Train iou: {:.4f}, '
                 'val iou:{:.4f}, '.format(step + 1, num_steps,
                                           optimizer.param_groups[0]["lr"],
                                           np.nanmean(train_sup_loss),
+                                          np.nanmean(train_unsup_loss),
                                           np.nanmean(train_iou),
                                           np.nanmean(validate_iou)))
 
@@ -247,10 +251,10 @@ def trainSingleModel(model,
             # # # # ================================================================ #
 
             writer.add_scalars('acc metrics', {'train iou': np.nanmean(train_iou),
-                                               # 'val hausdorff dist': np.nanmean(validate_h_dist),
                                                'val iou': np.nanmean(validate_iou)}, step + 1)
 
-            writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss)}, step + 1)
+            writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss),
+                                               'unsup loss': np.nanmean(train_unsup_loss)}, step + 1)
 
         if step > num_steps - 10:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
