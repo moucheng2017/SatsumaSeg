@@ -77,8 +77,8 @@ def getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_reso
 
     folder_labelled = data_directory + '/labelled'
 
-    train_image_folder_labelled = folder_labelled + '/patches'
-    train_label_folder_labelled = folder_labelled + '/labels'
+    train_image_folder_labelled = folder_labelled + '/imgs'
+    train_label_folder_labelled = folder_labelled + '/lbls'
     train_dataset_labelled = CT_Dataset(train_image_folder_labelled, train_label_folder_labelled, new_resolution, labelled=True)
 
     # train_image_folder_unlabelled = data_directory + '/unlabelled/patches'
@@ -88,18 +88,18 @@ def getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_reso
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
     # trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=train_batchsize*ratio, shuffle=True, num_workers=0, drop_last=False)
 
-    validate_image_folder = data_directory + '/validate/patches'
-    validate_label_folder = data_directory + '/validate/labels'
+    validate_image_folder = data_directory + '/validate/imgs'
+    validate_label_folder = data_directory + '/validate/lbls'
 
     testdata_path = data_directory + '/test'
 
-    test_image_folder = data_directory + '/test/patches'
-    test_label_folder = data_directory + '/test/labels'
+    test_image_folder = data_directory + '/test/imgs'
+    test_label_folder = data_directory + '/test/lbls'
 
     validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, new_resolution, labelled=True)
     test_dataset = CT_Dataset(test_image_folder, test_label_folder, new_resolution, labelled=True)
 
-    validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
+    validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
     testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
     return trainloader_labelled, validateloader, testdata_path, train_dataset_labelled, validate_dataset, test_dataset
@@ -211,7 +211,7 @@ def trainSingleModel(model,
         # # # # ================================================================ #
 
         writer.add_scalars('acc metrics', {'train iou': np.nanmean(train_iou),
-                                           'val hausdorff dist': np.nanmean(validate_h_dist),
+                                           # 'val hausdorff dist': np.nanmean(validate_h_dist),
                                            'val iou': np.nanmean(validate_iou)}, step + 1)
 
         writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss)}, step + 1)
@@ -229,20 +229,20 @@ def trainSingleModel(model,
     training_time = stop - start
     print('Training Time: ', training_time)
 
-    test_image_path = os.path.join(testdata_path, 'patches')
-    test_label_path = os.path.join(testdata_path, 'labels')
-    test_iou = test(saved_information_path + '/' + save_model_name,
-                    saved_model_path,
-                    test_image_path,
-                    test_label_path,
-                    device,
-                    model_name,
-                    class_no,
-                    [192, 192, 192],
-                    1)
-
-    print('Test IoU: ' + str(np.nanmean(test_iou)) + '\n')
-    print('Test IoU std: ' + str(np.nanstd(test_iou)) + '\n')
+    # test_image_path = os.path.join(testdata_path, 'patches')
+    # test_label_path = os.path.join(testdata_path, 'labels')
+    # test_iou = test(saved_information_path + '/' + save_model_name,
+    #                 saved_model_path,
+    #                 test_image_path,
+    #                 test_label_path,
+    #                 device,
+    #                 model_name,
+    #                 class_no,
+    #                 [192, 192, 192],
+    #                 1)
+    #
+    # print('Test IoU: ' + str(np.nanmean(test_iou)) + '\n')
+    # print('Test IoU std: ' + str(np.nanstd(test_iou)) + '\n')
 
     print('\nTraining finished and model saved\n')
 

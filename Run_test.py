@@ -1,8 +1,8 @@
 import torch
 # sys.path.append("..")
 
-from Train_Unet_simPL import trainModels
-# from Train_Unet import trainModels
+# from Train_Unet_simPL import trainModels
+from Train_Unet import trainModels
 torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
@@ -20,7 +20,7 @@ if __name__ == '__main__':
                 train_batchsize=1,
                 num_steps=800,
                 learning_rate=1e-3,
-                width=16,
+                width=12,
                 log_tag='20220120',
-                new_resolution=8
+                new_resolution=12
                 )
