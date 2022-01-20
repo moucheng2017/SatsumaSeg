@@ -136,17 +136,17 @@ class CT_Dataset(torch.utils.data.Dataset):
 
         if self.labelled_flag is True:
             [image, label] = self.augmentation_cropping.crop(image, label)
-            image1 = self.augmentation_contrast.randomintensity(image)
+            # image1 = self.augmentation_contrast.randomintensity(image)
             # image2 = self.augmentation_gaussian.gaussiannoise(image)
-            weights = np.random.dirichlet((1, 1), 1)
-            image = weights[0][0]*image + weights[0][1]*image1
+            # weights = np.random.dirichlet((1, 1), 1)
+            # image = weights[0][0]*image + weights[0][1]*image1
             return image, label, imagename
         else:
             [image] = self.augmentation_cropping.crop(image)
-            image1 = self.augmentation_contrast.randomintensity(image)
+            # image1 = self.augmentation_contrast.randomintensity(image)
             # image2 = self.augmentation_gaussian.gaussiannoise(image)
-            weights = np.random.dirichlet((1, 1), 1)
-            image = weights[0][0]*image + weights[0][1]*image1
+            # weights = np.random.dirichlet((1, 1), 1)
+            # image = weights[0][0]*image + weights[0][1]*image1
             return image, imagename
 
     def __len__(self):

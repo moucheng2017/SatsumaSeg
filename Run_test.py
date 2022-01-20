@@ -18,9 +18,9 @@ if __name__ == '__main__':
                 class_no=2,
                 repeat=1,
                 train_batchsize=1,
-                num_steps=3200,
+                num_steps=1600,
                 learning_rate=1e-3,
                 width=12,
-                log_tag='20220120',
+                log_tag='20220120_no_data_augmentation',
                 new_resolution=[10, 224, 224]
                 )
