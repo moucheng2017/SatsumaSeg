@@ -3,19 +3,7 @@ import os
 import random
 
 import torch
-# import gzip
-# import shutil
-# import random
-import errno
-# # import pydicom
 import numpy as np
-from PIL import Image
-import nibabel as nib
-import matplotlib.pyplot as plt
-from scipy.ndimage.morphology import binary_fill_holes
-from skimage.transform import resize
-# from nipype.interfaces.ants import N4BiasFieldCorrection
-from tifffile import imsave
 
 # Read cases, for each case, read the whole volume
 # 1. random crop around the lung mask
