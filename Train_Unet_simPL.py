@@ -117,16 +117,16 @@ def trainSingleModel(model,
     save_model_name = model_name
     saved_information_path = '../Results/' + dataset_name + '/' + dataset_tag + '/' + log_tag
     if not os.path.exists(saved_information_path):
-        os.makedirs(saved_information_path)
+        os.makedirs(saved_information_path, exist_ok=True)
     # os.mkdir(saved_information_path, exist_ok=True)
     saved_log_path = saved_information_path + '/Logs'
     # os.mkdir(saved_log_path, exist_ok=True)
     if not os.path.exists(saved_log_path):
-        os.makedirs(saved_log_path)
+        os.makedirs(saved_log_path, exist_ok=True)
     saved_model_path = saved_information_path + '/' + save_model_name + '/trained_models'
     # os.mkdir(saved_model_path, exist_ok=True)
     if not os.path.exists(saved_model_path):
-        os.makedirs(saved_model_path)
+        os.makedirs(saved_model_path, exist_ok=True)
 
     print('The current model is:')
     print(save_model_name)
