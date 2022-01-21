@@ -15,11 +15,11 @@ if __name__ == '__main__':
                 class_no=2,
                 repeat=1,
                 train_batchsize=1,
-                num_steps=5000,
-                learning_rate=1e-2,
-                width=8,
+                num_steps=24000,
+                learning_rate=1e-3,
+                width=16,
                 log_tag='20220120_no_data_augmentation',
-                new_resolution=[16, 224, 224]
+                new_resolution=[8, 224, 224]
                 )
 
     trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data/',
@@ -30,9 +30,9 @@ if __name__ == '__main__':
                 class_no=2,
                 repeat=1,
                 train_batchsize=1,
-                num_steps=5000,
-                learning_rate=1e-2,
-                width=8,
+                num_steps=24000,
+                learning_rate=1e-3,
+                width=16,
                 log_tag='20220120_no_data_augmentation',
-                new_resolution=[16, 224, 224]
+                new_resolution=[8, 224, 224]
                 )
