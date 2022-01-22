@@ -229,8 +229,8 @@ def trainSingleModel(model,
             loss.backward()
             optimizer.step()
 
-            for param_group in optimizer.param_groups:
-                param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
+            # for param_group in optimizer.param_groups:
+            #     param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
 
             print(
                 'Step [{}/{}], '
