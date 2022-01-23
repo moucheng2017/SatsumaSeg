@@ -18,7 +18,7 @@ if __name__ == '__main__':
                 num_steps=8000,
                 learning_rate=1e-3,
                 width=16,
-                log_tag='20220120_no_data_augmentation',
+                log_tag='20220120_augmentation',
                 new_resolution=[8, 224, 224]
                 )
 
