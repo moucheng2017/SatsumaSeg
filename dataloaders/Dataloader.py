@@ -25,7 +25,9 @@ class RandomCropping(object):
         new_d = self.output_size[0]
         new_h = self.output_size[1]
         new_w = self.output_size[2]
+
         skip = random.choice(self.skip_slices)
+        skip_x = random.choice(self.skip_slices)
 
         for volume in volumes:
             c, d, h, w = np.shape(volume)
@@ -102,7 +104,7 @@ class CT_Dataset(torch.utils.data.Dataset):
         self.labels_folder = labels_folder
         self.labelled_flag = labelled
         self.augmentation_contrast = RandomContrast()
-        self.augmentation_cropping = RandomCropping(new_size, [1])
+        self.augmentation_cropping = RandomCropping(new_size, [1, 2])
         self.augmentation_gaussian = RandomGaussian()
 
     def __getitem__(self, index):
@@ -124,17 +126,17 @@ class CT_Dataset(torch.utils.data.Dataset):
 
         if self.labelled_flag is True:
             [image, label] = self.augmentation_cropping.crop(image, label)
-            # image1 = self.augmentation_contrast.randomintensity(image)
+            image1 = self.augmentation_contrast.randomintensity(image)
             # image2 = self.augmentation_gaussian.gaussiannoise(image)
-            # weights = np.random.dirichlet((1, 1), 1)
-            # image = weights[0][0]*image + weights[0][1]*image1
+            weights = np.random.dirichlet((1, 1), 1)
+            image = weights[0][0]*image + weights[0][1]*image1
             return image, label, imagename
         else:
             [image] = self.augmentation_cropping.crop(image)
-            # image1 = self.augmentation_contrast.randomintensity(image)
+            image1 = self.augmentation_contrast.randomintensity(image)
             # image2 = self.augmentation_gaussian.gaussiannoise(image)
-            # weights = np.random.dirichlet((1, 1), 1)
-            # image = weights[0][0]*image + weights[0][1]*image1
+            weights = np.random.dirichlet((1, 1), 1)
+            image = weights[0][0]*image + weights[0][1]*image1
             return image, imagename
 
     def __len__(self):
