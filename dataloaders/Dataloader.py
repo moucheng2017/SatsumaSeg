@@ -14,6 +14,7 @@ import numpy as np
 
 class RandomCropping(object):
     def __init__(self, output_size, skip_slices):
+
         # output_size: d x h x w
         self.output_size = output_size
         self.skip_slices = skip_slices
