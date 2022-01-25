@@ -6,15 +6,18 @@ if __name__ == '__main__':
 
     trainModels(data_directory='/SAN/medic/PerceptronHead/data/lung/public/',
                 dataset_name='airway',
-                dataset_tag='mismatch_exp',
+                dataset_tag='512',
                 downsample=0,
                 input_dim=1,
                 class_no=2,
                 repeat=3,
                 train_batchsize=1,
-                num_steps=3200,
+                num_steps=8000,
                 learning_rate=1e-3,
-                width=12,
-                log_tag='20220120',
-                new_resolution=[10, 224, 224]
+                width=16,
+                log_tag='20220125',
+                new_resolution=[12, 512, 512],
+                l2=0.001,
+                alpha=1.0,
+                warmup=0.5
                 )
