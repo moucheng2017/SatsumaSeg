@@ -150,8 +150,12 @@ def trainSingleModel(model,
         train_sup_loss = []
         train_unsup_loss = []
 
-        if step <= int(0.8 * num_steps):
-            scale = sigmoid_rampup(step, int(0.8 * num_steps), 1.0)
+        # warmup_ratio = 0.1
+        warmup = 100
+        # if step <= int(warmup_ratio * num_steps):
+        if step <= warmup:
+            # scale = sigmoid_rampup(step, int(warmup_ratio * num_steps), 1.0)
+            scale = sigmoid_rampup(step, warmup, 1.0)
             alpha_current = alpha * scale
         else:
             alpha_current = 1.0
