@@ -41,15 +41,12 @@ if __name__ == '__main__':
             dim2_paths.append(file)
 
     print('cases of 512:' + str(dim1//2))
-    print('case of 768:' + str(dim2//2))
-
-    print('\n')
-
     for file in dim1_paths:
         print(file)
 
     print('\n')
     print('\n')
 
+    print('case of 768:' + str(dim2//2))
     for file in dim2_paths:
         print(file)
