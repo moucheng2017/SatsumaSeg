@@ -64,43 +64,43 @@ class Unet3D(nn.Module):
         self.w3 = width * 4
         self.w4 = width * 8
 
-        # if z_downsample == 0:
-        #     encoder_downsamples = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
-        #     upsamples_steps = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
-        # elif z_downsample == 1:
-        #     encoder_downsamples = [(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
-        #     upsamples_steps = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
-        # elif z_downsample == 2:
-        #     encoder_downsamples = [(2, 2, 2), (2, 2, 2), (1, 2, 2), (1, 2, 2)]
-        #     upsamples_steps = [(1, 2, 2), (1, 2, 2), (2, 2, 2), (2, 2, 2)]
-        # elif z_downsample == 3:
-        #     encoder_downsamples = [(2, 2, 2), (2, 2, 2), (2, 2, 2), (1, 2, 2)]
-        #     upsamples_steps = [(1, 2, 2), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
-        # elif z_downsample == 4:
-        #     encoder_downsamples = [(2, 2, 2), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
-        #     upsamples_steps = [(2, 2, 2), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
-        # else:
-        #     encoder_downsamples = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
-        #     upsamples_steps = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
-
         if z_downsample == 0:
-            encoder_downsamples = [(1, 1, 1), (1, 1, 1), (1, 1, 1), (1, 1, 1)]
-            upsamples_steps = [(1, 1, 1), (1, 1, 1), (1, 1, 1), (1, 1, 1)]
+            encoder_downsamples = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
+            upsamples_steps = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
         elif z_downsample == 1:
-            encoder_downsamples = [(2, 2, 2), (1, 1, 1), (1, 1, 1), (1, 1, 1)]
-            upsamples_steps = [(1, 1, 1), (1, 1, 1), (1, 1, 1), (2, 2, 2)]
+            encoder_downsamples = [(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
+            upsamples_steps = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
         elif z_downsample == 2:
-            encoder_downsamples = [(2, 2, 2), (2, 2, 2), (1, 1, 1), (1, 1, 1)]
-            upsamples_steps = [(1, 1, 1), (1, 1, 1), (2, 2, 2), (2, 2, 2)]
+            encoder_downsamples = [(2, 2, 2), (2, 2, 2), (1, 2, 2), (1, 2, 2)]
+            upsamples_steps = [(1, 2, 2), (1, 2, 2), (2, 2, 2), (2, 2, 2)]
         elif z_downsample == 3:
-            encoder_downsamples = [(2, 2, 2), (2, 2, 2), (2, 2, 2), (1, 1, 1)]
-            upsamples_steps = [(1, 1, 1), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
+            encoder_downsamples = [(2, 2, 2), (2, 2, 2), (2, 2, 2), (1, 2, 2)]
+            upsamples_steps = [(1, 2, 2), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
         elif z_downsample == 4:
             encoder_downsamples = [(2, 2, 2), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
             upsamples_steps = [(2, 2, 2), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
         else:
             encoder_downsamples = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
             upsamples_steps = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
+
+        # if z_downsample == 0:
+        #     encoder_downsamples = [(1, 1, 1), (1, 1, 1), (1, 1, 1), (1, 1, 1)]
+        #     upsamples_steps = [(1, 1, 1), (1, 1, 1), (1, 1, 1), (1, 1, 1)]
+        # elif z_downsample == 1:
+        #     encoder_downsamples = [(2, 2, 2), (1, 1, 1), (1, 1, 1), (1, 1, 1)]
+        #     upsamples_steps = [(1, 1, 1), (1, 1, 1), (1, 1, 1), (2, 2, 2)]
+        # elif z_downsample == 2:
+        #     encoder_downsamples = [(2, 2, 2), (2, 2, 2), (1, 1, 1), (1, 1, 1)]
+        #     upsamples_steps = [(1, 1, 1), (1, 1, 1), (2, 2, 2), (2, 2, 2)]
+        # elif z_downsample == 3:
+        #     encoder_downsamples = [(2, 2, 2), (2, 2, 2), (2, 2, 2), (1, 1, 1)]
+        #     upsamples_steps = [(1, 1, 1), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
+        # elif z_downsample == 4:
+        #     encoder_downsamples = [(2, 2, 2), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
+        #     upsamples_steps = [(2, 2, 2), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
+        # else:
+        #     encoder_downsamples = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
+        #     upsamples_steps = [(1, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
 
         self.econv0 = single_conv(in_channels=in_ch, out_channels=self.w1, step=1)
         self.econv1 = DoubleRandomDilatedConv(in_channels=self.w1, out_channels=self.w2, step=encoder_downsamples[0])
