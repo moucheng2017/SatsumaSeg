@@ -1,7 +1,7 @@
 import glob
 import os
 # import gzip
-# import shutil
+import shutil
 # import random
 import errno
 import numpy as np
@@ -23,6 +23,13 @@ def read_all_files(path):
 if __name__ == '__main__':
 
     allfiles = read_all_files('/home/moucheng/projects_data/Pulmonary_data/airway')
+
+    save512img = '/home/moucheng/projects_data/Pulmonary_data/airway/512/imgs'
+    save512lbl = '/home/moucheng/projects_data/Pulmonary_data/airway/512/lbls'
+
+    save768img = '/home/moucheng/projects_data/Pulmonary_data/airway/768/imgs'
+    save768lbl = '/home/moucheng/projects_data/Pulmonary_data/airway/768/lbls'
+
     dim1 = 0
     dim2 = 0
 
@@ -34,11 +41,29 @@ if __name__ == '__main__':
         # print(np.shape(file))
         c, d, h, w = np.shape(data)
         if h == 512:
-            dim1+=1
-            dim1_paths.append(file)
+            dim1 += 1
+            if 'volume' in file:
+                dim1_paths.append(file)
+                filename = os.path.split(file)[-1]
+                savepath = os.path.join(save512img, filename)
+                shutil.move(file, savepath)
+            elif 'label' in file:
+                filename = os.path.split(file)[-1]
+                savepath = os.path.join(save512lbl, filename)
+                shutil.move(file, savepath)
+
         elif h == 768:
-            dim2+=1
-            dim2_paths.append(file)
+            dim2 += 1
+            if 'volume' in file:
+                dim2_paths.append(file)
+                filename = os.path.split(file)[-1]
+                savepath = os.path.join(save768img, filename)
+                shutil.move(file, savepath)
+            elif 'label' in file:
+                filename = os.path.split(file)[-1]
+                savepath = os.path.join(save768lbl, filename)
+                # print(savepath)
+                shutil.move(file, savepath)
 
     print('cases of 512:' + str(dim1//2))
     for file in dim1_paths:

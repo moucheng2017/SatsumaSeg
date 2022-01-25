@@ -18,8 +18,11 @@ if __name__ == '__main__':
                 num_steps=8000,
                 learning_rate=1e-3,
                 width=16,
-                log_tag='20220120_augmentation',
-                new_resolution=[12, 512, 512]
+                log_tag='20220125_augmentation',
+                new_resolution=[12, 512, 512],
+                l2=0.01,
+                alpha=1.0,
+                warmup=0.1
                 )
 
     # trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data/',
