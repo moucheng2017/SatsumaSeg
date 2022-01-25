@@ -31,7 +31,8 @@ def trainModels(dataset_tag,
                 learning_rate,
                 width,
                 log_tag,
-                new_resolution=[12, 224, 224]
+                new_resolution=[12, 512, 512],
+                l2=0.01
                 ):
 
     for j in range(1, repeat + 1):
@@ -46,6 +47,7 @@ def trainModels(dataset_tag,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_d' + str(downsample) + \
+                   '_r' + str(l2) + \
                    '_z' + str(new_resolution[0]) + \
                    '_x' + str(new_resolution[1])
 
@@ -65,6 +67,7 @@ def trainModels(dataset_tag,
                          testdata_path=test_data_path,
                          class_no=class_no,
                          log_tag=log_tag,
+                         l2=l2,
                          dilation=1)
 
 
@@ -117,6 +120,7 @@ def trainSingleModel(model,
                      dilation,
                      testdata_path,
                      log_tag,
+                     l2,
                      class_no):
 
     device = torch.device('cuda')
@@ -142,7 +146,7 @@ def trainSingleModel(model,
 
     model.to(device)
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.05)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
 
     start = timeit.default_timer()
 
@@ -190,8 +194,8 @@ def trainSingleModel(model,
         loss.backward()
         optimizer.step()
 
-        for param_group in optimizer.param_groups:
-            param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
+        # for param_group in optimizer.param_groups:
+        #     param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
 
         print(
             'Step [{}/{}], '
