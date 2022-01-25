@@ -136,7 +136,7 @@ def trainSingleModel(model,
 
     model.to(device)
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.1)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.01)
 
     start = timeit.default_timer()
 
@@ -151,7 +151,7 @@ def trainSingleModel(model,
         train_unsup_loss = []
 
         # warmup_ratio = 0.1
-        warmup = 100
+        warmup = 1000
         # if step <= int(warmup_ratio * num_steps):
         if step <= warmup:
             # scale = sigmoid_rampup(step, int(warmup_ratio * num_steps), 1.0)
