@@ -32,7 +32,10 @@ def trainModels(dataset_tag,
                 learning_rate,
                 width,
                 log_tag,
-                new_resolution=[12, 224, 224]
+                new_resolution=[12, 512, 512],
+                l2=0.01,
+                alpha=1.0,
+                warmup=0.1
                 ):
 
     for j in range(1, repeat + 1):
@@ -47,6 +50,9 @@ def trainModels(dataset_tag,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_d' + str(downsample) + \
+                   '_r' + str(l2) + \
+                   '_a' + str(alpha) + \
+                   '_wu' + str(warmup) + \
                    '_z' + str(new_resolution[0]) + \
                    '_x' + str(new_resolution[1])
 
@@ -65,7 +71,11 @@ def trainModels(dataset_tag,
                          testdata_path=test_data_path,
                          class_no=class_no,
                          log_tag=log_tag,
-                         dilation=1)
+                         dilation=1,
+                         l2=l2,
+                         alpha=alpha,
+                         warmup=warmup
+                         )
 
 
 def getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_resolution):
@@ -109,9 +119,12 @@ def trainSingleModel(model,
                      dilation,
                      testdata_path,
                      log_tag,
-                     class_no):
+                     class_no,
+                     l2=0.01,
+                     alpha=1.0,
+                     warmup=0.1):
 
-    alpha = 1.0
+    # alpha = 1.0
 
     device = torch.device('cuda')
     save_model_name = model_name
@@ -136,7 +149,7 @@ def trainSingleModel(model,
 
     model.to(device)
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.01)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
 
     start = timeit.default_timer()
 
@@ -150,12 +163,12 @@ def trainSingleModel(model,
         train_sup_loss = []
         train_unsup_loss = []
 
-        # warmup_ratio = 0.1
-        warmup = 1000
-        # if step <= int(warmup_ratio * num_steps):
-        if step <= warmup:
-            # scale = sigmoid_rampup(step, int(warmup_ratio * num_steps), 1.0)
-            scale = sigmoid_rampup(step, warmup, 1.0)
+        warmup_ratio = warmup
+        # warmup = 1000
+        if step <= int(warmup_ratio * num_steps):
+        # if step <= warmup:
+            scale = sigmoid_rampup(step, int(warmup_ratio * num_steps), 1.0)
+            # scale = sigmoid_rampup(step, warmup, 1.0)
             alpha_current = alpha * scale
         else:
             alpha_current = 1.0
