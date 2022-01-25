@@ -17,9 +17,9 @@ if __name__ == '__main__':
                 train_batchsize=1,
                 num_steps=8000,
                 learning_rate=1e-3,
-                width=16,
+                width=12,
                 log_tag='20220120_augmentation',
-                new_resolution=[8, 224, 224]
+                new_resolution=[3, 400, 400]
                 )
 
     # trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data/',
