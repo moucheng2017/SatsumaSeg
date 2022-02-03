@@ -11,10 +11,10 @@ import torch.nn.functional as F
 def double_conv(in_channels, out_channels, step):
     # double convolutional layers
     return nn.Sequential(
-        nn.Conv3d(in_channels, out_channels, (3, 3, 3), stride=step, padding=(1, 1, 1), groups=1, bias=False),
+        nn.Conv3d(in_channels, out_channels, (3, 3, 3), stride=step, padding=(0, 1, 1), groups=1, bias=False),
         nn.InstanceNorm3d(out_channels, affine=True),
         nn.ReLU(inplace=True),
-        nn.Conv3d(out_channels, out_channels, (3, 3, 3), stride=(1, 1, 1), padding=(1, 1 ,1), groups=1, bias=False),
+        nn.Conv3d(out_channels, out_channels, (3, 3, 3), stride=(1, 1, 1), padding=(0, 1, 1), groups=1, bias=False),
         nn.InstanceNorm3d(out_channels, affine=True),
         nn.ReLU(inplace=True)
     )
@@ -120,7 +120,9 @@ class Unet3D(nn.Module):
 
         self.dconv_last = nn.Conv3d(self.w1, self.final_in, (1, 1, 1), bias=True)
 
-        self.threshold = nn.Parameter(0.9*torch.ones(1))
+        # self.threshold = nn.Parameter(0.9*torch.ones(1))
+
+        self.pixel_threshold = double_conv(in_channels=self.w1, out_channels=1, step=(1, 1, 1))
 
     def forward(self, x, dilation_encoder=[1, 1, 1, 1], dilation_decoder=[1, 1, 1, 1]):
         # print(x.size())
@@ -156,4 +158,6 @@ class Unet3D(nn.Module):
         y0 = self.dconv0(y0, dilation_decoder[3])
         y = self.dconv_last(y0)
 
-        return y
+        pixel_thresholding = self.pixel_threshold(y0.detach())
+
+        return y, pixel_thresholding

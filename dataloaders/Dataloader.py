@@ -82,7 +82,7 @@ class RandomContrast(object):
 
 
 class RandomGaussian(object):
-    def __init__(self, mean=0, std=0.1):
+    def __init__(self, mean=0, std=0.01):
         self.m = mean
         self.sigma = std
 
@@ -105,7 +105,7 @@ class CT_Dataset(torch.utils.data.Dataset):
         self.labels_folder = labels_folder
         self.labelled_flag = labelled
         self.augmentation_contrast = RandomContrast()
-        self.augmentation_cropping = RandomCropping(new_size, [1, 2])
+        self.augmentation_cropping = RandomCropping(new_size, [1])
         self.augmentation_gaussian = RandomGaussian()
 
     def __getitem__(self, index):
