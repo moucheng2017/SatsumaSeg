@@ -43,7 +43,6 @@ def trainModels(dataset_tag,
         repeat_str = str(j)
 
         Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
-        Exp2 = ConfModel(in_channels=1, out_channels=1, step=1)
 
         Exp_name = 'simPL_unet' + \
                    '_e' + str(repeat_str) + \
@@ -62,7 +61,6 @@ def trainModels(dataset_tag,
 
         # ===================
         trainSingleModel(model=Exp,
-                         model2=Exp2,
                          model_name=Exp_name,
                          num_steps=num_steps,
                          learning_rate=learning_rate,
@@ -111,7 +109,6 @@ def getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_reso
 
 
 def trainSingleModel(model,
-                     model2,
                      model_name,
                      num_steps,
                      learning_rate,
@@ -153,10 +150,10 @@ def trainSingleModel(model,
     writer = SummaryWriter(saved_log_path + '/Log_' + save_model_name)
 
     model.to(device)
-    model2.to(device)
+    # model2.to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
-    optimizer_conf = torch.optim.AdamW(model2.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
+    # optimizer_conf = torch.optim.AdamW(model2.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
 
     start = timeit.default_timer()
 
