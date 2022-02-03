@@ -51,6 +51,29 @@ class DoubleRandomDilatedConv(nn.Module):
         return output
 
 
+class ConfModel(nn.Module):
+    def __init__(self, in_channels, out_channels, step, width=32):
+        super(ConfModel, self).__init__()
+        self.attention_branch = nn.Sequential(
+            nn.Conv3d(in_channels=in_channels, out_channels=width, kernel_size=(3, 3, 3), stride=step, dilation=(1, 1, 1), padding=(0, 1, 1), bias=False),
+            nn.InstanceNorm3d(width, affine=True),
+            nn.ReLU(inplace=True),
+            nn.Conv3d(in_channels=width, out_channels=out_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(0, 1, 1), bias=False),
+            nn.InstanceNorm3d(out_channels, affine=True),
+            nn.ReLU(inplace=True)
+        )
+
+    def forward(self, x):
+        # self.attention_branch[0].dilation = (1, 1, int(random_seed))
+        # self.attention_branch[0].padding = (1, int(random_seed), int(random_seed))
+        # self.attention_branch[3].dilation = (1, int(random_seed), int(random_seed))
+        # self.attention_branch[3].padding = (1, int(random_seed), int(random_seed))
+        output = self.attention_branch(x)
+        # output = torch.sigmoid(output)
+        output = torch.norm(output, dim=1, keepdim=True, p=2)
+        return output
+
+
 class Unet3D(nn.Module):
     def __init__(self, in_ch, width, class_no, z_downsample=0):
         super(Unet3D, self).__init__()
@@ -122,7 +145,7 @@ class Unet3D(nn.Module):
 
         # self.threshold = nn.Parameter(0.9*torch.ones(1))
 
-        self.pixel_threshold = double_conv(in_channels=self.w1, out_channels=1, step=(1, 1, 1))
+        # self.pixel_threshold = double_conv(in_channels=self.w1, out_channels=1, step=(1, 1, 1))
 
     def forward(self, x, dilation_encoder=[1, 1, 1, 1], dilation_decoder=[1, 1, 1, 1]):
         # print(x.size())
@@ -158,6 +181,6 @@ class Unet3D(nn.Module):
         y0 = self.dconv0(y0, dilation_decoder[3])
         y = self.dconv_last(y0)
 
-        pixel_thresholding = self.pixel_threshold(y0.detach())
+        # pixel_thresholding = self.pixel_threshold(y0)
 
-        return y, pixel_thresholding
+        return y, y0
