@@ -17,7 +17,7 @@ from tensorboardX import SummaryWriter
 from Utils import evaluate, test, sigmoid_rampup
 from Loss import SoftDiceLoss
 # =================================
-from Baselines import Unet3D
+from Baselines import Unet3D, ConfModel
 
 
 def trainModels(dataset_tag,
@@ -43,6 +43,8 @@ def trainModels(dataset_tag,
         repeat_str = str(j)
 
         Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
+        Exp2 = ConfModel(in_channels=1, out_channels=1, step=1)
+
         Exp_name = 'simPL_unet' + \
                    '_e' + str(repeat_str) + \
                    '_l' + str(learning_rate) + \
@@ -60,6 +62,7 @@ def trainModels(dataset_tag,
 
         # ===================
         trainSingleModel(model=Exp,
+                         model2=Exp2,
                          model_name=Exp_name,
                          num_steps=num_steps,
                          learning_rate=learning_rate,
@@ -108,6 +111,7 @@ def getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_reso
 
 
 def trainSingleModel(model,
+                     model2,
                      model_name,
                      num_steps,
                      learning_rate,
@@ -129,6 +133,7 @@ def trainSingleModel(model,
     device = torch.device('cuda')
     save_model_name = model_name
     saved_information_path = '../Results/' + dataset_name + '/' + dataset_tag + '/' + log_tag
+
     if not os.path.exists(saved_information_path):
         os.makedirs(saved_information_path, exist_ok=True)
     # os.mkdir(saved_information_path, exist_ok=True)
@@ -148,8 +153,10 @@ def trainSingleModel(model,
     writer = SummaryWriter(saved_log_path + '/Log_' + save_model_name)
 
     model.to(device)
+    model2.to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
+    optimizer_conf = torch.optim.AdamW(model2.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
 
     start = timeit.default_timer()
 
@@ -200,7 +207,9 @@ def trainSingleModel(model,
 
             outputs, threshold = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
             outputs, outputs_u = torch.split(outputs, [b_l, b_u], dim=0)
-            threshold_l, threshold_u = torch.split(threshold, [b_l, b_u], dim=0)
+            # threshold_l, outputs_u = torch.split(outputs_u, [b_l, b_u], dim=0)
+            # with torch.no_grad():
+            # side_threshold = model2(outputs_u.detach())
 
             # print(threshold_l.size())
             # print(threshold_u.size())
@@ -232,17 +241,15 @@ def trainSingleModel(model,
 
             # unlabelled training:
             # side_threshold = torch.sigmoid(F.softplus(model.threshold) + torch.rand(1, device=device))
-            # threshold_u = torch.mean(threshold_u, 2)
-            # side_threshold = torch.sigmoid(F.softplus(torch.unsqueeze(threshold_u, 1)))
 
             if class_no == 2:
                 prob_outputs_u = torch.sigmoid(outputs_u)
             else:
                 prob_outputs_u = F.softmax(outputs_u, dim=1)
 
-            if class_no == 2:
-                # class_outputs_u_main = (prob_outputs_u > side_threshold.detach()).float()
-                class_outputs_u_side = (prob_outputs_u > 0.9).float()
+            # side_threshold = torch.mean(side_threshold, dim=1)
+            # class_outputs_u_main = (prob_outputs_u > side_threshold.float())
+            class_outputs_u_side = (prob_outputs_u > 0.5).float()
 
             if class_no == 2:
                 # loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_main) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_main.squeeze())
@@ -251,25 +258,19 @@ def trainSingleModel(model,
             train_unsup_loss.append(alpha_current*loss_u.item())
 
             loss += alpha_current*loss_u
-
-            # assume threshold confidence is mean 0.5 std 0.5 normal distribution:
-            # threshold_target = torch.flatten(side_threshold).normal_(mean=0.5, std=0.5)
-            # loss_kl = nn.KLDivLoss(reduction='mean', log_target=True)(torch.flatten(side_threshold), threshold_target)
-            # loss += 0.1*loss_kl
-
-            # class_outputs_u_main = (prob_outputs_u > side_threshold).float()
-            class_outputs_u_side = (prob_outputs_u > 0.5).float()
-
-            if class_no == 2:
-                # loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_main) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_main.squeeze())
-                loss_u += SoftDiceLoss()(prob_outputs_u, class_outputs_u_side) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_side.squeeze())
-
-            train_unsup_loss.append(alpha_current*loss_u.item())
-
-            loss += alpha_current*loss_u
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
+            # # assume threshold confidence is mean 0.75 std 0.25 normal distribution:
+            # model2.train()
+            # threshold_u = model2(outputs_u.detach())
+            # threshold_target = threshold_u.detach().view(-1).normal_(mean=0.75, std=0.25)
+            # loss_kl = nn.MSELoss(reduction='mean')(threshold_u.view(-1), threshold_target)
+            #
+            # optimizer_conf.zero_grad()
+            # loss_kl.backward()
+            # optimizer_conf.step()
 
             for param_group in optimizer.param_groups:
                 param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
