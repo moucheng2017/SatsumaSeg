@@ -246,11 +246,12 @@ def trainSingleModel(model,
 
             # side_threshold = torch.mean(side_threshold, dim=1)
             # class_outputs_u_main = (prob_outputs_u > side_threshold.float())
-            class_outputs_u_side = (prob_outputs_u > 0.5).float()
+            class_outputs_u_side = (prob_outputs_u.detach() > 0.5).float()
+            mask = (prob_outputs_u.detach() > 0.9).float()
 
             if class_no == 2:
                 # loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_main) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_main.squeeze())
-                loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_side) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_side.squeeze())
+                loss_u = SoftDiceLoss()(prob_outputs_u*mask, class_outputs_u_side*mask) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze()*mask, class_outputs_u_side.squeeze()*mask)
 
             train_unsup_loss.append(alpha_current*loss_u.item())
 

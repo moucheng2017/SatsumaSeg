@@ -16,14 +16,14 @@ if __name__ == '__main__':
                     class_no=2,
                     repeat=1,
                     train_batchsize=2,
-                    num_steps=1500,
+                    num_steps=800,
                     learning_rate=1e-4,
                     width=16,
                     log_tag='20220202',
                     new_resolution=[32, 256, 256],
                     l2=1e-4,
-                    alpha=0.1,
-                    warmup=0.1
+                    alpha=1.0,
+                    warmup=0.8
                     )
 
     # trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data/',
