@@ -31,7 +31,8 @@ def trainModels(dataset_tag,
                 learning_rate,
                 width,
                 log_tag,
-                new_resolution=[12, 224, 224]
+                new_resolution=[12, 224, 224],
+                l2=0.01
                 ):
 
     for j in range(1, repeat + 1):
@@ -65,6 +66,7 @@ def trainModels(dataset_tag,
                          testdata_path=test_data_path,
                          class_no=class_no,
                          log_tag=log_tag,
+                         l2=l2,
                          dilation=1)
 
 
@@ -117,6 +119,7 @@ def trainSingleModel(model,
                      dilation,
                      testdata_path,
                      log_tag,
+                     l2,
                      class_no):
 
     device = torch.device('cuda')
@@ -142,7 +145,7 @@ def trainSingleModel(model,
 
     model.to(device)
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.05)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
 
     start = timeit.default_timer()
 
@@ -163,7 +166,7 @@ def trainSingleModel(model,
         train_imgs = labelled_img.to(device=device, dtype=torch.float32)
         labels = labelled_label.to(device=device, dtype=torch.float32)
 
-        outputs = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
+        outputs, _ = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
         if class_no == 2:
             prob_outputs = torch.sigmoid(outputs)
         else:
@@ -190,8 +193,8 @@ def trainSingleModel(model,
         loss.backward()
         optimizer.step()
 
-        for param_group in optimizer.param_groups:
-            param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
+        # for param_group in optimizer.param_groups:
+        #     param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
 
         print(
             'Step [{}/{}], '

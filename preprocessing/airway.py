@@ -64,10 +64,11 @@ def prepare_data(data_path, lbl_path, save_img_path, save_lbl_path, case_index, 
 
 if __name__ == '__main__':
 
-    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRaw'
-    lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllSeg'
-    save_img_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRawNP/'
-    save_lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllSegNP/'
+    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Turkish/raw/imgs/'
+    lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Turkish/raw/lbls/'
+
+    save_img_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Turkish/labelled/imgs/'
+    save_lbl_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Turkish/labelled/lbls/'
 
     all_volumes = [os.path.join(data_path, i) for i in os.listdir(data_path)]
     all_lbls = [os.path.join(lbl_path, i) for i in os.listdir(lbl_path)]

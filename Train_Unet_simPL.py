@@ -198,8 +198,15 @@ def trainSingleModel(model,
 
         if torch.sum(labels) > 100.0:
 
-            outputs = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
+            outputs, threshold = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
             outputs, outputs_u = torch.split(outputs, [b_l, b_u], dim=0)
+            threshold_l, threshold_u = torch.split(threshold, [b_l, b_u], dim=0)
+
+            # print(threshold_l.size())
+            # print(threshold_u.size())
+
+            # print(outputs.size())
+            # print(outputs_u.size())
 
             if class_no == 2:
                 prob_outputs = torch.sigmoid(outputs)
@@ -224,7 +231,9 @@ def trainSingleModel(model,
             validate_iou, validate_h_dist = evaluate(validateloader, model, device, model_name, class_no, dilation)
 
             # unlabelled training:
-            side_threshold = torch.sigmoid(F.softplus(model.threshold) + torch.rand(1, device=device))
+            # side_threshold = torch.sigmoid(F.softplus(model.threshold) + torch.rand(1, device=device))
+            # threshold_u = torch.mean(threshold_u, 2)
+            # side_threshold = torch.sigmoid(F.softplus(torch.unsqueeze(threshold_u, 1)))
 
             if class_no == 2:
                 prob_outputs_u = torch.sigmoid(outputs_u)
@@ -232,22 +241,28 @@ def trainSingleModel(model,
                 prob_outputs_u = F.softmax(outputs_u, dim=1)
 
             if class_no == 2:
-                class_outputs_u_main = (prob_outputs_u > side_threshold).float()
-                class_outputs_u_side = (prob_outputs_u > 0.5).float()
+                # class_outputs_u_main = (prob_outputs_u > side_threshold.detach()).float()
+                class_outputs_u_side = (prob_outputs_u > 0.9).float()
 
             if class_no == 2:
-                loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_main) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_main.squeeze())
-                loss_u += SoftDiceLoss()(prob_outputs_u, class_outputs_u_side) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_side.squeeze())
+                # loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_main) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_main.squeeze())
+                loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_side) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_side.squeeze())
 
-            train_unsup_loss.append(alpha_current*0.5*loss_u.item())
+            train_unsup_loss.append(alpha_current*loss_u.item())
 
-            loss += alpha_current*loss_u*0.5
+            loss += alpha_current*loss_u
+
+            # assume threshold confidence is mean 0.5 std 0.5 normal distribution:
+            # threshold_target = torch.flatten(side_threshold).normal_(mean=0.5, std=0.5)
+            # loss_kl = nn.KLDivLoss(reduction='mean', log_target=True)(torch.flatten(side_threshold), threshold_target)
+            # loss += 0.1*loss_kl
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-            # for param_group in optimizer.param_groups:
-            #     param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
+            for param_group in optimizer.param_groups:
+                param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
 
             print(
                 'Step [{}/{}], '

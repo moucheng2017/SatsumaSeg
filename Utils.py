@@ -148,7 +148,7 @@ def evaluate(validateloader, model, device, model_name, class_no, dilation):
             elif 'expert' in model_name:
                 val_outputs = model(val_img, dilation)
             else:
-                val_outputs = model(val_img)
+                val_outputs, _ = model(val_img)
 
             if class_no == 2:
                 val_outputs = torch.sigmoid(val_outputs)
