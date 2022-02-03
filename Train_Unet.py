@@ -47,6 +47,7 @@ def trainModels(dataset_tag,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_d' + str(downsample) + \
+                   '_r' + str(l2) + \
                    '_z' + str(new_resolution[0]) + \
                    '_x' + str(new_resolution[1])
 

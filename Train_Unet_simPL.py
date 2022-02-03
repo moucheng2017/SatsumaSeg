@@ -257,6 +257,16 @@ def trainSingleModel(model,
             # loss_kl = nn.KLDivLoss(reduction='mean', log_target=True)(torch.flatten(side_threshold), threshold_target)
             # loss += 0.1*loss_kl
 
+            # class_outputs_u_main = (prob_outputs_u > side_threshold).float()
+            class_outputs_u_side = (prob_outputs_u > 0.5).float()
+
+            if class_no == 2:
+                # loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_main) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_main.squeeze())
+                loss_u += SoftDiceLoss()(prob_outputs_u, class_outputs_u_side) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_side.squeeze())
+
+            train_unsup_loss.append(alpha_current*loss_u.item())
+
+            loss += alpha_current*loss_u
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
