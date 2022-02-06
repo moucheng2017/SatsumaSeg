@@ -204,15 +204,7 @@ def trainSingleModel(model,
 
             outputs, threshold = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
             outputs, outputs_u = torch.split(outputs, [b_l, b_u], dim=0)
-            # threshold_l, outputs_u = torch.split(outputs_u, [b_l, b_u], dim=0)
-            # with torch.no_grad():
-            # side_threshold = model2(outputs_u.detach())
-
-            # print(threshold_l.size())
-            # print(threshold_u.size())
-
-            # print(outputs.size())
-            # print(outputs_u.size())
+            threshold_l, threshold_u = torch.split(threshold, [b_l, b_u], dim=0)
 
             if class_no == 2:
                 prob_outputs = torch.sigmoid(outputs)
@@ -236,18 +228,13 @@ def trainSingleModel(model,
 
             validate_iou, validate_h_dist = evaluate(validateloader, model, device, model_name, class_no, dilation)
 
-            # unlabelled training:
-            # side_threshold = torch.sigmoid(F.softplus(model.threshold) + torch.rand(1, device=device))
-
             if class_no == 2:
                 prob_outputs_u = torch.sigmoid(outputs_u)
             else:
                 prob_outputs_u = F.softmax(outputs_u, dim=1)
 
-            # side_threshold = torch.mean(side_threshold, dim=1)
-            # class_outputs_u_main = (prob_outputs_u > side_threshold.float())
             class_outputs_u_side = (prob_outputs_u.detach() > 0.5).float()
-            mask = (prob_outputs_u.detach() > 0.9).float()
+            mask = (prob_outputs_u.detach() > 0.95).float()
 
             if class_no == 2:
                 # loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_main) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_main.squeeze())

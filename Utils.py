@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import torch
 # torch.manual_seed(0)
 import errno
@@ -27,7 +28,10 @@ from torch.utils import data
 # def stitch_subvolumes():
 # this function is to stich up all subvolume into the whole
 
-def segment_whole_volume(model, volume, train_size=[192, 192, 192], class_no=2):
+def segment_whole_volume(model,
+                         volume,
+                         train_size=[192, 192, 192],
+                         class_no=2):
     '''
     volume (numpy): c x d x h x w
     model: loaded model
@@ -41,18 +45,27 @@ def segment_whole_volume(model, volume, train_size=[192, 192, 192], class_no=2):
     # segmentation = torch.from_numpy(segmentation).to(device='cuda', dtype=torch.float32)
 
     # Loop through the whole volume:
-    for i in range(0, no_d-1):
-        for j in range(0, no_h-1):
-            for k in range(0, no_w-1):
+    for i in range(0, no_d-1, 1):
+        for j in range(0, no_h-1, 1):
+            for k in range(0, no_w-1, 1):
                 subvolume = volume[:, i*train_size[0]:(i+1)*train_size[0], j*train_size[1]:(j+1)*train_size[1], k*train_size[2]:(k+1)*train_size[2]]
+
+                # plt.imshow(subvolume[0, 0, :, :])
+                # plt.show()
+
                 subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
-                subseg = model(subvolume.unsqueeze(0))
+                subseg, _ = model(subvolume.unsqueeze(0))
                 if class_no == 2:
                     subseg = torch.sigmoid(subseg)
                     # subseg = (subseg > 0.5).float()
                 else:
                     subseg = torch.softmax(subseg, dim=1)
                     # _, subseg = torch.max(subseg, dim=1)
+
+                # slice = subseg.detach().cpu().numpy()
+                # plt.imshow(slice[0, 0, 0, :, :])
+                # plt.show()
+
                 segmentation[:, i*train_size[0]:(i+1)*train_size[0], j*train_size[1]:(j+1)*train_size[1], k*train_size[2]:(k+1)*train_size[2]] = subseg.detach().cpu().numpy()
 
     # corner case:
@@ -60,7 +73,7 @@ def segment_whole_volume(model, volume, train_size=[192, 192, 192], class_no=2):
     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
 
     # print(subvolume.unsqueeze(0).size())
-    subseg = model(subvolume.unsqueeze(0))
+    subseg, _ = model(subvolume.unsqueeze(0))
     if class_no == 2:
         subseg = torch.sigmoid(subseg)
     else:
