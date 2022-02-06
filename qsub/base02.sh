@@ -5,4 +5,4 @@
 #$ -l h_rt=48:00:00
 #$ -wd /SAN/medic/PerceptronHead/codes/SatsumaSeg/exps
 
-~/anaconda3/envs/env2021/bin/python base02.py
+~/miniconda3/envs/pytorch1.4/bin/python base02.py
