@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import nibabel as nib
 # import itk as itk
 # import dicom2nifti
-from joblib import Parallel
 from skimage import measure, morphology, segmentation
 
 
@@ -75,7 +74,7 @@ def generate_markers(image):
     # Creation of the Watershed Marker matrix
     # print(np.shape(image))
     h, w = np.shape(image)
-    marker_watershed = np.zeros((h, w), dtype=np.int)
+    marker_watershed = np.zeros((h, w))
     marker_watershed += marker_internal * 255
     marker_watershed += marker_external * 128
     return marker_internal, marker_external, marker_watershed
@@ -91,7 +90,7 @@ def seperate_lungs(image):
     sobel_gradient *= 255.0 / np.max(sobel_gradient)
 
     # Watershed algorithm
-    watershed = morphology.watershed(sobel_gradient, marker_watershed)
+    watershed = segmentation.watershed(sobel_gradient, marker_watershed)
 
     # Reducing the image created by the Watershed algorithm to its outline
     outline = ndimage.morphological_gradient(watershed, size=(1, 1))
@@ -113,7 +112,7 @@ def seperate_lungs(image):
     lungfilter = np.bitwise_or(marker_internal, outline)
     # Close holes in the lungfilter
     # fill_holes is not used here, since in some slices the heart would be reincluded by accident
-    lungfilter = ndimage.morphology.binary_closing(lungfilter, structure=np.ones((5, 5)), iterations=5)
+    lungfilter = ndimage.binary_closing(lungfilter, structure=np.ones((5, 5)), iterations=5)
     # # Apply the lungfilter (note the filtered areas being assigned -2000 HU)
     segmented = np.where(lungfilter == 1, image, -2000 * np.ones((512, 512)))
     return lungfilter, segmented
@@ -135,8 +134,8 @@ def LungMask(path_ct):
     ct_hu = get_pixels_hu(ct)
     # vessels_hu = get_pixels_hu(vessels)
     # change here to select starting and end points
-    start_slice = 20
-    end_slice = np.shape(ct_hu)[2] - 20
+    start_slice = 0
+    end_slice = np.shape(ct_hu)[2]
     for slice_in in range(start_slice, end_slice):
         # axial plane:
         ct_slice_axial = ct_hu[:, :, slice_in]
@@ -145,18 +144,21 @@ def LungMask(path_ct):
         new_ct_axial = lungfilter_axial * ct_slice_axial
         if (slice_in == start_slice):
             ct_masked = np.array(new_ct_axial)
-            selected_ct = np.array(ct_slice_axial)
+            # selected_ct = np.array(ct_slice_axial)
+            lung_mask = np.array(lungfilter_axial)
         else:
             ct_masked = np.dstack((ct_masked, new_ct_axial))
-            selected_ct = np.dstack((selected_ct, ct_slice_axial))
+            # selected_ct = np.dstack((selected_ct, ct_slice_axial))
+            lung_mask = np.dstack((lung_mask, lungfilter_axial))
         print('slice ' + str(slice_in) + ' is done')
         print('\n')
 
     cts_masked = (ct_masked.astype(np.float64) - np.int16(intercept)) / slope
-    selected_ct = (selected_ct.astype(np.float64) - np.int16(intercept)) / slope
+    # lung_mask = (lung_mask.astype(np.float64) - np.int16(intercept)) / slope
+    # selected_ct = (selected_ct.astype(np.float64) - np.int16(intercept)) / slope
     store_path = filename1 + '_ct_masked.nii'
-    store_path_selected_ct = filename1 + '_lung_selected.nii'
-    nib.save(nib.Nifti1Image(selected_ct, ct.affine, ct.header), store_path_selected_ct)
+    store_path_lungfilter = filename1 + '_lung_filter.nii'
+    nib.save(nib.Nifti1Image(lung_mask, ct.affine, ct.header), store_path_lungfilter)
     nib.save(nib.Nifti1Image(cts_masked, ct.affine, ct.header), store_path)
     print('case ' + filename1 + 'lung masked vessel is done')
     print('\n')
@@ -179,7 +181,7 @@ def run_all_cases(path, tag):
 
 
 if __name__ == '__main__':
-    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/AllRaw/1841A.nii.gz'
+    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Mixed/test_nii/imgs/Pat15a.nii.gz'
     # ct = load_nifti(data_path)
     # slope = ct.dataobj.slope
     # intercept = ct.dataobj.inter

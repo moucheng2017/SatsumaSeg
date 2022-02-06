@@ -5,11 +5,7 @@ import random
 import torch
 import numpy as np
 
-# Read cases, for each case, read the whole volume
-# 1. random crop around the lung mask
-# 2. crop again around the lung mask but with a lower resolution
-# 3. apply contrast augmentation and noises to create another input
-# Right now it is just random cropping
+import nibabel as nib
 
 
 class RandomCropping(object):
@@ -109,40 +105,49 @@ class CT_Dataset(torch.utils.data.Dataset):
         self.augmentation_gaussian = RandomGaussian()
 
     def __getitem__(self, index):
-        all_images = glob.glob(os.path.join(self.imgs_folder, '*.npy'))
-        all_images.sort()
+        # Images:
+        all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii*')))
         imagename = all_images[index]
-        image = np.load(imagename)
+        image = nib.load(imagename)
+        image = image.get_fdata()
         image = np.array(image, dtype='float32')
-        # print(np.shape(image))
+        # transform dimension:
+        # original dimension: (H x W x D)
+        image = np.transpose(image, (2, 0, 1))
+        # (D x H x W)
+        image = np.expand_dims(image, axis=0)
+        # (H x W x D)
+        # Now applying lung window:
+        image[image < -1000.0] = -1000.0
+        image[image > 500.0] = 500.0
+        # apply normalisation
+        image = (image - np.nanmean(image)) / np.nanstd(image)
 
-        all_labels = glob.glob(os.path.join(self.labels_folder, '*.npy'))
-        all_labels.sort()
-        label = np.load(all_labels[index])
+        # Labels:
+        all_labels = sorted(glob.glob(os.path.join(self.labels_folder, '*.nii*')))
+        label = nib.load(all_labels[index])
+        label = label.get_fdata()
         label = np.array(label, dtype='float32')
-        # print(np.shape(label))
+        label = np.transpose(label, (2, 0, 1))
+        label = np.expand_dims(label, axis=0)
 
         _, imagename = os.path.split(imagename)
         imagename, imagetxt = os.path.splitext(imagename)
 
+        image = self.augmentation_contrast.randomintensity(image)
+
         if self.labelled_flag is True:
             [image, label] = self.augmentation_cropping.crop(image, label)
-            image1 = self.augmentation_contrast.randomintensity(image)
-            # image2 = self.augmentation_gaussian.gaussiannoise(image)
-            weights = np.random.dirichlet((1, 1), 1)
-            image = weights[0][0]*image + weights[0][1]*image1
+            image = (image - np.nanmean(image)) / np.nanstd(image)
             return image, label, imagename
         else:
             [image] = self.augmentation_cropping.crop(image)
-            image1 = self.augmentation_contrast.randomintensity(image)
-            # image2 = self.augmentation_gaussian.gaussiannoise(image)
-            weights = np.random.dirichlet((1, 1), 1)
-            image = weights[0][0]*image + weights[0][1]*image1
+            image = (image - np.nanmean(image)) / np.nanstd(image)
             return image, imagename
 
     def __len__(self):
         # You should change 0 to the total size of your dataset.
-        return len(glob.glob(os.path.join(self.imgs_folder, '*.npy')))
+        return len(glob.glob(os.path.join(self.imgs_folder, '*.nii*')))
 
 
 if __name__ == '__main__':
