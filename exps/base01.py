@@ -22,6 +22,6 @@ if __name__ == '__main__':
                 learning_rate=1e-4,
                 width=16,
                 log_tag='20200206',
-                new_resolution=[16, 448, 448],
+                new_resolution=[16, 384, 384],
                 l2=5e-2
                 )
