@@ -29,7 +29,7 @@ if __name__ == '__main__':
     trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data/',
                 dataset_name='airway',
                 dataset_tag='Mixed',
-                downsample=3,
+                downsample=4,
                 input_dim=1,
                 class_no=2,
                 repeat=1,
@@ -38,6 +38,6 @@ if __name__ == '__main__':
                 learning_rate=1e-4,
                 width=16,
                 log_tag='train_on_turkish',
-                new_resolution=[8, 512, 512],
+                new_resolution=[32, 320, 320],
                 l2=5e-2
                 )
