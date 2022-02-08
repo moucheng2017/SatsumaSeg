@@ -116,7 +116,7 @@ class CT_Dataset(torch.utils.data.Dataset):
         image = np.transpose(image, (2, 0, 1))
         # (D x H x W)
         image = np.expand_dims(image, axis=0)
-        # (H x W x D)
+        # (C x D x H x W)
         # Now applying lung window:
         image[image < -1000.0] = -1000.0
         image[image > 500.0] = 500.0
