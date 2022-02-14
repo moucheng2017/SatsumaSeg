@@ -85,7 +85,7 @@ def segment_whole_volume(model,
 def segmentation_one_case_one_model(model_path,
                                     data_path,
                                     save_path,
-                                    sizes,
+                                    size,
                                     classno=2):
 
     model = torch.load(model_path)
@@ -99,33 +99,44 @@ def segmentation_one_case_one_model(model_path,
 
     for each_case, each_label in zip(all_cases, all_labels):
 
+        # print(each_case)
         volume_nii = nib.load(each_case)
         volume = volume_nii.get_fdata()
+
+        saved_segmentation = np.zeros_like(volume)
 
         volume = np.transpose(volume, (2, 0, 1))
         volume = np.expand_dims(volume, axis=0)
 
         save_name_ext = os.path.split(each_case)[-1]
         save_name = os.path.splitext(save_name_ext)[0]
-        save_name_nii = save_name + '_seg.nii.gz'
-
-        segmentation_np = None
+        # save_name_nii = save_name + '_seg.nii.gz'
+        save_name_nii = save_name + '_test_d' + str(size[0]) + '_r' + str(size[1]) + '_seg.nii.gz'
+        # segmentation_np = None
 
         # ensemble testing on different sizes
-        for each_size in sizes:
-            segmentation_np_current = segment_whole_volume(model, volume, each_size, classno)
-            segmentation_np_current = segmentation_np_current[0, :, :, :]
-            segmentation_np_current = np.transpose(segmentation_np_current, (1, 2, 0))
-            segmentation_np += segmentation_np_current
+        # for each_size in sizes:
+        segmentation_np = segment_whole_volume(model, volume, size, classno)
+        segmentation_np = segmentation_np[0, :, :, :]
+        # segmentation_np = np.transpose(segmentation_np, (1, 2, 0))
+        # segmentation_np += segmentation_np_current
 
-        segmentation_np = segmentation_np / len(sizes)
+        # segmentation_np = segmentation_np / len(sizes)
 
         if classno == 2:
             segmentation_np = np.where(segmentation_np > 0.5, 1, 0)
         else:
             segmentation_np = np.argmax(segmentation_np, axis=1)
 
-        segmentation_nii = nib.Nifti1Image(segmentation_np,
+        h, w, d = np.shape(saved_segmentation)
+
+        # print(np.shape(segmentation_np))
+        # print(np.shape(saved_segmentation))
+
+        for dd in range(d):
+            saved_segmentation[:, :, dd] = segmentation_np[dd, :, :]
+
+        segmentation_nii = nib.Nifti1Image(saved_segmentation,
                                            volume_nii.affine,
                                            volume_nii.header)
 
@@ -136,15 +147,14 @@ def segmentation_one_case_one_model(model_path,
 
 
 if __name__ == '__main__':
-    model_path = '/home/moucheng/projects_codes/Results/airway/Turkish/20220202/sup_unet_e1_l0.0001_b2_w16_s4000_d3_z32_x256/trained_models/sup_unet_e1_l0.0001_b2_w16_s4000_d3_z32_x256_3998.pt'
-    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Mixed/test_nii'
-    save_path = '/home/moucheng/projects_codes/Results/airway/Turkish/20220202/sup_unet_e1_l0.0001_b2_w16_s4000_d3_z32_x256/segmentation'
+    model_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/trained_models/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384_3998.pt'
+    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Mixed/test'
+    save_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/segmentation'
 
     segmentation_one_case_one_model(model_path,
                                     data_path,
                                     save_path,
-                                    sizes=[[12, 256, 256],
-                                           [128, 256, 256]],
+                                    size=[64, 256, 256],
                                     classno=2)
 
 

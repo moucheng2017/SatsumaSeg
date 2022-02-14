@@ -175,6 +175,6 @@ class Unet3D(nn.Module):
         y0 = torch.cat([y0, x0], dim=1)
         y0 = self.dconv0(y0, dilation_decoder[3])
         y = self.dconv_last(y0)
-        pixel_thresholding = self.threshold(y0)
+        # pixel_thresholding = self.threshold(y0)
 
-        return y, pixel_thresholding
+        return y, y0

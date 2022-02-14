@@ -33,11 +33,11 @@ if __name__ == '__main__':
                 input_dim=1,
                 class_no=2,
                 repeat=1,
-                train_batchsize=1,
+                train_batchsize=2,
                 num_steps=1000,
                 learning_rate=1e-4,
                 width=16,
                 log_tag='train_on_turkish',
-                new_resolution=[32, 320, 320],
-                l2=5e-2
+                new_resolution=[32, 256, 256],
+                l2=1e-2
                 )
