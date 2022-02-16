@@ -60,21 +60,27 @@ class RandomCropping(object):
 
 
 class RandomContrast(object):
-    def __init__(self, bin_range=[10, 256]):
-        self.bin_low = bin_range[0]
-        self.bin_high = bin_range[1]
+    def __init__(self, bin_range=[10, 20, 50, 70, 100]):
+        # self.bin_low = bin_range[0]
+        # self.bin_high = bin_range[1]
+        self.bin_range = bin_range
 
     def randomintensity(self, input):
-        bin = np.random.randint(self.bin_low, self.bin_high)
+        bin = np.random.choice(self.bin_range)
         c, d, h, w = np.shape(input)
-        for each_slice in range(d):
-            single_channel = input[:, each_slice, :, :].squeeze()
-            image_histogram, bins = np.histogram(single_channel.flatten(), bin, density=True)
-            cdf = image_histogram.cumsum()  # cumulative distribution function
-            cdf = 255 * cdf / cdf[-1]  # normalize
-            single_channel = np.interp(single_channel.flatten(), bins[:-1], cdf)
-            input[:, each_slice, :, :] = np.reshape(single_channel, (c, 1, h, w))
-        return input
+        image_histogram, bins = np.histogram(input.flatten(), bin, density=True)
+        cdf = image_histogram.cumsum()  # cumulative distribution function
+        cdf = 255 * cdf / cdf[-1]  # normalize
+        output = np.interp(input.flatten(), bins[:-1], cdf)
+        output = np.reshape(output, (c, 1, h, w))
+        # for each_slice in range(d):
+        #     single_channel = input[:, each_slice, :, :].squeeze()
+        #     image_histogram, bins = np.histogram(single_channel.flatten(), bin, density=True)
+        #     cdf = image_histogram.cumsum()  # cumulative distribution function
+        #     cdf = 255 * cdf / cdf[-1]  # normalize
+        #     single_channel = np.interp(single_channel.flatten(), bins[:-1], cdf)
+        #     input[:, each_slice, :, :] = np.reshape(single_channel, (c, 1, h, w))
+        return output
 
 
 class RandomGaussian(object):
@@ -102,7 +108,7 @@ class CT_Dataset(torch.utils.data.Dataset):
         self.labelled_flag = labelled
         self.augmentation_contrast = RandomContrast()
         self.augmentation_cropping = RandomCropping(new_size, [1])
-        self.augmentation_gaussian = RandomGaussian()
+        # self.augmentation_gaussian = RandomGaussian()
 
     def __getitem__(self, index):
         # Images:
