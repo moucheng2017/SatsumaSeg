@@ -8,7 +8,7 @@ import numpy as np
 import os
 from os import listdir
 # import Image
-
+from dataloaders.Dataloader import RandomContrast
 import timeit
 import torch.nn as nn
 import torch.nn.functional as F
@@ -31,16 +31,24 @@ def segment_whole_volume(model,
     model: loaded model
     calculate iou for each subvolume then sum them up then average, don't ensemble the volumes in gpu
     '''
+    # print(np.shape(volume))
     c, d, h, w = np.shape(volume)
+    volume[volume < -1000.0] = -1000.0
+    volume[volume > 500.0] = 500.0
+    volume = (volume - np.nanmean(volume)) / np.nanstd(volume)
     segmentation = np.zeros_like(volume)
     model.eval()
+
+    ratio_h = 10
     # Loop through the whole volume:
 
     if full_resolution is False:
-        for i in range(0, d - train_size[0]-1, train_size[0]//2):
-            for j in range(0, h - train_size[1]-1, train_size[1]//2):
-                for k in range(0, w - train_size[2]-1, train_size[2]//2):
+        for i in range(0, d - train_size[0], train_size[0]//train_size[0]):
+            for j in range(0, h - train_size[1], train_size[1]//train_size[1]):
+                for k in range(0, w - train_size[2], train_size[2]//train_size[2]):
                     subvolume = volume[:, i:i+train_size[0], j:j+train_size[1], k:k+train_size[2]]
+                    # subvolume = RandomContrast(bin_range=[10, 50]).randomintensity(subvolume)
+                    subvolume = (subvolume - np.nanmean(subvolume)) / np.nanstd(subvolume)
                     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
                     subseg, _ = model(subvolume.unsqueeze(0))
 
@@ -55,6 +63,7 @@ def segment_whole_volume(model,
     else:
         for i in range(0, d - train_size[0] - 1, train_size[0] // 2):
             subvolume = volume[:, i:i + train_size[0], :, :]
+            subvolume = (subvolume - np.nanmean(subvolume)) / np.nanstd(subvolume)
             subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
             subseg, _ = model(subvolume.unsqueeze(0))
 
@@ -69,6 +78,7 @@ def segment_whole_volume(model,
 
     # corner case the last one:
     subvolume = volume[:, d-train_size[0]:d, h-train_size[1]:h, w-train_size[2]:w]
+    subvolume = (subvolume - np.nanmean(subvolume)) / np.nanstd(subvolume)
     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
     subseg, _ = model(subvolume.unsqueeze(0))
 
@@ -111,7 +121,7 @@ def segmentation_one_case_one_model(model_path,
         save_name_ext = os.path.split(each_case)[-1]
         save_name = os.path.splitext(save_name_ext)[0]
         # save_name_nii = save_name + '_seg.nii.gz'
-        save_name_nii = save_name + '_test_d' + str(size[0]) + '_r' + str(size[1]) + '_seg.nii.gz'
+        save_name_nii = save_name + '_test_d' + str(size[0]) + '_r' + str(size[1]) + '_ratio10.seg.nii.gz'
         # segmentation_np = None
 
         # ensemble testing on different sizes
@@ -147,14 +157,17 @@ def segmentation_one_case_one_model(model_path,
 
 
 if __name__ == '__main__':
-    model_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/trained_models/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384_3998.pt'
+    model_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/trained_models/' \
+                 'sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384_3999.pt'
+
     data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Mixed/test'
-    save_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/segmentation'
+
+    save_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/segmentation/model3999'
 
     segmentation_one_case_one_model(model_path,
                                     data_path,
                                     save_path,
-                                    size=[64, 256, 256],
+                                    size=[16, 480, 480],
                                     classno=2)
 
 
