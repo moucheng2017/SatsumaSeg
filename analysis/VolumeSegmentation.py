@@ -36,6 +36,7 @@ def segment_whole_volume(model,
     volume[volume < -1000.0] = -1000.0
     volume[volume > 500.0] = 500.0
     volume = (volume - np.nanmean(volume)) / np.nanstd(volume)
+    volume = RandomContrast(bin_range=[100, 150, 200]).randomintensity(volume)
     segmentation = np.zeros_like(volume)
     model.eval()
 
@@ -43,11 +44,10 @@ def segment_whole_volume(model,
     # Loop through the whole volume:
 
     if full_resolution is False:
-        for i in range(0, d - train_size[0], train_size[0]//train_size[0]):
-            for j in range(0, h - train_size[1], train_size[1]//train_size[1]):
-                for k in range(0, w - train_size[2], train_size[2]//train_size[2]):
+        for i in range(0, d - train_size[0], 4):
+            for j in range(0, h - train_size[1], 8):
+                for k in range(0, w - train_size[2], 8):
                     subvolume = volume[:, i:i+train_size[0], j:j+train_size[1], k:k+train_size[2]]
-                    # subvolume = RandomContrast(bin_range=[10, 50]).randomintensity(subvolume)
                     subvolume = (subvolume - np.nanmean(subvolume)) / np.nanstd(subvolume)
                     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
                     subseg, _ = model(subvolume.unsqueeze(0))
@@ -61,7 +61,7 @@ def segment_whole_volume(model,
 
                     segmentation[:, i:i+train_size[0], j:j+train_size[1], k:k+train_size[2]] = subseg.detach().cpu().numpy()
     else:
-        for i in range(0, d - train_size[0] - 1, train_size[0] // 2):
+        for i in range(0, d - train_size[0] - 1, 2):
             subvolume = volume[:, i:i + train_size[0], :, :]
             subvolume = (subvolume - np.nanmean(subvolume)) / np.nanstd(subvolume)
             subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
@@ -96,7 +96,8 @@ def segmentation_one_case_one_model(model_path,
                                     data_path,
                                     save_path,
                                     size,
-                                    classno=2):
+                                    classno=2,
+                                    full_resolution=False):
 
     model = torch.load(model_path)
     test_data_path = data_path + '/imgs'
@@ -121,12 +122,17 @@ def segmentation_one_case_one_model(model_path,
         save_name_ext = os.path.split(each_case)[-1]
         save_name = os.path.splitext(save_name_ext)[0]
         # save_name_nii = save_name + '_seg.nii.gz'
-        save_name_nii = save_name + '_test_d' + str(size[0]) + '_r' + str(size[1]) + '_ratio10.seg.nii.gz'
+        save_name_nii = save_name + '_test_d' + str(size[0]) + '_r' + str(size[1]) + '.seg.nii.gz'
         # segmentation_np = None
 
         # ensemble testing on different sizes
         # for each_size in sizes:
-        segmentation_np = segment_whole_volume(model, volume, size, classno)
+        segmentation_np = segment_whole_volume(model,
+                                               volume,
+                                               size,
+                                               classno,
+                                               full_resolution)
+
         segmentation_np = segmentation_np[0, :, :, :]
         # segmentation_np = np.transpose(segmentation_np, (1, 2, 0))
         # segmentation_np += segmentation_np_current

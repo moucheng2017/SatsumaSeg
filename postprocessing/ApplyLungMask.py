@@ -33,7 +33,7 @@ def lungseparation(lung_path, seg_path, save_path):
 
 if __name__ == "__main__":
     lung_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/segmentation/lung_label/Pat25b_lunglabel.nii.gz'
-    seg_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/segmentation/model3999/Pat25b.nii_test_d16_r448_seg.nii.gz'
+    seg_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/segmentation/model3999/Pat25b.nii_test_d16_r480.seg.nii.gz'
     save_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/segmentation/seg'
     lungseparation(lung_path,
                    seg_path,
