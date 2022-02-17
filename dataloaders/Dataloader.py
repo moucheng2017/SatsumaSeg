@@ -60,19 +60,20 @@ class RandomCropping(object):
 
 
 class RandomContrast(object):
-    def __init__(self, bin_range=[10, 20, 50, 70, 100]):
+    def __init__(self, bin_range=[50, 100, 150, 200]):
         # self.bin_low = bin_range[0]
         # self.bin_high = bin_range[1]
         self.bin_range = bin_range
 
     def randomintensity(self, input):
+
         bin = np.random.choice(self.bin_range)
         c, d, h, w = np.shape(input)
         image_histogram, bins = np.histogram(input.flatten(), bin, density=True)
         cdf = image_histogram.cumsum()  # cumulative distribution function
         cdf = 255 * cdf / cdf[-1]  # normalize
         output = np.interp(input.flatten(), bins[:-1], cdf)
-        output = np.reshape(output, (c, 1, h, w))
+        output = np.reshape(output, (c, d, h, w))
         # for each_slice in range(d):
         #     single_channel = input[:, each_slice, :, :].squeeze()
         #     image_histogram, bins = np.histogram(single_channel.flatten(), bin, density=True)
