@@ -17,7 +17,7 @@ from tensorboardX import SummaryWriter
 from Utils import evaluate, test, sigmoid_rampup
 from Loss import SoftDiceLoss
 # =================================
-from Models import Unet3D, ConfModel
+from Models import Unet3D
 
 
 def trainModels(dataset_name,
@@ -198,7 +198,7 @@ def trainSingleModel(model,
 
         labels = labelled_label.to(device=device, dtype=torch.float32)
 
-        if torch.sum(labels) > 100.0:
+        if torch.sum(labels) > 10.0:
 
             outputs = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
             outputs, outputs_u = torch.split(outputs, [b_l, b_u], dim=0)
@@ -249,11 +249,13 @@ def trainSingleModel(model,
             print(
                 'Step [{}/{}], '
                 'lr: {:.4f},'
+                'threshold: {:.4f},'
                 'Train sup loss: {:.4f}, '
                 'Train unsup loss: {:.4f}, '
                 'Train iou: {:.4f}, '
                 'val iou:{:.4f}, '.format(step + 1, num_steps,
                                           optimizer.param_groups[0]["lr"],
+                                          threshold.item(),
                                           np.nanmean(train_sup_loss),
                                           np.nanmean(train_unsup_loss),
                                           np.nanmean(train_iou),
@@ -265,6 +267,8 @@ def trainSingleModel(model,
 
             writer.add_scalars('acc metrics', {'train iou': np.nanmean(train_iou),
                                                'val iou': np.nanmean(validate_iou)}, step + 1)
+
+            writer.add_scalars('threshold', {'threshold pseudo label': threshold.item()}, step + 1)
 
             writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss),
                                                'unsup loss': np.nanmean(train_unsup_loss)}, step + 1)
