@@ -19,8 +19,7 @@ from Loss import SoftDiceLoss
 from Models import Unet3D
 
 
-def trainModels(dataset_tag,
-                dataset_name,
+def trainModels(dataset_name,
                 data_directory,
                 downsample,
                 input_dim,
@@ -51,7 +50,7 @@ def trainModels(dataset_tag,
                    '_z' + str(new_resolution[0]) + \
                    '_x' + str(new_resolution[1])
 
-        trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset, test_dataset = getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_resolution)
+        trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset, test_dataset = getData(data_directory, dataset_name, train_batchsize, new_resolution)
 
         # ===================
         trainSingleModel(model=Exp,
@@ -59,7 +58,6 @@ def trainModels(dataset_tag,
                          num_steps=num_steps,
                          learning_rate=learning_rate,
                          dataset_name=dataset_name,
-                         dataset_tag=dataset_tag,
                          train_dataset_with_labels=train_dataset_with_labels,
                          train_batchsize=train_batchsize,
                          trainloader_with_labels=trainloader_withlabels,
@@ -71,9 +69,9 @@ def trainModels(dataset_tag,
                          dilation=1)
 
 
-def getData(data_directory, dataset_name, dataset_tag, train_batchsize, new_resolution):
+def getData(data_directory, dataset_name, train_batchsize, new_resolution):
 
-    data_directory = data_directory + dataset_name + '/' + dataset_tag
+    data_directory = data_directory + '/' + dataset_name
     data_directory_eval_test = data_directory + dataset_name
 
     folder_labelled = data_directory + '/labelled'
@@ -112,7 +110,6 @@ def trainSingleModel(model,
                      num_steps,
                      learning_rate,
                      dataset_name,
-                     dataset_tag,
                      train_dataset_with_labels,
                      train_batchsize,
                      trainloader_with_labels,
@@ -125,7 +122,7 @@ def trainSingleModel(model,
 
     device = torch.device('cuda')
     save_model_name = model_name
-    saved_information_path = '../Results/' + dataset_name + '/' + dataset_tag + '/' + log_tag
+    saved_information_path = '../Results/' + dataset_name + '/' + log_tag
     if not os.path.exists(saved_information_path):
         os.makedirs(saved_information_path, exist_ok=True)
     # os.mkdir(saved_information_path, exist_ok=True)
