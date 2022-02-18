@@ -18,7 +18,7 @@ from tensorboardX import SummaryWriter
 from Utils import evaluate, test
 from Loss import SoftDiceLoss
 # =================================
-from Baselines import Unet3D
+from Models import Unet3D
 
 
 # For consistency restrictions:

@@ -54,7 +54,7 @@ def segment_whole_volume(model,
                 # plt.show()
 
                 subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
-                subseg, _ = model(subvolume.unsqueeze(0))
+                subseg = model(subvolume.unsqueeze(0))
                 if class_no == 2:
                     subseg = torch.sigmoid(subseg)
                     # subseg = (subseg > 0.5).float()
@@ -73,7 +73,7 @@ def segment_whole_volume(model,
     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
 
     # print(subvolume.unsqueeze(0).size())
-    subseg, _ = model(subvolume.unsqueeze(0))
+    subseg = model(subvolume.unsqueeze(0))
     if class_no == 2:
         subseg = torch.sigmoid(subseg)
     else:
@@ -161,7 +161,7 @@ def evaluate(validateloader, model, device, model_name, class_no, dilation):
             elif 'expert' in model_name:
                 val_outputs = model(val_img, dilation)
             else:
-                val_outputs, _ = model(val_img)
+                val_outputs = model(val_img)
 
             if class_no == 2:
                 val_outputs = torch.sigmoid(val_outputs)

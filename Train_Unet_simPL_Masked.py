@@ -44,7 +44,7 @@ def trainModels(dataset_tag,
 
         Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
 
-        Exp_name = 'simPL_unet' + \
+        Exp_name = 'simPL_mask_unet' + \
                    '_e' + str(repeat_str) + \
                    '_l' + str(learning_rate) + \
                    '_b' + str(train_batchsize) + \
@@ -232,11 +232,13 @@ def trainSingleModel(model,
             else:
                 prob_outputs_u = F.softmax(outputs_u, dim=1)
 
-            threshold = torch.sigmoid(F.softplus(model.threshold) + torch.rand(1, device=device))
-            class_outputs_u_side = (prob_outputs_u > threshold).float()
+            mask_threshold = torch.sigmoid(F.softplus(model.threshold) + torch.rand(1, device=device))
+            mask = (prob_outputs_u > mask_threshold).float()
+            class_outputs_u_side = (prob_outputs_u > 0.5).float()
 
             if class_no == 2:
-                loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_side) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_side.squeeze())
+                # loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_main) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_main.squeeze())
+                loss_u = SoftDiceLoss()(prob_outputs_u*mask, class_outputs_u_side*mask) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze()*mask, class_outputs_u_side.squeeze()*mask)
 
             train_unsup_loss.append(alpha_current*loss_u.item())
 
@@ -244,6 +246,16 @@ def trainSingleModel(model,
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
+            # # assume threshold confidence is mean 0.75 std 0.25 normal distribution:
+            # model2.train()
+            # threshold_u = model2(outputs_u.detach())
+            # threshold_target = threshold_u.detach().view(-1).normal_(mean=0.75, std=0.25)
+            # loss_kl = nn.MSELoss(reduction='mean')(threshold_u.view(-1), threshold_target)
+            #
+            # optimizer_conf.zero_grad()
+            # loss_kl.backward()
+            # optimizer_conf.step()
 
             for param_group in optimizer.param_groups:
                 param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
