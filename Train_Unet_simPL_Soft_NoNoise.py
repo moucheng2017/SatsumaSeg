@@ -232,7 +232,7 @@ def trainSingleModel(model,
 
             threshold = torch.sigmoid(F.softplus(model.threshold))
 
-            class_outputs_u_soft = torch.sigmoid(prob_outputs_u / threshold)
+            class_outputs_u_soft = torch.sigmoid(outputs_u / threshold)
             class_outputs_u_hard = (prob_outputs_u > class_outputs_u_soft.detach()).float()
 
             if class_no == 2:
