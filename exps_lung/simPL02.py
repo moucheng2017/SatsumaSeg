@@ -6,12 +6,12 @@ torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-from Train_Unet_simPL_Soft import trainModels
+from Train_Unet_simPL import trainModels
 
 if __name__ == '__main__':
 
     trainModels(data_directory='/SAN/medic/PerceptronHead/data',
-                dataset_name='Task08_HepaticVessel',
+                dataset_name='Task06_Lung',
                 downsample=3,
                 input_dim=1,
                 class_no=2,
