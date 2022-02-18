@@ -11,6 +11,7 @@ def plot_different_contrast_ct(volume_path, contrasts, slice_no):
 
     volume_nii = nib.load(volume_path)
     volume = volume_nii.get_fdata()
+    print(np.shape(volume))
     volume = (volume - np.nanmean(volume)) / np.nanstd(volume)
 
     fig, axes = plt.subplots(nrows=len(slice_no), ncols=len(contrasts)+1, figsize=(20, 10))
@@ -36,9 +37,9 @@ def plot_different_contrast_ct(volume_path, contrasts, slice_no):
 
 
 if __name__ == "__main__":
-    plot_different_contrast_ct(volume_path='/home/moucheng/projects_data/Pulmonary_data/airway/Mixed/test/imgs/Pat25b.nii.gz',
-                               contrasts=[100, 150, 200],
-                               slice_no=[170, 150])
+    plot_different_contrast_ct(volume_path='/home/moucheng/projects_data/Task08_HepaticVessel/ssl/test/imgs/hepaticvessel_001.nii.gz',
+                               contrasts=[150, 180, 255],
+                               slice_no=[10, 20])
 
 
 
