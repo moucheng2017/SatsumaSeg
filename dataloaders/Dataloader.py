@@ -60,27 +60,26 @@ class RandomCropping(object):
 
 
 class RandomContrast(object):
-    def __init__(self, bin_range=[50, 100, 150, 200]):
+    def __init__(self, bin_range=[50, 100, 150, 200, 255]):
         # self.bin_low = bin_range[0]
         # self.bin_high = bin_range[1]
         self.bin_range = bin_range
 
     def randomintensity(self, input):
 
-        bin = np.random.choice(self.bin_range)
-        c, d, h, w = np.shape(input)
-        image_histogram, bins = np.histogram(input.flatten(), bin, density=True)
-        cdf = image_histogram.cumsum()  # cumulative distribution function
-        cdf = 255 * cdf / cdf[-1]  # normalize
-        output = np.interp(input.flatten(), bins[:-1], cdf)
-        output = np.reshape(output, (c, d, h, w))
-        # for each_slice in range(d):
-        #     single_channel = input[:, each_slice, :, :].squeeze()
-        #     image_histogram, bins = np.histogram(single_channel.flatten(), bin, density=True)
-        #     cdf = image_histogram.cumsum()  # cumulative distribution function
-        #     cdf = 255 * cdf / cdf[-1]  # normalize
-        #     single_channel = np.interp(single_channel.flatten(), bins[:-1], cdf)
-        #     input[:, each_slice, :, :] = np.reshape(single_channel, (c, 1, h, w))
+        augmentation_flag = np.random.rand()
+
+        if augmentation_flag >= 0.5:
+            bin = np.random.choice(self.bin_range)
+            c, d, h, w = np.shape(input)
+            image_histogram, bins = np.histogram(input.flatten(), bin, density=True)
+            cdf = image_histogram.cumsum()  # cumulative distribution function
+            cdf = 255 * cdf / cdf[-1]  # normalize
+            output = np.interp(input.flatten(), bins[:-1], cdf)
+            output = np.reshape(output, (c, d, h, w))
+        else:
+            output = input
+
         return output
 
 
@@ -115,6 +114,9 @@ class CT_Dataset(torch.utils.data.Dataset):
         # Images:
         all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii*')))
         imagename = all_images[index]
+        _, imagename = os.path.split(imagename)
+        imagename, imagetxt = os.path.splitext(imagename)
+        # load image and preprocessing:
         image = nib.load(imagename)
         image = image.get_fdata()
         image = np.array(image, dtype='float32')
@@ -129,21 +131,17 @@ class CT_Dataset(torch.utils.data.Dataset):
         image[image > 500.0] = 500.0
         # apply normalisation
         image = (image - np.nanmean(image)) / np.nanstd(image)
-
-        # Labels:
-        all_labels = sorted(glob.glob(os.path.join(self.labels_folder, '*.nii*')))
-        label = nib.load(all_labels[index])
-        label = label.get_fdata()
-        label = np.array(label, dtype='float32')
-        label = np.transpose(label, (2, 0, 1))
-        label = np.expand_dims(label, axis=0)
-
-        _, imagename = os.path.split(imagename)
-        imagename, imagetxt = os.path.splitext(imagename)
-
+        # random contrast:
         image = self.augmentation_contrast.randomintensity(image)
 
         if self.labelled_flag is True:
+            # Labels:
+            all_labels = sorted(glob.glob(os.path.join(self.labels_folder, '*.nii*')))
+            label = nib.load(all_labels[index])
+            label = label.get_fdata()
+            label = np.array(label, dtype='float32')
+            label = np.transpose(label, (2, 0, 1))
+            label = np.expand_dims(label, axis=0)
             [image, label] = self.augmentation_cropping.crop(image, label)
             image = (image - np.nanmean(image)) / np.nanstd(image)
             return image, label, imagename
