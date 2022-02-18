@@ -112,10 +112,8 @@ class CT_Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         # Images:
-        all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii*')))
+        all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
         imagename = all_images[index]
-        _, imagename = os.path.split(imagename)
-        imagename, imagetxt = os.path.splitext(imagename)
         # load image and preprocessing:
         image = nib.load(imagename)
         image = image.get_fdata()
@@ -133,10 +131,12 @@ class CT_Dataset(torch.utils.data.Dataset):
         image = (image - np.nanmean(image)) / np.nanstd(image)
         # random contrast:
         image = self.augmentation_contrast.randomintensity(image)
-
+        # extract image name
+        _, imagename = os.path.split(imagename)
+        imagename, imagetxt = os.path.splitext(imagename)
         if self.labelled_flag is True:
             # Labels:
-            all_labels = sorted(glob.glob(os.path.join(self.labels_folder, '*.nii*')))
+            all_labels = sorted(glob.glob(os.path.join(self.labels_folder, '*.nii.gz*')))
             label = nib.load(all_labels[index])
             label = label.get_fdata()
             label = np.array(label, dtype='float32')
@@ -144,6 +144,7 @@ class CT_Dataset(torch.utils.data.Dataset):
             label = np.expand_dims(label, axis=0)
             [image, label] = self.augmentation_cropping.crop(image, label)
             image = (image - np.nanmean(image)) / np.nanstd(image)
+
             return image, label, imagename
         else:
             [image] = self.augmentation_cropping.crop(image)
@@ -152,7 +153,7 @@ class CT_Dataset(torch.utils.data.Dataset):
 
     def __len__(self):
         # You should change 0 to the total size of your dataset.
-        return len(glob.glob(os.path.join(self.imgs_folder, '*.nii*')))
+        return len(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
 
 
 if __name__ == '__main__':

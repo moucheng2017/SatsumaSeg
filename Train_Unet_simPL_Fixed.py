@@ -17,7 +17,7 @@ from tensorboardX import SummaryWriter
 from Utils import evaluate, test, sigmoid_rampup
 from Loss import SoftDiceLoss
 # =================================
-from Models import Unet3D, ConfModel
+from Models import Unet3D
 
 
 def trainModels(
@@ -92,7 +92,7 @@ def getData(data_directory, dataset_name, train_batchsize, new_resolution):
     train_dataset_unlabelled = CT_Dataset(train_image_folder_unlabelled, train_label_folder_unlabelled, new_resolution, labelled=False)
 
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
-    trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=1*train_batchsize, shuffle=True, num_workers=0, drop_last=False)
+    trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=2*train_batchsize, shuffle=True, num_workers=0, drop_last=False)
 
     validate_image_folder = data_directory + '/validate/imgs'
     validate_label_folder = data_directory + '/validate/lbls'
@@ -198,7 +198,7 @@ def trainSingleModel(model,
 
         labels = labelled_label.to(device=device, dtype=torch.float32)
 
-        if torch.sum(labels) > 100.0:
+        if torch.sum(labels) > 10.0:
 
             outputs = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
             outputs, outputs_u = torch.split(outputs, [b_l, b_u], dim=0)

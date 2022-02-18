@@ -8,17 +8,17 @@ torch.backends.cudnn.benchmark = False
 
 if __name__ == '__main__':
     # with torch.autograd.set_detect_anomaly(True):
-    trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data/',
-                dataset_name='airway',
-                downsample=4,
+    trainModels(data_directory='/home/moucheng/projects_data',
+                dataset_name='Task06_Lung',
+                downsample=3,
                 input_dim=1,
                 class_no=2,
                 repeat=1,
-                train_batchsize=1,
+                train_batchsize=2,
                 num_steps=800,
                 learning_rate=1e-4,
                 width=16,
-                log_tag='20220202',
+                log_tag='20220218',
                 new_resolution=[16, 256, 256],
                 l2=1e-4,
                 alpha=1.0,

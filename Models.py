@@ -138,8 +138,7 @@ class Unet3D(nn.Module):
         self.upsample2 = nn.Upsample(scale_factor=upsamples_steps[2], mode='trilinear', align_corners=True)
         self.upsample3 = nn.Upsample(scale_factor=upsamples_steps[3], mode='trilinear', align_corners=True)
 
-        # self.dconv_last = nn.Conv3d(self.w1, self.final_in, (1, 1, 1), bias=True)
-        # self.threshold = ConfModel(self.w1, self.w1)
+        self.dconv_last = nn.Conv3d(self.w1, self.final_in, (1, 1, 1), bias=True)
         self.threshold = nn.Parameter(0.95*torch.ones(1))
 
     def forward(self, x, dilation_encoder=[1, 1, 1, 1], dilation_decoder=[1, 1, 1, 1]):
