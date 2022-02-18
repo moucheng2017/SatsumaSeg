@@ -51,24 +51,24 @@ class DoubleRandomDilatedConv(nn.Module):
         return output
 
 
-class ConfModel(nn.Module):
-    def __init__(self, in_channels, out_channels, ratio=4):
-        super(ConfModel, self).__init__()
-        self.avg = nn.AdaptiveAvgPool3d(1)
-        self.attention_branch = nn.Sequential(
-            nn.Conv3d(in_channels=in_channels, out_channels=in_channels*ratio, kernel_size=(1, 1, 1), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(0, 0, 0), bias=False),
-            nn.InstanceNorm3d(in_channels*ratio, affine=True),
-            nn.PReLU(),
-            nn.Conv3d(in_channels=in_channels*ratio, out_channels=out_channels, kernel_size=(1, 1, 1), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(0, 0, 0), bias=False),
-            nn.InstanceNorm3d(out_channels, affine=True),
-            nn.PReLU()
-        )
-
-    def forward(self, x):
-        output = self.attention_branch(x)
-        output = self.avg(output)
-        output = torch.sigmoid(output)
-        return output
+# class ConfModel(nn.Module):
+#     def __init__(self, in_channels, out_channels, ratio=4):
+#         super(ConfModel, self).__init__()
+#         self.avg = nn.AdaptiveAvgPool3d(1)
+#         self.attention_branch = nn.Sequential(
+#             nn.Conv3d(in_channels=in_channels, out_channels=in_channels*ratio, kernel_size=(1, 1, 1), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(0, 0, 0), bias=False),
+#             nn.InstanceNorm3d(in_channels*ratio, affine=True),
+#             nn.PReLU(),
+#             nn.Conv3d(in_channels=in_channels*ratio, out_channels=out_channels, kernel_size=(1, 1, 1), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(0, 0, 0), bias=False),
+#             nn.InstanceNorm3d(out_channels, affine=True),
+#             nn.PReLU()
+#         )
+#
+#     def forward(self, x):
+#         output = self.attention_branch(x)
+#         output = self.avg(output)
+#         output = torch.sigmoid(output)
+#         return output
 
 
 class Unet3D(nn.Module):
@@ -138,9 +138,9 @@ class Unet3D(nn.Module):
         self.upsample2 = nn.Upsample(scale_factor=upsamples_steps[2], mode='trilinear', align_corners=True)
         self.upsample3 = nn.Upsample(scale_factor=upsamples_steps[3], mode='trilinear', align_corners=True)
 
-        self.dconv_last = nn.Conv3d(self.w1, self.final_in, (1, 1, 1), bias=True)
-        self.threshold = ConfModel(self.w1, self.w1)
-        # self.threshold = nn.Parameter(0.9*torch.ones(1))
+        # self.dconv_last = nn.Conv3d(self.w1, self.final_in, (1, 1, 1), bias=True)
+        # self.threshold = ConfModel(self.w1, self.w1)
+        self.threshold = nn.Parameter(0.95*torch.ones(1))
 
     def forward(self, x, dilation_encoder=[1, 1, 1, 1], dilation_decoder=[1, 1, 1, 1]):
         # print(x.size())
@@ -177,4 +177,4 @@ class Unet3D(nn.Module):
         y = self.dconv_last(y0)
         # pixel_thresholding = self.threshold(y0)
 
-        return y, y0
+        return y
