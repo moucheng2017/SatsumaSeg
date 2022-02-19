@@ -18,9 +18,9 @@ if __name__ == '__main__':
                 repeat=1,
                 train_batchsize=2,
                 num_steps=2000,
-                learning_rate=1e-3,
+                learning_rate=1e-2,
                 width=16,
                 log_tag='miccai',
-                new_resolution=[16, 256, 256],
+                new_resolution=[8, 320, 320],
                 l2=1e-2
                 )
