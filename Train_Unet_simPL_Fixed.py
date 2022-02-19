@@ -230,10 +230,10 @@ def trainSingleModel(model,
             else:
                 prob_outputs_u = F.softmax(outputs_u, dim=1)
 
-            class_outputs_u_side = (prob_outputs_u > 0.5).float()
+            pseudo_label = (prob_outputs_u > 0.5).float()
 
             if class_no == 2:
-                loss_u = SoftDiceLoss()(prob_outputs_u, class_outputs_u_side) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_side.squeeze())
+                loss_u = SoftDiceLoss()(prob_outputs_u, pseudo_label) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), pseudo_label.squeeze())
 
             train_unsup_loss.append(alpha_current*loss_u.item())
 

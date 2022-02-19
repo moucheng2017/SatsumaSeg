@@ -230,13 +230,14 @@ def trainSingleModel(model,
             else:
                 prob_outputs_u = F.softmax(outputs_u, dim=1)
 
-            # threshold = torch.sigmoid(F.softplus(model.threshold) - torch.log(-torch.log(torch.rand(1, device=device) + 1e-8) + 1e-8))
-            threshold = torch.sigmoid(F.softplus(model.threshold) + torch.rand(1, device=device))
-            class_outputs_u_soft = torch.sigmoid(outputs_u / threshold)
-            class_outputs_u_hard = (prob_outputs_u > class_outputs_u_soft.detach()).float()
+            # Calculate the threshold:
+            threshold = torch.sigmoid(F.softplus(model.threshold))
+            threshold = torch.sigmoid(outputs_u / threshold)
+            threshold = threshold[threshold > 0.5].mean()
+            learnt_pseudo_label = (prob_outputs_u > threshold).float()
 
             if class_no == 2:
-                loss_u = 0.5*SoftDiceLoss()(prob_outputs_u, class_outputs_u_soft) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), class_outputs_u_hard.squeeze())
+                loss_u = 0.5*SoftDiceLoss()(prob_outputs_u, learnt_pseudo_label) + 0.5*nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), learnt_pseudo_label.squeeze())
 
             train_unsup_loss.append(alpha_current*loss_u.item())
 
@@ -257,7 +258,7 @@ def trainSingleModel(model,
                 'Train iou: {:.4f}, '
                 'val iou:{:.4f}, '.format(step + 1, num_steps,
                                           optimizer.param_groups[0]["lr"],
-                                          threshold.item(),
+                                          float(threshold.cpu().detach()),
                                           np.nanmean(train_sup_loss),
                                           np.nanmean(train_unsup_loss),
                                           np.nanmean(train_iou),
@@ -270,7 +271,7 @@ def trainSingleModel(model,
             writer.add_scalars('acc metrics', {'train iou': np.nanmean(train_iou),
                                                'val iou': np.nanmean(validate_iou)}, step + 1)
 
-            writer.add_scalars('threshold', {'threshold pseudo label': threshold.item()}, step + 1)
+            writer.add_scalars('hyperparameter values', {'threshold current': threshold.cpu().detach()}, step + 1)
 
             writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss),
                                                'unsup loss': np.nanmean(train_unsup_loss)}, step + 1)
