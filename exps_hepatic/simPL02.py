@@ -20,8 +20,9 @@ if __name__ == '__main__':
                 num_steps=500,
                 learning_rate=1e-2,
                 width=16,
+                unlabelled=5,
                 log_tag='miccai',
-                new_resolution=[5, 480, 480],
+                new_resolution=[8, 448, 448],
                 l2=1e-4,
                 alpha=0.05,
                 warmup=1.0

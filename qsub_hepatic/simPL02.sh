@@ -1,5 +1,5 @@
 #$ -l tmem=16G
-#$ -l gpu=true,gpu_type=!(gtx1080ti|rtx2080ti)
+#$ -l gpu=true,gpu_type=!(rtx6000|rtx8000)
 #$ -S /bin/bash
 #$ -j y
 #$ -l h_rt=48:00:00

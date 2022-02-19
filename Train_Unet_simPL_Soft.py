@@ -31,6 +31,7 @@ def trainModels(dataset_name,
                 learning_rate,
                 width,
                 log_tag,
+                unlabelled=2,
                 new_resolution=[12, 512, 512],
                 l2=0.01,
                 alpha=1.0,
@@ -47,6 +48,7 @@ def trainModels(dataset_name,
                    '_e' + str(repeat_str) + \
                    '_l' + str(learning_rate) + \
                    '_b' + str(train_batchsize) + \
+                   '_u' + str(unlabelled) + \
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_d' + str(downsample) + \
@@ -56,7 +58,7 @@ def trainModels(dataset_name,
                    '_z' + str(new_resolution[0]) + \
                    '_x' + str(new_resolution[1])
 
-        trainloader_withlabels, trainloader_withoutlabels, validateloader, test_data_path = getData(data_directory, dataset_name, train_batchsize, new_resolution)
+        trainloader_withlabels, trainloader_withoutlabels, validateloader, test_data_path = getData(data_directory, dataset_name, train_batchsize, new_resolution, unlabelled)
 
         # ===================
         trainSingleModel(model=Exp,
