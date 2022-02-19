@@ -31,6 +31,7 @@ def trainModels(dataset_name,
                 learning_rate,
                 width,
                 log_tag,
+                unlabelled=5,
                 new_resolution=[12, 512, 512],
                 l2=0.01,
                 alpha=1.0,
@@ -47,6 +48,7 @@ def trainModels(dataset_name,
                    '_e' + str(repeat_str) + \
                    '_l' + str(learning_rate) + \
                    '_b' + str(train_batchsize) + \
+                   '_u' + str(unlabelled) + \
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_d' + str(downsample) + \
@@ -56,7 +58,7 @@ def trainModels(dataset_name,
                    '_z' + str(new_resolution[0]) + \
                    '_x' + str(new_resolution[1])
 
-        trainloader_withlabels, trainloader_withoutlabels, validateloader, test_data_path = getData(data_directory, dataset_name, train_batchsize, new_resolution)
+        trainloader_withlabels, trainloader_withoutlabels, validateloader, test_data_path = getData(data_directory, dataset_name, train_batchsize, new_resolution, unlabelled)
 
         # ===================
         trainSingleModel(model=Exp,
@@ -77,7 +79,7 @@ def trainModels(dataset_name,
                          )
 
 
-def getData(data_directory, dataset_name, train_batchsize, new_resolution):
+def getData(data_directory, dataset_name, train_batchsize, new_resolution, unlabelled_ratio):
 
     data_directory = data_directory + '/' + dataset_name
 
@@ -91,7 +93,7 @@ def getData(data_directory, dataset_name, train_batchsize, new_resolution):
     train_dataset_unlabelled = CT_Dataset(train_image_folder_unlabelled, train_label_folder_unlabelled, new_resolution, labelled=False)
 
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
-    trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=2*train_batchsize, shuffle=True, num_workers=0, drop_last=False)
+    trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=unlabelled_ratio*train_batchsize, shuffle=True, num_workers=0, drop_last=False)
 
     validate_image_folder = data_directory + '/validate/imgs'
     validate_label_folder = data_directory + '/validate/lbls'

@@ -21,7 +21,8 @@ if __name__ == '__main__':
                 learning_rate=1e-2,
                 width=16,
                 log_tag='miccai',
-                new_resolution=[5, 480, 480],
+                unlabelled=5,
+                new_resolution=[8, 448, 448],
                 l2=1e-4,
                 alpha=0.05,
                 warmup=1.0
