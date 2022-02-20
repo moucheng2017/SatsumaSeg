@@ -13,10 +13,13 @@ from Metrics import segmentation_scores
 from dataloaders.Dataloader import CT_Dataset
 from tensorboardX import SummaryWriter
 
-from Utils import evaluate, test
+from Utils import evaluate
 from Loss import SoftDiceLoss
 # =================================
 from Models import Unet3D
+import errno
+
+from analysis.VolumeSegmentation import test_all_models
 
 
 def trainModels(dataset_name,
@@ -66,7 +69,8 @@ def trainModels(dataset_name,
                          class_no=class_no,
                          log_tag=log_tag,
                          l2=l2,
-                         dilation=1)
+                         dilation=1,
+                         size=new_resolution)
 
 
 def getData(data_directory, dataset_name, train_batchsize, new_resolution):
@@ -118,7 +122,8 @@ def trainSingleModel(model,
                      testdata_path,
                      log_tag,
                      l2,
-                     class_no):
+                     class_no,
+                     size):
 
     device = torch.device('cuda')
     save_model_name = model_name
@@ -191,8 +196,8 @@ def trainSingleModel(model,
         loss.backward()
         optimizer.step()
 
-        # for param_group in optimizer.param_groups:
-        #     param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
+        for param_group in optimizer.param_groups:
+            param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
 
         print(
             'Step [{}/{}], '
@@ -215,7 +220,7 @@ def trainSingleModel(model,
 
         writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss)}, step + 1)
 
-        if step > num_steps - 10:
+        if step > num_steps - 5:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
             torch.save(model, path_model)
@@ -228,20 +233,18 @@ def trainSingleModel(model,
     training_time = stop - start
     print('Training Time: ', training_time)
 
-    # test_image_path = os.path.join(testdata_path, 'patches')
-    # test_label_path = os.path.join(testdata_path, 'labels')
-    # test_iou = test(saved_information_path + '/' + save_model_name,
-    #                 saved_model_path,
-    #                 test_image_path,
-    #                 test_label_path,
-    #                 device,
-    #                 model_name,
-    #                 class_no,
-    #                 [192, 192, 192],
-    #                 1)
-    #
-    # print('Test IoU: ' + str(np.nanmean(test_iou)) + '\n')
-    # print('Test IoU std: ' + str(np.nanstd(test_iou)) + '\n')
+    save_path = saved_information_path + '/results'
+    try:
+        os.mkdir(save_path)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise
+        pass
+
+    iou_mean, iou_std = test_all_models(saved_model_path, testdata_path, saved_information_path, size, class_no, False, False)
+
+    print('Test IoU: ' + str(iou_mean) + '\n')
+    print('Test IoU std: ' + str(iou_std) + '\n')
 
     print('\nTraining finished and model saved\n')
 
