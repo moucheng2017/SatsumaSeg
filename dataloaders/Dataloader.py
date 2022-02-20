@@ -60,7 +60,7 @@ class RandomCropping(object):
 
 
 class RandomContrast(object):
-    def __init__(self, bin_range=[50, 100, 150, 200, 255]):
+    def __init__(self, bin_range=[100, 150, 200, 255]):
         # self.bin_low = bin_range[0]
         # self.bin_high = bin_range[1]
         self.bin_range = bin_range
@@ -106,7 +106,7 @@ class CT_Dataset(torch.utils.data.Dataset):
         self.imgs_folder = imgs_folder
         self.labels_folder = labels_folder
         self.labelled_flag = labelled
-        self.augmentation_contrast = RandomContrast()
+        # self.augmentation_contrast = RandomContrast()
         self.augmentation_cropping = RandomCropping(new_size, [1])
         # self.augmentation_gaussian = RandomGaussian()
 
@@ -130,7 +130,7 @@ class CT_Dataset(torch.utils.data.Dataset):
         # apply normalisation
         image = (image - np.nanmean(image)) / np.nanstd(image)
         # random contrast:
-        image = self.augmentation_contrast.randomintensity(image)
+        # image = self.augmentation_contrast.randomintensity(image)
         # extract image name
         _, imagename = os.path.split(imagename)
         imagename, imagetxt = os.path.splitext(imagename)
