@@ -20,6 +20,8 @@ import matplotlib.pyplot as plt
 
 import nibabel as nib
 
+from Metrics import segmentation_scores
+
 
 def segment_whole_volume(model,
                          volume,
@@ -36,7 +38,7 @@ def segment_whole_volume(model,
     volume[volume < -1000.0] = -1000.0
     volume[volume > 500.0] = 500.0
     volume = (volume - np.nanmean(volume)) / np.nanstd(volume)
-    volume = RandomContrast(bin_range=[100, 150, 200]).randomintensity(volume)
+    # volume = RandomContrast(bin_range=[100, 150, 200]).randomintensity(volume)
     segmentation = np.zeros_like(volume)
     model.eval()
 
@@ -44,9 +46,9 @@ def segment_whole_volume(model,
     # Loop through the whole volume:
 
     if full_resolution is False:
-        for i in range(0, d - train_size[0], 4):
-            for j in range(0, h - train_size[1], 8):
-                for k in range(0, w - train_size[2], 8):
+        for i in range(0, d - train_size[0], train_size[0]//2):
+            for j in range(0, h - train_size[1], train_size[1]//2):
+                for k in range(0, w - train_size[2], train_size[2]//2):
                     subvolume = volume[:, i:i+train_size[0], j:j+train_size[1], k:k+train_size[2]]
                     subvolume = (subvolume - np.nanmean(subvolume)) / np.nanstd(subvolume)
                     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
@@ -97,7 +99,8 @@ def segmentation_one_case_one_model(model_path,
                                     save_path,
                                     size,
                                     classno=2,
-                                    full_resolution=False):
+                                    full_resolution=False,
+                                    save_flag=False):
 
     model = torch.load(model_path)
     test_data_path = data_path + '/imgs'
@@ -108,11 +111,16 @@ def segmentation_one_case_one_model(model_path,
     all_labels = [os.path.join(test_label_path, f) for f in listdir(test_label_path)]
     all_labels.sort()
 
+    segmentation_iou_all_cases = []
+
     for each_case, each_label in zip(all_cases, all_labels):
 
         # print(each_case)
         volume_nii = nib.load(each_case)
         volume = volume_nii.get_fdata()
+
+        label_nii = nib.load(each_label)
+        label = label_nii.get_fdata()
 
         saved_segmentation = np.zeros_like(volume)
 
@@ -152,14 +160,58 @@ def segmentation_one_case_one_model(model_path,
         for dd in range(d):
             saved_segmentation[:, :, dd] = segmentation_np[dd, :, :]
 
-        segmentation_nii = nib.Nifti1Image(saved_segmentation,
-                                           volume_nii.affine,
-                                           volume_nii.header)
+        mean_iu, _, __ = segmentation_scores(label, saved_segmentation, classno)
+        segmentation_iou_all_cases.append(mean_iu)
 
-        save_path_nii = os.path.join(save_path, save_name_nii)
-        nib.save(segmentation_nii, save_path_nii)
+        if save_flag is True:
+            segmentation_nii = nib.Nifti1Image(saved_segmentation,
+                                               volume_nii.affine,
+                                               volume_nii.header)
 
-        print(save_path_nii + ' is saved.\n')
+            save_path_nii = os.path.join(save_path, save_name_nii)
+            nib.save(segmentation_nii, save_path_nii)
+            print(save_path_nii + ' is saved.\n')
+
+    return segmentation_iou_all_cases
+
+
+def test_all_models(model_path,
+                       data_path,
+                       save_path,
+                       size,
+                       classno=2,
+                       full_resolution=False,
+                       save_flag=False):
+
+    all_models = [os.path.join(model_path, f) for f in listdir(model_path) if os.path.isfile(os.path.join(model_path, f))]
+    all_models.sort()
+
+    for i, model in enumerate(all_models):
+        iou_one_model = segmentation_one_case_one_model(model, data_path, save_path, size, classno, full_resolution, save_flag)
+        if i == 0:
+            iou = iou_one_model
+        else:
+            iou = [value1+value2 for value1, value2 in zip(iou, iou_one_model)]
+
+    iou = [each_value / len(all_models) for each_value in iou]
+    assert len(iou) == len(iou_one_model)
+    mean_iou_all_models = np.nanmean(iou)
+    std_iou_all_models = np.nanstd(iou)
+
+    result_dictionary = {
+        'Test IoU mean': str(np.nanmean(iou)),
+        'Test IoU std': str(np.nanstd(iou))
+    }
+
+    ff_path = save_path + '/test_result_data.txt'
+    ff = open(ff_path, 'w')
+    ff.write(str(result_dictionary))
+    ff.close()
+
+    iou_path = save_path + '/iou.csv'
+    np.savetxt(iou_path, iou, delimiter=',')
+
+    return mean_iou_all_models, std_iou_all_models
 
 
 if __name__ == '__main__':

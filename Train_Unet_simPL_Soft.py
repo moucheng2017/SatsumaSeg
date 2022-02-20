@@ -9,7 +9,7 @@ import numpy as np
 from torch.utils import data
 import shutil
 import torch.nn.functional as F
-
+import errno
 from Metrics import segmentation_scores
 from dataloaders.Dataloader import CT_Dataset
 from tensorboardX import SummaryWriter
@@ -18,6 +18,8 @@ from Utils import evaluate, test, sigmoid_rampup
 from Loss import SoftDiceLoss
 # =================================
 from Models import Unet3D
+from analysis.VolumeSegmentation import test_all_models
+import errno
 
 
 def trainModels(dataset_name,
@@ -31,6 +33,7 @@ def trainModels(dataset_name,
                 learning_rate,
                 width,
                 log_tag,
+                unlabelled=2,
                 new_resolution=[12, 512, 512],
                 l2=0.01,
                 alpha=1.0,
@@ -47,6 +50,7 @@ def trainModels(dataset_name,
                    '_e' + str(repeat_str) + \
                    '_l' + str(learning_rate) + \
                    '_b' + str(train_batchsize) + \
+                   '_u' + str(unlabelled) + \
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_d' + str(downsample) + \
@@ -56,7 +60,7 @@ def trainModels(dataset_name,
                    '_z' + str(new_resolution[0]) + \
                    '_x' + str(new_resolution[1])
 
-        trainloader_withlabels, trainloader_withoutlabels, validateloader, test_data_path = getData(data_directory, dataset_name, train_batchsize, new_resolution)
+        trainloader_withlabels, trainloader_withoutlabels, validateloader, test_data_path = getData(data_directory, dataset_name, train_batchsize, new_resolution, unlabelled)
 
         # ===================
         trainSingleModel(model=Exp,
@@ -73,7 +77,8 @@ def trainModels(dataset_name,
                          dilation=1,
                          l2=l2,
                          alpha=alpha,
-                         warmup=warmup
+                         warmup=warmup,
+                         size=new_resolution
                          )
 
 
@@ -119,6 +124,7 @@ def trainSingleModel(model,
                      testdata_path,
                      log_tag,
                      class_no,
+                     size,
                      l2=0.01,
                      alpha=1.0,
                      warmup=0.1):
@@ -276,7 +282,7 @@ def trainSingleModel(model,
             writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss),
                                                'unsup loss': np.nanmean(train_unsup_loss)}, step + 1)
 
-        if step > num_steps - 10:
+        if step > num_steps - 5:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
             torch.save(model, path_model)
@@ -289,20 +295,18 @@ def trainSingleModel(model,
     training_time = stop - start
     print('Training Time: ', training_time)
 
-    # test_image_path = os.path.join(testdata_path, 'imgs')
-    # test_label_path = os.path.join(testdata_path, 'lbls')
-    # test_iou = test(saved_information_path + '/' + save_model_name,
-    #                 saved_model_path,
-    #                 test_image_path,
-    #                 test_label_path,
-    #                 device,
-    #                 model_name,
-    #                 class_no,
-    #                 [192, 192, 192],
-    #                 1)
+    save_path = saved_information_path + '/results'
+    try:
+        os.mkdir(save_path)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise
+        pass
 
-    # print('Test IoU: ' + str(np.nanmean(test_iou)) + '\n')
-    # print('Test IoU std: ' + str(np.nanstd(test_iou)) + '\n')
+    iou_mean, iou_std = test_all_models(saved_model_path, testdata_path, saved_information_path, size, class_no, False, False)
+
+    print('Test IoU: ' + str(iou_mean) + '\n')
+    print('Test IoU std: ' + str(iou_std) + '\n')
 
     print('\nTraining finished and model saved\n')
 
