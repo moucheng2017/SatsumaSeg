@@ -52,7 +52,7 @@ def segment_whole_volume(model,
                     subvolume = volume[:, i:i+train_size[0], j:j+train_size[1], k:k+train_size[2]]
                     subvolume = (subvolume - np.nanmean(subvolume)) / np.nanstd(subvolume)
                     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
-                    subseg, _ = model(subvolume.unsqueeze(0))
+                    subseg = model(subvolume.unsqueeze(0))
 
                     if class_no == 2:
                         subseg = torch.sigmoid(subseg)
@@ -67,7 +67,7 @@ def segment_whole_volume(model,
             subvolume = volume[:, i:i + train_size[0], :, :]
             subvolume = (subvolume - np.nanmean(subvolume)) / np.nanstd(subvolume)
             subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
-            subseg, _ = model(subvolume.unsqueeze(0))
+            subseg = model(subvolume.unsqueeze(0))
 
             if class_no == 2:
                 subseg = torch.sigmoid(subseg)
@@ -82,7 +82,7 @@ def segment_whole_volume(model,
     subvolume = volume[:, d-train_size[0]:d, h-train_size[1]:h, w-train_size[2]:w]
     subvolume = (subvolume - np.nanmean(subvolume)) / np.nanstd(subvolume)
     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
-    subseg, _ = model(subvolume.unsqueeze(0))
+    subseg = model(subvolume.unsqueeze(0))
 
     if class_no == 2:
         subseg = torch.sigmoid(subseg)
