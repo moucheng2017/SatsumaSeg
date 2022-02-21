@@ -9,19 +9,21 @@ torch.backends.cudnn.benchmark = False
 if __name__ == '__main__':
     # with torch.autograd.set_detect_anomaly(True):
     trainModels(data_directory='/home/moucheng/projects_data',
-                dataset_name='Task06_Lung',
+                dataset_name='Task08_HepaticVessel',
                 downsample=0,
                 input_dim=1,
                 class_no=2,
                 repeat=1,
                 train_batchsize=2,
-                num_steps=12,
-                learning_rate=1e-4,
+                num_steps=4000,
+                learning_rate=3e-2,
                 width=16,
-                log_tag='20220218',
-                new_resolution=[5, 480, 480],
+                log_tag='miccai',
+                unlabelled=1,
+                temperature=1.2,
+                new_resolution=[8, 448, 448],
                 l2=1e-4,
-                alpha=1.0,
+                alpha=0.01,
                 warmup=1.0
                 )
 
