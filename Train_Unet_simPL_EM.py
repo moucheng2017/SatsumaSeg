@@ -34,6 +34,7 @@ def trainModels(dataset_name,
                 width,
                 log_tag,
                 unlabelled=2,
+                temperature=1.0,
                 new_resolution=[12, 512, 512],
                 l2=0.01,
                 alpha=1.0,
@@ -45,12 +46,12 @@ def trainModels(dataset_name,
         repeat_str = str(j)
 
         Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
-
-        Exp_name = 'simPL_Soft_unet' + \
+        Exp_name = 'ExMaPL_unet' + \
                    '_e' + str(repeat_str) + \
                    '_l' + str(learning_rate) + \
                    '_b' + str(train_batchsize) + \
                    '_u' + str(unlabelled) + \
+                   '_t' + str(temperature) + \
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_d' + str(downsample) + \
@@ -75,6 +76,7 @@ def trainModels(dataset_name,
                          class_no=class_no,
                          log_tag=log_tag,
                          dilation=1,
+                         temperature=temperature,
                          l2=l2,
                          alpha=alpha,
                          warmup=warmup,
@@ -125,6 +127,7 @@ def trainSingleModel(model,
                      log_tag,
                      class_no,
                      size,
+                     temperature,
                      l2=0.01,
                      alpha=1.0,
                      warmup=0.1):
@@ -236,9 +239,8 @@ def trainSingleModel(model,
             else:
                 prob_outputs_u = F.softmax(outputs_u, dim=1)
 
-            # Calculate the threshold:
-            threshold = torch.sigmoid(F.softplus(model.threshold))
-            threshold = torch.sigmoid(outputs_u / threshold)
+            # Calculate the threshold via expecation:
+            threshold = torch.sigmoid(outputs_u / temperature)
             threshold = threshold[threshold > 0.5].mean()
             learnt_pseudo_label = (prob_outputs_u > threshold).float()
 
