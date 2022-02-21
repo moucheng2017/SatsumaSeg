@@ -10,7 +10,7 @@ if __name__ == '__main__':
     # with torch.autograd.set_detect_anomaly(True):
     trainModels(data_directory='/home/moucheng/projects_data',
                 dataset_name='Task08_HepaticVessel',
-                downsample=2,
+                downsample=0,
                 input_dim=1,
                 class_no=2,
                 repeat=1,
