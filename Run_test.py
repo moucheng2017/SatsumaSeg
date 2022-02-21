@@ -1,6 +1,6 @@
 import torch
 # sys.path.append("..")
-from Train_Unet_simPL_Soft import trainModels
+from Train_Unet_simPL_EM import trainModels
 # from Train_Unet import trainModels
 torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True

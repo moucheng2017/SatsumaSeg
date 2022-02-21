@@ -17,7 +17,7 @@ if __name__ == '__main__':
                 class_no=2,
                 repeat=1,
                 train_batchsize=2,
-                num_steps=2000,
+                num_steps=200,
                 learning_rate=3e-2,
                 width=16,
                 log_tag='miccai',

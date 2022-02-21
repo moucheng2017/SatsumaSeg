@@ -5,4 +5,4 @@
 #$ -l h_rt=24:00:00
 #$ -wd /SAN/medic/PerceptronHead/codes/SatsumaSeg/exps_hepatic
 
-~/miniconda3/envs/pytorch1.4/bin/python base01.py
+~/miniconda3/envs/pytorch1.4/bin/python base04.py
