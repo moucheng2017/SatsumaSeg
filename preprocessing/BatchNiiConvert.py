@@ -44,12 +44,11 @@ def main(args):
 
         # convert to nifti without change to orientation
         outniipath = parentoutputpth/Path(case.name+'.nii.gz')
-        convertseries(dcmdir, str(outniipath))
+        try:
+            convertseries(dcmdir, str(outniipath))
+        except RuntimeError:
+            print(f'FAILED :{case}')
 
-        # declare if failed
-        if not outniipath.exists():
-            print(f'{case} has no valid dicom series. Skipping...')
-            continue
 
 
 def convertseries(inpath, outpath):
