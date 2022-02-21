@@ -241,7 +241,7 @@ def trainSingleModel(model,
             raise
         pass
 
-    iou_mean, iou_std = test_all_models(saved_model_path, testdata_path, saved_information_path, size, class_no, False, False)
+    iou_mean, iou_std = test_all_models(saved_model_path, testdata_path, save_path, size, class_no, False, False)
 
     print('Test IoU: ' + str(iou_mean) + '\n')
     print('Test IoU std: ' + str(iou_std) + '\n')
