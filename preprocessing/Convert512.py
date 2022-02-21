@@ -2,6 +2,7 @@ import torchio as tio
 import argparse
 from pathlib import Path
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 def args_parser():
     parser = argparse.ArgumentParser('', add_help=False)
@@ -82,6 +83,7 @@ def main(args):
 
         # save image
         if args.savepreview:
+            plt.close('all')
             subject.plot(output_path=p_dir/Path(im.path.stem.split('.')[0]+'.png'))
 
 if __name__=='__main__':
