@@ -22,7 +22,7 @@ if __name__ == '__main__':
                 width=16,
                 log_tag='miccai',
                 unlabelled=4,
-                temperature=0.5,
+                temperature=1.0,
                 new_resolution=[8, 448, 448],
                 l2=1e-4,
                 alpha=0.01,
