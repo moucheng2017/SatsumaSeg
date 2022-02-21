@@ -4,13 +4,13 @@
 # is the one with the most number of slices within its directory.
 # 27th February 2021: v0.1.0 initiated
 
-import dicom2nifti
-import dicom2nifti.settings as settings
 import os
 import numpy as np
 import argparse
 from pathlib import Path
 from tqdm import tqdm
+import SimpleITK as sitk
+
 
 def args_parser():
     parser = argparse.ArgumentParser('', add_help=False)
@@ -21,49 +21,48 @@ def args_parser():
 
 def main(args):
 
-    # dicom2nifti settings
-    settings.disable_validate_slice_increment()
-
     # give parent paths
-    parentdicompth = args.inputsource
-    parentoutputpth = args.outputsource
-    Path(parentoutputpth).mkdir(exist_ok=True)
+    parentdicompth = Path(args.inputsource)
+    parentoutputpth = Path(args.outputsource)
+    parentoutputpth.mkdir(exist_ok=True)
 
     # get all cases to execute on
-    dcmlist = os.listdir(parentdicompth)
-    totaln = len(dcmlist)
-    jj = 1
-    for case in tqdm(dcmlist):
-        jj = jj + 1
-        # skip if already converted
-        if os.path.exists(os.path.join(parentoutputpth, case+'.nii.gz')):
-            continue
-        # identify dir with desired dicoms
-        casedir = os.path.join(parentdicompth, case)
-        subdir = [x[0] for x in os.walk(casedir)]
+    dcmlist = [x.name for x in parentdicompth.iterdir()]
+    outlist = [x.name for x in parentoutputpth.iterdir()]
+
+    # identify cases that are not already converted
+    convertlistname = list(set(dcmlist) - set(outlist))
+    convertlist = [parentdicompth/Path(x) for x in convertlistname]
+
+    for case in tqdm(convertlist):
+        # identify dir with greatest number of dicoms
+        subdir = [x[0] for x in os.walk(case)]
         Nfiles = [None]*len(subdir)
         for ii in range(len(subdir)):
             Nfiles[ii] = len(os.listdir(subdir[ii]))
         dcmdir = subdir[np.argmax(Nfiles)]
 
         # convert to nifti without change to orientation
-        dicom2nifti.convert_directory(dcmdir, parentoutputpth, compression=True, reorient=False)
+        outniipath = parentoutputpth/Path(case.name+'.nii.gz')
+        convertseries(dcmdir, str(outniipath))
 
-        # change name
-        alloutputs = os.listdir(parentoutputpth)
-        for ii in range(len(alloutputs)):
-            if alloutputs[ii].endswith('.nii.gz'):
-                alloutputs[ii] = alloutputs[ii].rstrip('.nii.gz')
-
-        # identify cases that are not already converted
-        unnamed = list(set(alloutputs) - set(dcmlist))
-        if not unnamed:
+        # declare if failed
+        if not outniipath.exists():
             print(f'{case} has no valid dicom series. Skipping...')
             continue
-        fullunnamed = os.path.join(parentoutputpth, unnamed[0]+'.nii.gz')
-        fullnewname = os.path.join(parentoutputpth, case+'.nii.gz')
-        os.rename(fullunnamed, fullnewname)
 
+
+def convertseries(inpath, outpath):
+    # based on https://stackoverflow.com/a/71074428
+    reader = sitk.ImageSeriesReader()
+    dicom_names = reader.GetGDCMSeriesFileNames(inpath)
+    reader.SetFileNames(dicom_names)
+    image = reader.Execute()
+
+    # Added a call to PermuteAxes to change the axes of the data
+    # image = sitk.PermuteAxes(image, [2, 1, 0])
+
+    sitk.WriteImage(image, outpath)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('output dicom dataset as nii.gz', parents=[args_parser()])
     args = parser.parse_args()
