@@ -2,7 +2,6 @@ import torchio as tio
 import argparse
 from pathlib import Path
 from tqdm import tqdm
-import matplotlib.pyplot as plt
 
 def args_parser():
     parser = argparse.ArgumentParser('', add_help=False)
@@ -10,6 +9,7 @@ def args_parser():
     parser.add_argument('inputlung', type=str, help='path to dir holding the dataset')
     parser.add_argument('--inputairway', '-a', default=None, type=str, help='path to dir holding the dataset')
     parser.add_argument('--outputdirname', '-o', default='output', type=str, help='path to dir to save the resultant')
+    parser.add_argument('--savepreview', '-p', action='store_true', help='save preview for each case.')
     return parser
 
 def main(args):
@@ -55,6 +55,9 @@ def main(args):
         oawy_dir = o_dir / iawy_dir.stem
         oawy_dir.mkdir(parents=True, exist_ok=True)
 
+    if args.savepreview:
+        p_dir = o_dir/Path('previews')
+        p_dir.mkdir(parents=True, exist_ok=True)
 
     # transform to 512x512 cubic
     transforms = [
@@ -73,11 +76,13 @@ def main(args):
         lg = subject.lung
         lg.save(olung_dir/Path(lg.path.name))
 
-
         if args.inputairway:
             ay = subject.airway
             ay.save(oawy_dir/Path(ay.path.name))
 
+        # save image
+        if args.savepreview:
+            subject.plot(output_path=p_dir/Path(im.path.stem.split('.')[0]+'.png'))
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser('resize dataset into 512x512x-1, original source, awy and lung masks must all be .nii.gz', parents=[args_parser()])
