@@ -2,6 +2,7 @@ import torchio as tio
 import argparse
 from pathlib import Path
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 def args_parser():
     parser = argparse.ArgumentParser('', add_help=False)
@@ -56,16 +57,22 @@ def main(args):
 
 
     # transform to 512x512 cubic
-    resize = tio.transforms.Resize(target_shape=(512, 512, -1), image_interpolation='bspline')
-    dataset = tio.SubjectsDataset(subjects, transform=resize)
+    transforms = [
+        tio.CopyAffine(target='image'),
+        tio.Resize(target_shape=(512, 512, -1), image_interpolation='bspline')
+    ]
+    dataset = tio.SubjectsDataset(subjects, transform=tio.Compose(transforms))
+
 
     # save output
     for subject in tqdm(dataset):
         im = subject.image
         im.save(osource_dir/Path(im.path.name))
+        # im.to_gif(output_path=osource_dir/Path(im.path.stem.split('.')[0]+'.gif'), axis=1, duration=10)
 
         lg = subject.lung
         lg.save(olung_dir/Path(lg.path.name))
+
 
         if args.inputairway:
             ay = subject.airway
