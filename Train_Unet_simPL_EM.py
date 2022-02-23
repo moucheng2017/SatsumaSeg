@@ -220,11 +220,11 @@ def trainSingleModel(model,
                 prob_outputs = F.softmax(outputs, dim=1)
 
             # Calculate the threshold via expecation:
-            threshold_u_ = torch.sigmoid(outputs_u / temperature)
+            threshold_u_ = torch.sigmoid(outputs_u.detach() / temperature)
             threshold_u_ = threshold_u_[threshold_u_ > threshold_u].mean()
             threshold_u = 0.9*threshold_u + 0.1*threshold_u_
-            threshold_u = torch.min(threshold_u, torch.tensor(0.999).to(device))
-            learnt_pseudo_label = (prob_outputs_u > threshold_u).float()
+            # threshold_u = torch.min(threshold_u, torch.tensor(0.999).to(device))
+            learnt_pseudo_label = (prob_outputs_u.detach() >= threshold_u).float()
 
             if class_no == 2:
                 loss = SoftDiceLoss()(prob_outputs, labels) + nn.BCELoss(reduction='mean')(prob_outputs.squeeze(), labels.squeeze())
