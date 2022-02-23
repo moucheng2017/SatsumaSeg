@@ -167,7 +167,7 @@ def trainSingleModel(model,
     iterator_train_labelled = iter(trainloader_with_labels)
     iterator_train_unlabelled = iter(trainloader_without_labels)
 
-    threshold_u = 0.5
+    threshold_u = torch.tensor(0.5).to(device)
 
     for step in range(num_steps):
 
