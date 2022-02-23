@@ -25,6 +25,6 @@ if __name__ == '__main__':
                 temperature=1.0,
                 new_resolution=[8, 448, 448],
                 l2=1e-4,
-                alpha=0.01,
+                alpha=0.1,
                 warmup=1.0
                 )

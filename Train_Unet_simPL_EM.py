@@ -167,7 +167,7 @@ def trainSingleModel(model,
     iterator_train_labelled = iter(trainloader_with_labels)
     iterator_train_unlabelled = iter(trainloader_without_labels)
 
-    threshold_u = torch.tensor(0.5).to(device)
+    threshold_u = 0.5
 
     for step in range(num_steps):
 
@@ -223,9 +223,7 @@ def trainSingleModel(model,
             threshold_u_ = torch.sigmoid(outputs_u / temperature)
             threshold_u_ = threshold_u_[threshold_u_ > threshold_u].mean()
             threshold_u = 0.9*threshold_u + 0.1*threshold_u_
-            threshold_u = torch.min(torch.tensor(0.999).to(device), threshold_u)
-
-            learnt_pseudo_label = (prob_outputs_u > threshold_u).float()
+            learnt_pseudo_label = (prob_outputs_u >= threshold_u).float()
 
             if class_no == 2:
                 loss = SoftDiceLoss()(prob_outputs, labels) + nn.BCELoss(reduction='mean')(prob_outputs.squeeze(), labels.squeeze())
