@@ -221,7 +221,7 @@ def trainSingleModel(model,
 
             # Calculate the threshold via expecation:
             threshold_u_ = torch.sigmoid(outputs_u.detach() / temperature)
-            threshold_u_ = threshold_u_[threshold_u_ > threshold_u].mean()
+            threshold_u_ = threshold_u_[threshold_u_ > 0.5].mean()
             threshold_u = 0.95 * threshold_u + 0.05 * threshold_u_
             if torch.isnan(threshold_u) is True:
                 threshold_u = torch.tensor(0.99).to(device)
