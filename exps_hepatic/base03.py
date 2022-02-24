@@ -6,7 +6,7 @@ torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-from Train_Unet_simPL_Fixed import trainModels
+from Train_Unet import trainModels
 
 if __name__ == '__main__':
 
@@ -17,13 +17,10 @@ if __name__ == '__main__':
                 class_no=2,
                 repeat=1,
                 train_batchsize=2,
-                num_steps=2000,
+                num_steps=4000,
                 learning_rate=3e-2,
                 width=8,
                 log_tag='miccai',
-                unlabelled=4,
                 new_resolution=[16, 480, 480],
-                l2=1e-4,
-                alpha=0.1,
-                warmup=1.0
+                l2=1e-4
                 )
