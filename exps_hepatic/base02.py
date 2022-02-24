@@ -12,15 +12,15 @@ if __name__ == '__main__':
 
     trainModels(data_directory='/SAN/medic/PerceptronHead/data',
                 dataset_name='Task08_HepaticVessel',
-                downsample=2,
+                downsample=3,
                 input_dim=1,
                 class_no=2,
                 repeat=1,
                 train_batchsize=2,
                 num_steps=2000,
                 learning_rate=3e-2,
-                width=16,
+                width=8,
                 log_tag='miccai',
-                new_resolution=[8, 448, 448],
+                new_resolution=[16, 480, 480],
                 l2=1e-4
                 )
