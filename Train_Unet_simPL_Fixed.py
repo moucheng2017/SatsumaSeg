@@ -236,7 +236,7 @@ def trainSingleModel(model,
             else:
                 prob_outputs_u = F.softmax(outputs_u, dim=1)
 
-            threshold = torch.sigmoid(outputs_u / 2.0)
+            threshold = torch.sigmoid(outputs_u / 5.0)
             threshold = threshold[threshold > 0.5]
             threshold = threshold.mean()
             pseudo_label = (prob_outputs_u.detach() > threshold).float()
@@ -290,7 +290,7 @@ def trainSingleModel(model,
     training_time = stop - start
     print('Training Time: ', training_time)
 
-    save_path = saved_information_path + '/results'
+    save_path = saved_model_path + '/results'
     try:
         os.mkdir(save_path)
     except OSError as exc:
