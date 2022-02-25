@@ -236,7 +236,10 @@ def trainSingleModel(model,
             else:
                 prob_outputs_u = F.softmax(outputs_u, dim=1)
 
-            pseudo_label = (prob_outputs_u > 0.5).float()
+            threshold = torch.sigmoid(outputs_u / 2.0)
+            threshold = threshold[threshold > 0.5]
+            threshold = threshold.mean()
+            pseudo_label = (prob_outputs_u.detach() > threshold).float()
 
             if class_no == 2:
                 loss_u = SoftDiceLoss()(prob_outputs_u, pseudo_label) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), pseudo_label.squeeze())
