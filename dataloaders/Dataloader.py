@@ -103,9 +103,11 @@ class CT_Dataset(torch.utils.data.Dataset):
     '''
     Each volume should be at: Dimension X Height X Width
     '''
-    def __init__(self, imgs_folder, labels_folder, new_size, labelled):
+    def __init__(self, imgs_folder, labels_folder, lung_folder, new_size, labelled):
         self.imgs_folder = imgs_folder
         self.labels_folder = labels_folder
+        self.lung_folder = lung_folder
+
         self.labelled_flag = labelled
         self.augmentation_contrast = RandomContrast()
         self.augmentation_cropping = RandomCropping(new_size, [1])
@@ -135,6 +137,18 @@ class CT_Dataset(torch.utils.data.Dataset):
         # extract image name
         _, imagename = os.path.split(imagename)
         imagename, imagetxt = os.path.splitext(imagename)
+
+        # Lung masks:
+        all_lungs = sorted(glob.glob(os.path.join(self.lung_folder, '*.nii.gz*')))
+        lung = nib.load(all_lungs[index])
+        lung = lung.get_fdata()
+        lung = np.array(lung, dtype='float32')
+        lung = np.transpose(lung, (2, 0, 1))
+        lung = np.expand_dims(lung, axis=0)
+
+        # applying the lung mask
+        image = image*lung
+
         if self.labelled_flag is True:
             # Labels:
             all_labels = sorted(glob.glob(os.path.join(self.labels_folder, '*.nii.gz*')))

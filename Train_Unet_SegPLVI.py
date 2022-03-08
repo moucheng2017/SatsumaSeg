@@ -91,32 +91,43 @@ def trainModels(
                          )
 
 
-def getData(data_directory, dataset_name, train_batchsize, new_resolution, unlabelled_ratio):
+def getData(data_directory, dataset_name, train_batchsize, new_resolution):
 
     data_directory = data_directory + '/' + dataset_name
+    data_directory_eval_test = data_directory + dataset_name
 
     folder_labelled = data_directory + '/labelled'
+
     train_image_folder_labelled = folder_labelled + '/imgs'
     train_label_folder_labelled = folder_labelled + '/lbls'
-    train_dataset_labelled = CT_Dataset(train_image_folder_labelled, train_label_folder_labelled, new_resolution, labelled=True)
+    train_lung_folder_labelled = folder_labelled + '/lung'
 
-    train_image_folder_unlabelled = data_directory + '/unlabelled/imgs'
-    train_label_folder_unlabelled = data_directory + '/unlabelled/lbls'
-    train_dataset_unlabelled = CT_Dataset(train_image_folder_unlabelled, train_label_folder_unlabelled, new_resolution, labelled=False)
+    train_dataset_labelled = CT_Dataset(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, new_resolution, labelled=True)
+
+    # train_image_folder_unlabelled = data_directory + '/unlabelled/patches'
+    # train_label_folder_unlabelled = data_directory + '/unlabelled/labels'
+    # train_dataset_unlabelled = CustomDataset(train_image_folder_unlabelled, train_label_folder_unlabelled, 'none', labelled=True)
 
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
-    trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=unlabelled_ratio*train_batchsize, shuffle=True, num_workers=0, drop_last=False)
+    # trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=train_batchsize*ratio, shuffle=True, num_workers=0, drop_last=False)
 
     validate_image_folder = data_directory + '/validate/imgs'
     validate_label_folder = data_directory + '/validate/lbls'
+    validate_lung_folder = data_directory + '/validate/lung'
 
     testdata_path = data_directory + '/test'
 
-    validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, new_resolution, labelled=True)
+    test_image_folder = data_directory + '/test/imgs'
+    test_label_folder = data_directory + '/test/lbls'
+    test_lung_folder = data_directory + '/test/lung'
+
+    validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, new_resolution, labelled=True)
+    test_dataset = CT_Dataset(test_image_folder, test_label_folder, test_lung_folder, new_resolution, labelled=True)
 
     validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
+    testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
-    return trainloader_labelled, trainloader_unlabelled, validateloader, testdata_path
+    return trainloader_labelled, validateloader, testdata_path, train_dataset_labelled, validate_dataset, test_dataset
 # =====================================================================================================================================
 
 
