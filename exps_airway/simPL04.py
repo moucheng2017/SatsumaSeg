@@ -6,22 +6,25 @@ torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-from Train_Unet import trainModels
+from Train_Unet_SegPL import trainModels
 
 if __name__ == '__main__':
 
     trainModels(data_directory='/SAN/medic/PerceptronHead/data/lung/private/',
                 dataset_name='airway',
-                dataset_tag='Mixed',
                 downsample=4,
                 input_dim=1,
                 class_no=2,
                 repeat=1,
                 train_batchsize=2,
-                num_steps=4000,
-                learning_rate=1e-4,
+                num_steps=5000,
+                learning_rate=1e-2,
                 width=16,
-                log_tag='20200206',
-                new_resolution=[16, 256, 256],
-                l2=5e-2
+                unlabelled=4,
+                log_tag='220200206',
+                new_resolution=[32, 480, 480],
+                l2=1e-4,
+                alpha=1.0,
+                warmup=0.5,
+                threshold=0.4
                 )

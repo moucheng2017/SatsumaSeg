@@ -5,4 +5,4 @@
 #$ -l h_rt=96:00:00
 #$ -wd /SAN/medic/PerceptronHead/codes/SatsumaSeg/exps_lung
 
-~/miniconda3/envs/pytorch1.4/bin/python simPL03.py
+~/miniconda3/envs/pytorch1.4/bin/python simPL05.py

@@ -54,7 +54,7 @@ def segment_whole_volume(model,
                 # plt.show()
 
                 subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
-                subseg = model(subvolume.unsqueeze(0))
+                subseg, _ = model(subvolume.unsqueeze(0))
                 if class_no == 2:
                     subseg = torch.sigmoid(subseg)
                     # subseg = (subseg > 0.5).float()
@@ -73,7 +73,7 @@ def segment_whole_volume(model,
     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
 
     # print(subvolume.unsqueeze(0).size())
-    subseg = model(subvolume.unsqueeze(0))
+    subseg, _ = model(subvolume.unsqueeze(0))
     if class_no == 2:
         subseg = torch.sigmoid(subseg)
     else:
@@ -299,7 +299,7 @@ def test_brats(saved_information_path, saved_model_path, testdata, device, model
                 elif 'expert' in model_name:
                     test_outputs = model(test_img, dilation)
                 else:
-                    test_outputs = model(test_img)
+                    test_outputs, _ = model(test_img)
 
                 if class_no == 2:
                     test_class_outputs = torch.sigmoid(test_outputs)
