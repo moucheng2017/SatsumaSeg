@@ -130,10 +130,13 @@ class CT_Dataset(torch.utils.data.Dataset):
         # Now applying lung window:
         image[image < -1000.0] = -1000.0
         image[image > 500.0] = 500.0
-        # apply normalisation
-        image = (image - np.nanmean(image)) / np.nanstd(image)
+
         # random contrast:
         image = self.augmentation_contrast.randomintensity(image)
+
+        # apply normalisation
+        image = (image - np.nanmean(image)) / np.nanstd(image)
+
         # extract image name
         _, imagename = os.path.split(imagename)
         imagename, imagetxt = os.path.splitext(imagename)
@@ -158,7 +161,7 @@ class CT_Dataset(torch.utils.data.Dataset):
             label = np.transpose(label, (2, 0, 1))
             label = np.expand_dims(label, axis=0)
             [image, label] = self.augmentation_cropping.crop(image, label)
-            image = (image - np.nanmean(image)) / np.nanstd(image)
+            # image = (image - np.nanmean(image)) / np.nanstd(image)
 
             return image, label, imagename
         else:
