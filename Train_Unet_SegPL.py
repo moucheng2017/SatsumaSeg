@@ -38,28 +38,49 @@ def trainModels(
                 new_resolution=[12, 512, 512],
                 l2=0.01,
                 alpha=1.0,
-                warmup=0.1
+                warmup=0.1,
+                threshold=0.5
                 ):
 
     for j in range(1, repeat + 1):
+
+        assert threshold > 0.0
 
         repeat_str = str(j)
 
         Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
 
-        Exp_name = 'simPL_Fixed_unet' + \
-                   '_e' + str(repeat_str) + \
-                   '_l' + str(learning_rate) + \
-                   '_b' + str(train_batchsize) + \
-                   '_u' + str(unlabelled) + \
-                   '_w' + str(width) + \
-                   '_s' + str(num_steps) + \
-                   '_d' + str(downsample) + \
-                   '_r' + str(l2) + \
-                   '_a' + str(alpha) + \
-                   '_wu' + str(warmup) + \
-                   '_z' + str(new_resolution[0]) + \
-                   '_x' + str(new_resolution[1])
+        if threshold < 1.0:
+            Exp_name = 'SegPL' + \
+                       '_e' + str(repeat_str) + \
+                       '_l' + str(learning_rate) + \
+                       '_t' + str(threshold) + \
+                       '_b' + str(train_batchsize) + \
+                       '_u' + str(unlabelled) + \
+                       '_w' + str(width) + \
+                       '_s' + str(num_steps) + \
+                       '_d' + str(downsample) + \
+                       '_r' + str(l2) + \
+                       '_a' + str(alpha) + \
+                       '_wu' + str(warmup) + \
+                       '_z' + str(new_resolution[0]) + \
+                       '_x' + str(new_resolution[1])
+        else:
+            # random threshld between 0 and 1 which is sampled from half of the normal distribution
+            Exp_name = 'SegPL' + \
+                       '_e' + str(repeat_str) + \
+                       '_l' + str(learning_rate) + \
+                       '_t_r' + \
+                       '_b' + str(train_batchsize) + \
+                       '_u' + str(unlabelled) + \
+                       '_w' + str(width) + \
+                       '_s' + str(num_steps) + \
+                       '_d' + str(downsample) + \
+                       '_r' + str(l2) + \
+                       '_a' + str(alpha) + \
+                       '_wu' + str(warmup) + \
+                       '_z' + str(new_resolution[0]) + \
+                       '_x' + str(new_resolution[1])
 
         trainloader_withlabels, trainloader_withoutlabels, validateloader, test_data_path = getData(data_directory, dataset_name, train_batchsize, new_resolution, unlabelled)
 
@@ -79,7 +100,8 @@ def trainModels(
                          l2=l2,
                          alpha=alpha,
                          warmup=warmup,
-                         size=new_resolution
+                         size=new_resolution,
+                         threshold=threshold
                          )
 
 
@@ -127,7 +149,8 @@ def trainSingleModel(model,
                      size,
                      l2=0.01,
                      alpha=1.0,
-                     warmup=0.1):
+                     warmup=0.1,
+                     threshold=0.5):
 
     # alpha = 1.0
 
@@ -206,7 +229,7 @@ def trainSingleModel(model,
 
         if torch.sum(labels) > 10.0:
 
-            outputs = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
+            outputs, _ = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
             outputs, outputs_u = torch.split(outputs, [b_l, b_u], dim=0)
 
             if class_no == 2:
@@ -236,10 +259,12 @@ def trainSingleModel(model,
             else:
                 prob_outputs_u = F.softmax(outputs_u, dim=1)
 
-            threshold = torch.sigmoid(outputs_u / 5.0)
-            threshold = threshold[threshold > 0.5]
-            threshold = threshold.mean()
-            pseudo_label = (prob_outputs_u.detach() > threshold).float()
+            if threshold > 1.0:
+                threshold_pseudo = torch.rand(1, device=device)
+            else:
+                threshold_pseudo = threshold
+
+            pseudo_label = (prob_outputs_u.detach() > threshold_pseudo).float()
 
             if class_no == 2:
                 loss_u = SoftDiceLoss()(prob_outputs_u, pseudo_label) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), pseudo_label.squeeze())
@@ -298,10 +323,9 @@ def trainSingleModel(model,
             raise
         pass
 
-    iou_mean, iou_std = test_all_models(saved_model_path, testdata_path, save_path, size, class_no, False, False)
-
-    print('Test IoU: ' + str(iou_mean) + '\n')
-    print('Test IoU std: ' + str(iou_std) + '\n')
+    # iou_mean, iou_std = test_all_models(saved_model_path, testdata_path, save_path, size, class_no, False, False)
+    # print('Test IoU: ' + str(iou_mean) + '\n')
+    # print('Test IoU std: ' + str(iou_std) + '\n')
 
     print('\nTraining finished and model saved\n')
 

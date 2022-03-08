@@ -51,24 +51,27 @@ class DoubleRandomDilatedConv(nn.Module):
         return output
 
 
-# class ConfModel(nn.Module):
-#     def __init__(self, in_channels, out_channels, ratio=4):
-#         super(ConfModel, self).__init__()
-#         self.avg = nn.AdaptiveAvgPool3d(1)
-#         self.attention_branch = nn.Sequential(
-#             nn.Conv3d(in_channels=in_channels, out_channels=in_channels*ratio, kernel_size=(1, 1, 1), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(0, 0, 0), bias=False),
-#             nn.InstanceNorm3d(in_channels*ratio, affine=True),
-#             nn.PReLU(),
-#             nn.Conv3d(in_channels=in_channels*ratio, out_channels=out_channels, kernel_size=(1, 1, 1), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(0, 0, 0), bias=False),
-#             nn.InstanceNorm3d(out_channels, affine=True),
-#             nn.PReLU()
-#         )
-#
-#     def forward(self, x):
-#         output = self.attention_branch(x)
-#         output = self.avg(output)
-#         output = torch.sigmoid(output)
-#         return output
+class ThresholdModel(nn.Module):
+    def __init__(self, c=8):
+        super(ThresholdModel, self).__init__()
+
+        self.threshold_net = nn.Sequential(
+            nn.Conv3d(in_channels=c, out_channels=c*8, kernel_size=(3, 3, 3), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(1, 1, 1), bias=False),
+            nn.InstanceNorm3d(c*8, affine=True),
+            nn.ReLU(inplace=True)
+        )
+
+        self.threshold_logvar = nn.Conv3d(in_channels=8*c, out_channels=1, kernel_size=(1, 1, 1), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(0, 0, 0), bias=True)
+
+        self.threshold_mean = nn.Conv3d(in_channels=8 * c, out_channels=1, kernel_size=(1, 1, 1), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(0, 0, 0), bias=True)
+
+    def forward(self, x):
+        y = self.threshold_net(x.detach())
+        y = torch.mean(y, dim=-1, keepdim=True)
+        y = torch.mean(y, dim=-2, keepdim=True)
+        t_mean = self.threshold_mean(y)
+        t_logvar = self.threshold_logvar(y)
+        return t_mean, t_logvar
 
 
 class Unet3D(nn.Module):
@@ -174,6 +177,5 @@ class Unet3D(nn.Module):
         y0 = torch.cat([y0, x0], dim=1)
         y0 = self.dconv0(y0, dilation_decoder[3])
         y = self.dconv_last(y0)
-        # pixel_thresholding = self.threshold(y0)
 
-        return y
+        return y, y0
