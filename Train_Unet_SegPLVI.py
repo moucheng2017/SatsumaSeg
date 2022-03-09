@@ -279,7 +279,7 @@ def trainSingleModel(model,
                 loss_u += 0.1*SoftDiceLoss()(prob_outputs_l, pseudo_label_l) + 0.1*nn.BCELoss(reduction='mean')(prob_outputs_l.squeeze(), pseudo_label_l.squeeze())
 
             # K-L loss:
-            kld_loss = torch.log(std_prior) - logvar + 0.5 * (log_var.exp() + (mu - mean_prior).pow(2)) / std_prior**2 - 0.5
+            kld_loss = torch.log(std_prior) - logvar + 0.5 * (logvar.exp() + (mu - mean_prior).pow(2)) / std_prior**2 - 0.5
             kld_loss = kld_loss.mean() * alpha_current
 
             train_unsup_loss.append(alpha_current*loss_u.item())
