@@ -173,7 +173,7 @@ def trainSingleModel(model,
         train_imgs = labelled_img.to(device=device, dtype=torch.float32)
         labels = labelled_label.to(device=device, dtype=torch.float32)
 
-        outputs = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
+        outputs, _ = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
         if class_no == 2:
             prob_outputs = torch.sigmoid(outputs)
         else:
