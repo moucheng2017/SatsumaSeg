@@ -9,7 +9,7 @@ import numpy as np
 from torch.utils import data
 import shutil
 import torch.nn.functional as F
-
+import math
 from Metrics import segmentation_scores
 from dataloaders.Dataloader import CT_Dataset
 from tensorboardX import SummaryWriter
@@ -108,9 +108,10 @@ def getData(data_directory, dataset_name, train_batchsize, new_resolution, ratio
 
     train_dataset_labelled = CT_Dataset(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, new_resolution, labelled=True)
 
-    train_image_folder_unlabelled = data_directory + '/unlabelled/patches'
-    train_label_folder_unlabelled = data_directory + '/unlabelled/labels'
-    train_dataset_unlabelled = CustomDataset(train_image_folder_unlabelled, train_label_folder_unlabelled, 'none', labelled=True)
+    train_image_folder_unlabelled = data_directory + '/unlabelled/imgs'
+    train_label_folder_unlabelled = data_directory + '/unlabelled/lbls'
+    train_lung_folder_unlabelled = data_directory + '/unlabelled/lung'
+    train_dataset_unlabelled = CT_Dataset(train_image_folder_unlabelled, train_label_folder_unlabelled, train_lung_folder_unlabelled, new_resolution, labelled=False)
 
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
     trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=train_batchsize*ratio, shuffle=True, num_workers=0, drop_last=False)
@@ -268,7 +269,7 @@ def trainSingleModel(model,
             loss.backward()
             optimizer.step()
             # K-L loss for threshold model:
-            kld_loss = torch.log(std_prior) - logvar + 0.5 * (logvar.exp() + (mu - mean_prior).pow(2)) / std_prior**2 - 0.5
+            kld_loss = math.log(std_prior) - logvar + 0.5 * (logvar.exp() + (mu - mean_prior).pow(2)) / std_prior**2 - 0.5
             kld_loss = kld_loss.mean() * alpha_current
             train_kl_loss.append(kld_loss.item())
             # update the threshold model
