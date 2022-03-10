@@ -16,7 +16,7 @@ if __name__ == '__main__':
                 input_dim=1,
                 class_no=2,
                 repeat=1,
-                train_batchsize=2,
+                train_batchsize=1,
                 num_steps=5000,
                 learning_rate=5e-3,
                 width=16,
