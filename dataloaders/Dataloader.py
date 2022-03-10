@@ -137,7 +137,7 @@ class CT_Dataset(torch.utils.data.Dataset):
         image = self.augmentation_contrast.randomintensity(image)
 
         # apply normalisation
-        image = (image - np.nanmean(image)) / np.nanstd(image)
+        image = (image - np.nanmean(image) + 1e-10) / (np.nanstd(image) + 1e-10)
 
         # extract image name
         _, imagename = os.path.split(imagename)
@@ -163,11 +163,11 @@ class CT_Dataset(torch.utils.data.Dataset):
             label = np.transpose(label, (2, 0, 1))
             label = np.expand_dims(label, axis=0)
             [image, label, lung] = self.augmentation_cropping.crop(image, label, lung)
-            image = (image - np.nanmean(image)) / np.nanstd(image)
+            # image = (image - np.nanmean(image)) / np.nanstd(image)
             return image, label, lung, imagename
         else:
             [image, lung] = self.augmentation_cropping.crop(image, lung)
-            image = (image - np.nanmean(image)) / np.nanstd(image)
+            # image = (image - np.nanmean(image)) / np.nanstd(image)
             return image, lung, imagename
 
     def __len__(self):
