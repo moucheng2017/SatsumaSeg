@@ -165,33 +165,28 @@ def trainSingleModel(model,
         train_sup_loss = []
 
         try:
-            labelled_img, labelled_label, labelled_name = next(iterator_train_labelled)
+            labelled_img, labelled_label, labelled_lung, labelled_name = next(iterator_train_labelled)
         except StopIteration:
             iterator_train_labelled = iter(trainloader_with_labels)
-            labelled_img, labelled_label, labelled_name = next(iterator_train_labelled)
+            labelled_img, labelled_label, labelled_lung, labelled_name = next(iterator_train_labelled)
 
         train_imgs = labelled_img.to(device=device, dtype=torch.float32)
         labels = labelled_label.to(device=device, dtype=torch.float32)
+        lung = labelled_lung.to(device=device, dtype=torch.float32)
 
         outputs, _ = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
-        if class_no == 2:
-            prob_outputs = torch.sigmoid(outputs)
-        else:
-            prob_outputs = F.softmax(outputs, dim=1)
+        prob_outputs = torch.sigmoid(outputs)
 
-        if class_no == 2:
-            loss = SoftDiceLoss()(prob_outputs, labels) + nn.BCELoss(reduction='mean')(prob_outputs.squeeze(), labels.squeeze())
-        else:
-            loss = nn.CrossEntropyLoss(reduction='mean', ignore_index=8)(prob_outputs, labels.long().squeeze(1))
+        lung_mask = (lung > 0.5)
+        prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask)
+        labels_masked = torch.masked_select(labels, lung_mask)
+        loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze(), labels_masked.squeeze())
 
         train_sup_loss.append(loss.item())
 
-        if class_no == 2:
-            class_outputs = (prob_outputs > 0.5).float()
-        else:
-            _, class_outputs = torch.max(prob_outputs, dim=1)
+        class_outputs = (prob_outputs_masked > 0.5).float()
 
-        train_mean_iu_ = segmentation_scores(labels, class_outputs, class_no)
+        train_mean_iu_ = segmentation_scores(labels_masked, class_outputs, class_no)
         train_iou.append(train_mean_iu_)
 
         validate_iou, validate_h_dist = evaluate(validateloader, model, device, model_name, class_no, dilation)
@@ -245,10 +240,10 @@ def trainSingleModel(model,
             raise
         pass
 
-    iou_mean, iou_std = test_all_models(saved_model_path, testdata_path, save_path, size, class_no, False, False)
-
-    print('Test IoU: ' + str(iou_mean) + '\n')
-    print('Test IoU std: ' + str(iou_std) + '\n')
+    # iou_mean, iou_std = test_all_models(saved_model_path, testdata_path, save_path, size, class_no, False, False)
+    #
+    # print('Test IoU: ' + str(iou_mean) + '\n')
+    # print('Test IoU std: ' + str(iou_std) + '\n')
 
     print('\nTraining finished and model saved\n')
 

@@ -151,10 +151,11 @@ def evaluate(validateloader, model, device, model_name, class_no, dilation):
         validate_iou = []
         validate_h_dist = []
 
-        for i, (val_images, val_label, imagename) in enumerate(validateloader):
+        for i, (val_images, val_label, val_lung, imagename) in enumerate(validateloader):
             val_img = val_images.to(device=device, dtype=torch.float32)
             # val_img = val_images.to(device=device, dtype=torch.float32).unsqueeze(1)
             val_label = val_label.to(device=device, dtype=torch.float32)
+            val_lung = val_lung.to(device=device, dtype=torch.float32)
 
             if 'CCT' in model_name or 'cct' in model_name:
                 val_outputs, _ = model(val_img)
@@ -169,7 +170,11 @@ def evaluate(validateloader, model, device, model_name, class_no, dilation):
             else:
                 _, val_class_outputs = torch.max(val_outputs, dim=1)
 
-            eval_mean_iu_ = segmentation_scores(val_label.squeeze(), val_class_outputs.squeeze(), class_no)
+            lung_mask = (val_lung > 0.5)
+            val_class_outputs_masked = torch.masked_select(val_class_outputs, lung_mask)
+            val_label_masked = torch.masked_select(val_label, lung_mask)
+
+            eval_mean_iu_ = segmentation_scores(val_label_masked.squeeze(), val_class_outputs_masked.squeeze(), class_no)
             validate_iou.append(eval_mean_iu_)
             if (val_class_outputs == 1).sum() > 1 and (val_label == 1).sum() > 1:
                 v_dist_ = hd95(val_class_outputs.squeeze(), val_label.squeeze(), class_no)
