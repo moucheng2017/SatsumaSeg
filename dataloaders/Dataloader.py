@@ -19,12 +19,14 @@ class RandomCropping(object):
         # for supervised learning, we need to crop both volume and the label, arg1: volume, arg2: label
         # for unsupervised learning, we only need to crop the volume, arg1: volume
         # new_resolution = 224
+        # begining slices and ending slices are not informative so discarded:
+        discared_slices = 5
         new_d = self.output_size[0]
         new_h = self.output_size[1]
         new_w = self.output_size[2]
 
         skip = random.choice(self.skip_slices)
-        skip_x = random.choice(self.skip_slices)
+        # skip_x = random.choice(self.skip_slices)
 
         for volume in volumes:
             c, d, h, w = np.shape(volume)
@@ -34,7 +36,7 @@ class RandomCropping(object):
             top_h = np.random.randint(0, h - new_h)
             top_w = np.random.randint(0, w - new_w)
 
-        top_d = np.random.randint(0, d - skip*new_d)
+        top_d = np.random.randint(skip*new_d+discared_slices, d - skip*new_d-discared_slices)
         outputs = []
 
         for each_input in volumes:
@@ -160,14 +162,13 @@ class CT_Dataset(torch.utils.data.Dataset):
             label = np.array(label, dtype='float32')
             label = np.transpose(label, (2, 0, 1))
             label = np.expand_dims(label, axis=0)
-            [image, label] = self.augmentation_cropping.crop(image, label)
-            # image = (image - np.nanmean(image)) / np.nanstd(image)
-
-            return image, label, imagename
-        else:
-            [image] = self.augmentation_cropping.crop(image)
+            [image, label, lung] = self.augmentation_cropping.crop(image, label, lung)
             image = (image - np.nanmean(image)) / np.nanstd(image)
-            return image, imagename
+            return image, label, lung, imagename
+        else:
+            [image, lung] = self.augmentation_cropping.crop(image, lung)
+            image = (image - np.nanmean(image)) / np.nanstd(image)
+            return image, lung, imagename
 
     def __len__(self):
         # You should change 0 to the total size of your dataset.
