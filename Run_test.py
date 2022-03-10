@@ -1,6 +1,6 @@
 import torch
 # sys.path.append("..")
-from Train_Unet_SegPL import trainModels
+from Train_Unet_SegPLVI import trainModels
 # from Train_Unet import trainModels
 torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
@@ -8,10 +8,10 @@ torch.backends.cudnn.benchmark = False
 
 if __name__ == '__main__':
     # with torch.autograd.set_detect_anomaly(True):
-    # simPL:
+    # SegPL-VI:
     trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data',
                 dataset_name='airway',
-                downsample=4,
+                downsample=3,
                 input_dim=1,
                 class_no=2,
                 repeat=1,
@@ -21,10 +21,12 @@ if __name__ == '__main__':
                 width=8,
                 log_tag='airway_segpl_vi',
                 unlabelled=1,
-                new_resolution=[16, 320, 320],
+                new_resolution=[8, 480, 480],
                 l2=1e-4,
                 alpha=1.0,
-                warmup=0.5
+                warmup=0.5,
+                mean=0.4,
+                std=0.125
                 )
 
     # trainModels(data_directory='/home/moucheng/projects_data',
