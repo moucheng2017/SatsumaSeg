@@ -82,7 +82,11 @@ def trainModels(
                        '_z' + str(new_resolution[0]) + \
                        '_x' + str(new_resolution[1])
 
-        trainloader_withlabels, trainloader_withoutlabels, validateloader, test_data_path = getData(data_directory, dataset_name, train_batchsize, new_resolution, unlabelled)
+        trainloader_withlabels, trainloader_withoutlabels, validateloader = getData(data_directory,
+                                                                                    dataset_name,
+                                                                                    train_batchsize,
+                                                                                    new_resolution,
+                                                                                    unlabelled)
 
         # ===================
         trainSingleModel(model=Exp,
@@ -93,22 +97,19 @@ def trainModels(
                          trainloader_with_labels=trainloader_withlabels,
                          trainloader_without_labels=trainloader_withoutlabels,
                          validateloader=validateloader,
-                         testdata_path=test_data_path,
                          class_no=class_no,
                          log_tag=log_tag,
                          dilation=1,
                          l2=l2,
                          alpha=alpha,
                          warmup=warmup,
-                         size=new_resolution,
                          threshold=threshold
                          )
 
 
-def getData(data_directory, dataset_name, train_batchsize, new_resolution):
+def getData(data_directory, dataset_name, train_batchsize, new_resolution, ratio):
 
     data_directory = data_directory + '/' + dataset_name
-    data_directory_eval_test = data_directory + dataset_name
 
     folder_labelled = data_directory + '/labelled'
 
@@ -118,30 +119,29 @@ def getData(data_directory, dataset_name, train_batchsize, new_resolution):
 
     train_dataset_labelled = CT_Dataset(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, new_resolution, labelled=True)
 
-    # train_image_folder_unlabelled = data_directory + '/unlabelled/patches'
-    # train_label_folder_unlabelled = data_directory + '/unlabelled/labels'
-    # train_dataset_unlabelled = CustomDataset(train_image_folder_unlabelled, train_label_folder_unlabelled, 'none', labelled=True)
+    train_image_folder_unlabelled = data_directory + '/unlabelled/patches'
+    train_label_folder_unlabelled = data_directory + '/unlabelled/labels'
+    train_dataset_unlabelled = CustomDataset(train_image_folder_unlabelled, train_label_folder_unlabelled, 'none', labelled=True)
 
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
-    # trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=train_batchsize*ratio, shuffle=True, num_workers=0, drop_last=False)
+    trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=train_batchsize*ratio, shuffle=True, num_workers=0, drop_last=False)
 
     validate_image_folder = data_directory + '/validate/imgs'
     validate_label_folder = data_directory + '/validate/lbls'
     validate_lung_folder = data_directory + '/validate/lung'
 
-    testdata_path = data_directory + '/test'
-
-    test_image_folder = data_directory + '/test/imgs'
-    test_label_folder = data_directory + '/test/lbls'
-    test_lung_folder = data_directory + '/test/lung'
-
     validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, new_resolution, labelled=True)
-    test_dataset = CT_Dataset(test_image_folder, test_label_folder, test_lung_folder, new_resolution, labelled=True)
-
     validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
-    testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
-    return trainloader_labelled, validateloader, testdata_path, train_dataset_labelled, validate_dataset, test_dataset
+    # testdata_path = data_directory + '/test'
+    # test_image_folder = data_directory + '/test/imgs'
+    # test_label_folder = data_directory + '/test/lbls'
+    # test_lung_folder = data_directory + '/test/lung'
+
+    # test_dataset = CT_Dataset(test_image_folder, test_label_folder, test_lung_folder, new_resolution, labelled=True)
+    # testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
+
+    return trainloader_labelled, trainloader_unlabelled, validateloader
 # =====================================================================================================================================
 
 
@@ -154,10 +154,8 @@ def trainSingleModel(model,
                      trainloader_without_labels,
                      validateloader,
                      dilation,
-                     testdata_path,
                      log_tag,
                      class_no,
-                     size,
                      l2=0.01,
                      alpha=1.0,
                      warmup=0.1,
@@ -171,13 +169,10 @@ def trainSingleModel(model,
 
     if not os.path.exists(saved_information_path):
         os.makedirs(saved_information_path, exist_ok=True)
-    # os.mkdir(saved_information_path, exist_ok=True)
     saved_log_path = saved_information_path + '/Logs'
-    # os.mkdir(saved_log_path, exist_ok=True)
     if not os.path.exists(saved_log_path):
         os.makedirs(saved_log_path, exist_ok=True)
     saved_model_path = saved_information_path + '/' + save_model_name + '/trained_models'
-    # os.mkdir(saved_model_path, exist_ok=True)
     if not os.path.exists(saved_model_path):
         os.makedirs(saved_model_path, exist_ok=True)
 
@@ -188,10 +183,8 @@ def trainSingleModel(model,
     writer = SummaryWriter(saved_log_path + '/Log_' + save_model_name)
 
     model.to(device)
-    # model2.to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
-    # optimizer_conf = torch.optim.AdamW(model2.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
 
     start = timeit.default_timer()
 
@@ -205,12 +198,8 @@ def trainSingleModel(model,
         train_sup_loss = []
         train_unsup_loss = []
 
-        warmup_ratio = warmup
-        # warmup = 1000
-        if step < int(warmup_ratio * num_steps):
-        # if step <= warmup:
-            scale = sigmoid_rampup(step, int(warmup_ratio * num_steps), 1.0)
-            # scale = sigmoid_rampup(step, warmup, 1.0)
+        if step < int(warmup * num_steps):
+            scale = sigmoid_rampup(step, int(warmup * num_steps), 1.0)
             alpha_current = alpha * scale
         else:
             alpha_current = alpha
@@ -249,11 +238,11 @@ def trainSingleModel(model,
                 prob_outputs = F.softmax(outputs, dim=1)
 
             if class_no == 2:
-                loss = SoftDiceLoss()(prob_outputs, labels) + nn.BCELoss(reduction='mean')(prob_outputs.squeeze(), labels.squeeze())
+                loss_s = SoftDiceLoss()(prob_outputs, labels) + nn.BCELoss(reduction='mean')(prob_outputs.squeeze(), labels.squeeze())
             else:
-                loss = nn.CrossEntropyLoss(reduction='mean', ignore_index=8)(prob_outputs, labels.long().squeeze(1))
+                loss_s = nn.CrossEntropyLoss(reduction='mean', ignore_index=8)(prob_outputs, labels.long().squeeze(1))
 
-            train_sup_loss.append(loss.item())
+            train_sup_loss.append(loss_s.item())
 
             if class_no == 2:
                 class_outputs = (prob_outputs > 0.5).float()
@@ -277,12 +266,12 @@ def trainSingleModel(model,
 
             pseudo_label = (prob_outputs_u.detach() > threshold_pseudo).float()
 
-            if class_no == 2:
-                loss_u = SoftDiceLoss()(prob_outputs_u, pseudo_label) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), pseudo_label.squeeze())
+            loss_u = SoftDiceLoss()(prob_outputs_u, pseudo_label) + nn.BCELoss(reduction='mean')(prob_outputs_u.squeeze(), pseudo_label.squeeze())
+            loss_u = loss_u*alpha_current
 
-            train_unsup_loss.append(alpha_current*loss_u.item())
+            train_unsup_loss.append(loss_u.item())
 
-            loss += alpha_current*loss_u
+            loss = loss_u + loss_s
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

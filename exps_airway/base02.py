@@ -2,11 +2,11 @@ import sys
 import torch
 sys.path.append("..")
 
-torch.manual_seed(0)
+# torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-from Train_Unet_SegPL import trainModels
+from Train_Unet import trainModels
 
 if __name__ == '__main__':
 
@@ -20,11 +20,7 @@ if __name__ == '__main__':
                 num_steps=5000,
                 learning_rate=5e-3,
                 width=16,
-                unlabelled=2,
                 log_tag='220200309',
                 new_resolution=[16, 480, 480],
-                l2=1e-4,
-                alpha=1.0,
-                warmup=0.5,
-                threshold=0.5
+                l2=1e-4
                 )
