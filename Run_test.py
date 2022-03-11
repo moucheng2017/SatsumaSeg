@@ -11,7 +11,7 @@ if __name__ == '__main__':
     # SegPL-VI:
     trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data',
                 dataset_name='airway',
-                downsample=3,
+                downsample=4,
                 input_dim=1,
                 class_no=2,
                 repeat=1,
@@ -21,7 +21,7 @@ if __name__ == '__main__':
                 width=8,
                 log_tag='airway_segpl_vi',
                 unlabelled=1,
-                new_resolution=[8, 480, 480],
+                new_resolution=[16, 448, 448],
                 l2=1e-4,
                 alpha=1.0,
                 warmup=0.5,
