@@ -275,8 +275,10 @@ def trainSingleModel(model,
 
             loss_u = loss_u * alpha_current
 
-            if loss_u != 0:
+            if loss_u != 0.0:
                 train_unsup_loss.append(loss_u.item())
+            else:
+                train_unsup_loss.append(0.0)
 
             loss = loss_u + loss_s
             optimizer.zero_grad()
