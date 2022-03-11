@@ -174,50 +174,55 @@ def trainSingleModel(model,
         labels = labelled_label.to(device=device, dtype=torch.float32)
         lung = labelled_lung.to(device=device, dtype=torch.float32)
 
-        outputs, _ = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
-        prob_outputs = torch.sigmoid(outputs)
+        if torch.sum(labels) > 10.0:
+            outputs, _ = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
+            prob_outputs = torch.sigmoid(outputs)
 
-        lung_mask = (lung > 0.5)
-        prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask)
-        labels_masked = torch.masked_select(labels, lung_mask)
-        loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze(), labels_masked.squeeze())
+            lung_mask = (lung > 0.5)
+            prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask)
+            labels_masked = torch.masked_select(labels, lung_mask)
 
-        train_sup_loss.append(loss.item())
+            if torch.sum(prob_outputs_masked) > 10.0:
+                loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze(), labels_masked.squeeze())
+            else:
+                loss = SoftDiceLoss()(prob_outputs_masked, labels_masked)
 
-        class_outputs = (prob_outputs_masked > 0.5).float()
+            train_sup_loss.append(loss.item())
 
-        train_mean_iu_ = segmentation_scores(labels_masked, class_outputs, class_no)
-        train_iou.append(train_mean_iu_)
+            class_outputs = (prob_outputs_masked > 0.5).float()
 
-        validate_iou, validate_h_dist = evaluate(validateloader, model, device, model_name, class_no, dilation)
+            train_mean_iu_ = segmentation_scores(labels_masked, class_outputs, class_no)
+            train_iou.append(train_mean_iu_)
 
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            validate_iou, validate_h_dist = evaluate(validateloader, model, device, model_name, class_no, dilation)
 
-        for param_group in optimizer.param_groups:
-            param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-        print(
-            'Step [{}/{}], '
-            'lr: {:.4f},'
-            'Train sup loss: {:.4f}, '
-            'Train iou: {:.4f}, '
-            'val iou:{:.4f}, '.format(step + 1, num_steps,
-                                      optimizer.param_groups[0]["lr"],
-                                      np.nanmean(train_sup_loss),
-                                      np.nanmean(train_iou),
-                                      np.nanmean(validate_iou)))
+            for param_group in optimizer.param_groups:
+                param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
 
-        # # # ================================================================== #
-        # # #                        TensorboardX Logging                        #
-        # # # # ================================================================ #
+            print(
+                'Step [{}/{}], '
+                'lr: {:.4f},'
+                'Train sup loss: {:.4f}, '
+                'Train iou: {:.4f}, '
+                'val iou:{:.4f}, '.format(step + 1, num_steps,
+                                          optimizer.param_groups[0]["lr"],
+                                          np.nanmean(train_sup_loss),
+                                          np.nanmean(train_iou),
+                                          np.nanmean(validate_iou)))
 
-        writer.add_scalars('acc metrics', {'train iou': np.nanmean(train_iou),
-                                           # 'val hausdorff dist': np.nanmean(validate_h_dist),
-                                           'val iou': np.nanmean(validate_iou)}, step + 1)
+            # # # ================================================================== #
+            # # #                        TensorboardX Logging                        #
+            # # # # ================================================================ #
 
-        writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss)}, step + 1)
+            writer.add_scalars('acc metrics', {'train iou': np.nanmean(train_iou),
+                                               # 'val hausdorff dist': np.nanmean(validate_h_dist),
+                                               'val iou': np.nanmean(validate_iou)}, step + 1)
+
+            writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss)}, step + 1)
 
         if step > num_steps - 5:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
