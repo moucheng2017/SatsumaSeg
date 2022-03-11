@@ -241,7 +241,10 @@ def trainSingleModel(model,
             prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask_labelled)
             labels_masked = torch.masked_select(labels, lung_mask_labelled)
 
-            loss_s = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze(), labels_masked.squeeze())
+            if torch.sum(prob_outputs_masked) > 10.0:
+                loss_s = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze(), labels_masked.squeeze())
+            else:
+                loss_s = SoftDiceLoss()(prob_outputs_masked, labels_masked)
 
             train_sup_loss.append(loss_s.item())
 
@@ -264,10 +267,17 @@ def trainSingleModel(model,
             prob_outputs_u_masked = torch.masked_select(prob_outputs_u, lung_mask_unlabelled)
             pseudo_label_masked = torch.masked_select(pseudo_label, lung_mask_unlabelled)
 
-            loss_u = SoftDiceLoss()(prob_outputs_u_masked, pseudo_label_masked) + nn.BCELoss(reduction='mean')(prob_outputs_u_masked.squeeze(), pseudo_label_masked.squeeze())
-            loss_u = loss_u*alpha_current
+            # If pseudo label is all background or all foreground then we don't use it because that would be obviously wrong
+            foreground_in_pseudo_labels = [torch.sum(pseudo_label_masked[i, :, :, :, :]) for i in range(pseudo_label_masked.size()[0])]
+            loss_u = 0.0
+            for i, foreground_index in enumerate(foreground_in_pseudo_labels):
+                if 10.0 < foreground_index < torch.numel(pseudo_label_masked[0, :, :, :, :]):
+                    loss_u += SoftDiceLoss()(prob_outputs_u_masked[i, :, :, :, :].copy(), pseudo_label_masked[i, :, :, :, :].copy()) + nn.BCELoss(reduction='mean')(prob_outputs_u_masked[i, :, :, :, :].copy().squeeze(), pseudo_label_masked[i, :, :, :, :].copy().squeeze())
 
-            train_unsup_loss.append(loss_u.item())
+            loss_u = loss_u * alpha_current
+
+            if loss_u != 0:
+                train_unsup_loss.append(loss_u.item())
 
             loss = loss_u + loss_s
             optimizer.zero_grad()

@@ -250,7 +250,13 @@ def trainSingleModel(model,
             prob_outputs_l_masked = torch.masked_select(prob_outputs_l, lung_mask_labelled)
             labels_masked = torch.masked_select(labels, lung_mask_labelled)
             pseudo_label_l_masked = torch.masked_select(pseudo_label_l, lung_mask_labelled)
-            loss_s = SoftDiceLoss()(prob_outputs_l_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_l_masked.squeeze(), labels_masked.squeeze())
+
+            if torch.sum(prob_outputs_l_masked) > 10.0:
+                loss_s = SoftDiceLoss()(prob_outputs_l_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_l_masked.squeeze(), labels_masked.squeeze())
+            else:
+                loss_s = SoftDiceLoss()(prob_outputs_l_masked, labels_masked)
+
+            # loss_s = SoftDiceLoss()(prob_outputs_l_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_l_masked.squeeze(), labels_masked.squeeze())
             train_sup_loss.append(loss_s.item())
             # segmentation result on training labelled data
             class_outputs = (prob_outputs_l_masked > 0.5).float()
@@ -267,12 +273,21 @@ def trainSingleModel(model,
             prob_outputs_u_masked = torch.masked_select(prob_outputs_u, lung_mask_unlabelled)
             pseudo_label_u_masked = torch.masked_select(pseudo_label_u, lung_mask_unlabelled)
             # loss for unsupervised data with their pseudo labels
-            loss_u = SoftDiceLoss()(prob_outputs_u_masked, pseudo_label_u_masked) + nn.BCELoss(reduction='mean')(prob_outputs_u_masked.squeeze(), pseudo_label_u_masked.squeeze())
+            foreground_in_pseudo_labels_l = [torch.sum(pseudo_label_l_masked[i, :, :, :, :].detach()) for i in range(pseudo_label_l_masked.size()[0])]
+            foreground_in_pseudo_labels_u = [torch.sum(pseudo_label_u_masked[i, :, :, :, :].detach()) for i in range(pseudo_label_u_masked.size()[0])]
+            loss_u = 0.0
+            for i, foreground_index in enumerate(foreground_in_pseudo_labels_u):
+                if 10.0 < foreground_index < torch.numel(pseudo_label_u_masked[0, :, :, :, :]):
+                    loss_u += SoftDiceLoss()(prob_outputs_u_masked[i, :, :, :, :].copy(), pseudo_label_u_masked[i, :, :, :, :].copy()) + nn.BCELoss(reduction='mean')(prob_outputs_u_masked[i, :, :, :, :].copy().squeeze(), pseudo_label_u_masked[i, :, :, :, :].copy().squeeze())
             # a regularisation for supervised data with their pseudo labels
-            loss_u += 0.1*SoftDiceLoss()(prob_outputs_l_masked, pseudo_label_l_masked) + 0.1*nn.BCELoss(reduction='mean')(prob_outputs_l_masked.squeeze(), pseudo_label_l_masked.squeeze())
+            for i, foreground_index in enumerate(foreground_in_pseudo_labels_l):
+                if 10.0 < foreground_index < torch.numel(pseudo_label_l_masked[0, :, :, :, :]):
+                    loss_u += 0.1*SoftDiceLoss()(prob_outputs_l_masked[i, :, :, :, :].copy(), pseudo_label_l_masked[i, :, :, :, :].copy()) + 0.1*nn.BCELoss(reduction='mean')(prob_outputs_l_masked[i, :, :, :, :].copy().squeeze(), pseudo_label_l_masked[i, :, :, :, :].copy().squeeze())
             # weighting the pseudo label losses
             loss_u = loss_u*alpha_current
-            train_unsup_loss.append(loss_u.item())
+
+            if loss_u != 0.0:
+                train_unsup_loss.append(loss_u.item())
             # final loss
             loss = loss_u + loss_s
             # M-step: updating the segmentation model
