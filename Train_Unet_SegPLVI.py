@@ -287,6 +287,9 @@ def trainSingleModel(model,
 
             if loss_u != 0.0:
                 train_unsup_loss.append(loss_u.item())
+            else:
+                train_unsup_loss.append(0.0)
+
             # final loss
             loss = loss_u + loss_s
             # M-step: updating the segmentation model
