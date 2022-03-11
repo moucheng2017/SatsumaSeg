@@ -18,7 +18,7 @@ if __name__ == '__main__':
                 repeat=1,
                 train_batchsize=1,
                 num_steps=5000,
-                learning_rate=2e-4,
+                learning_rate=5e-4,
                 width=16,
                 log_tag='220200309',
                 new_resolution=[16, 480, 480],
