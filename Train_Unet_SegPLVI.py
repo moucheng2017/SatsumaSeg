@@ -273,16 +273,15 @@ def trainSingleModel(model,
             prob_outputs_u_masked = torch.masked_select(prob_outputs_u, lung_mask_unlabelled)
             pseudo_label_u_masked = torch.masked_select(pseudo_label_u, lung_mask_unlabelled)
             # loss for unsupervised data with their pseudo labels
-            foreground_in_pseudo_labels_l = [torch.sum(pseudo_label_l_masked[i, :, :, :, :].detach()) for i in range(pseudo_label_l_masked.size()[0])]
-            foreground_in_pseudo_labels_u = [torch.sum(pseudo_label_u_masked[i, :, :, :, :].detach()) for i in range(pseudo_label_u_masked.size()[0])]
+            # foreground_in_pseudo_labels_l = [torch.sum(pseudo_label_l_masked[i, :, :, :, :].detach()) for i in range(pseudo_label_l_masked.size()[0])]
+            # foreground_in_pseudo_labels_u = [torch.sum(pseudo_label_u_masked[i, :, :, :, :].detach()) for i in range(pseudo_label_u_masked.size()[0])]
             loss_u = 0.0
-            for i, foreground_index in enumerate(foreground_in_pseudo_labels_u):
-                if 10.0 < foreground_index < torch.numel(pseudo_label_u_masked[0, :, :, :, :]):
-                    loss_u += SoftDiceLoss()(prob_outputs_u_masked[i, :, :, :, :].copy(), pseudo_label_u_masked[i, :, :, :, :].copy()) + nn.BCELoss(reduction='mean')(prob_outputs_u_masked[i, :, :, :, :].copy().squeeze()+1e-10, pseudo_label_u_masked[i, :, :, :, :].copy().squeeze()+1e-10)
+            # for i, foreground_index in enumerate(foreground_in_pseudo_labels_u):
+            if 10.0 < torch.sum(pseudo_label_u_masked) < torch.numel(pseudo_label_u_masked):
+                loss_u += SoftDiceLoss()(prob_outputs_u_masked, pseudo_label_u_masked) + nn.BCELoss(reduction='mean')(prob_outputs_u_masked.squeeze()+1e-10, pseudo_label_u_masked.squeeze()+1e-10)
             # a regularisation for supervised data with their pseudo labels
-            for i, foreground_index in enumerate(foreground_in_pseudo_labels_l):
-                if 10.0 < foreground_index < torch.numel(pseudo_label_l_masked[0, :, :, :, :]):
-                    loss_u += 0.1*SoftDiceLoss()(prob_outputs_l_masked[i, :, :, :, :].copy(), pseudo_label_l_masked[i, :, :, :, :].copy()) + 0.1*nn.BCELoss(reduction='mean')(prob_outputs_l_masked[i, :, :, :, :].copy().squeeze()+1e-10, pseudo_label_l_masked[i, :, :, :, :].copy().squeeze()+1e-10)
+            if 10.0 < torch.sum(pseudo_label_l_masked) < torch.numel(pseudo_label_l_masked):
+                loss_u += 0.1*SoftDiceLoss()(prob_outputs_l_masked, pseudo_label_l_masked) + 0.1*nn.BCELoss(reduction='mean')(prob_outputs_l_masked.squeeze()+1e-10, pseudo_label_l_masked.squeeze()+1e-10)
             # weighting the pseudo label losses
             loss_u = loss_u*alpha_current
 

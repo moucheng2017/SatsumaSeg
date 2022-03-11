@@ -268,11 +268,10 @@ def trainSingleModel(model,
             pseudo_label_masked = torch.masked_select(pseudo_label, lung_mask_unlabelled)
 
             # If pseudo label is all background or all foreground then we don't use it because that would be obviously wrong
-            foreground_in_pseudo_labels = [torch.sum(pseudo_label_masked[i, :, :, :, :]) for i in range(pseudo_label_masked.size()[0])]
+            # foreground_in_pseudo_labels = [torch.sum(pseudo_label_masked[i, :, :, :, :]) for i in range(pseudo_label_masked.size()[0])]
             loss_u = 0.0
-            for i, foreground_index in enumerate(foreground_in_pseudo_labels):
-                if 10.0 < foreground_index < torch.numel(pseudo_label_masked[0, :, :, :, :]):
-                    loss_u += SoftDiceLoss()(prob_outputs_u_masked[i, :, :, :, :].copy(), pseudo_label_masked[i, :, :, :, :].copy()) + nn.BCELoss(reduction='mean')(prob_outputs_u_masked[i, :, :, :, :].copy().squeeze()+1e-10, pseudo_label_masked[i, :, :, :, :].copy().squeeze()+1e-10)
+            if 10.0 < torch.sum(pseudo_label_masked) < torch.numel(pseudo_label_masked):
+                loss_u += SoftDiceLoss()(prob_outputs_u_masked, pseudo_label_masked) + nn.BCELoss(reduction='mean')(prob_outputs_u_masked.squeeze()+1e-10, pseudo_label_masked.squeeze()+1e-10)
 
             loss_u = loss_u * alpha_current
 
