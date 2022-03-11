@@ -21,7 +21,7 @@ if __name__ == '__main__':
                 width=8,
                 log_tag='airway_segpl_vi',
                 unlabelled=1,
-                new_resolution=[16, 384, 384],
+                new_resolution=[16, 320, 320],
                 l2=1e-4,
                 alpha=1.0,
                 warmup=0.5,
