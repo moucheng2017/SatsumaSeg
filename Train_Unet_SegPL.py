@@ -243,11 +243,16 @@ def trainSingleModel(model,
 
             if torch.sum(prob_outputs_masked) > 10.0:
                 loss_s = SoftDiceLoss()(prob_outputs_masked, labels_masked)
+            else:
+                loss_s = 0.0
                 # loss_s = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
             # else:
             #     loss_s = SoftDiceLoss()(prob_outputs_masked, labels_masked)
 
-            train_sup_loss.append(loss_s.item())
+            if loss_s != 0.0:
+                train_sup_loss.append(loss_s.item())
+            else:
+                train_sup_loss.append(0.0)
 
             class_outputs = (prob_outputs_masked > 0.5).float()
 
