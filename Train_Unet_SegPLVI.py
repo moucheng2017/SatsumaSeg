@@ -299,9 +299,10 @@ def trainSingleModel(model,
             # final loss
             loss = loss_u + loss_s
             # M-step: updating the segmentation model
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            if loss != 0.0:
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
             # K-L loss for threshold model:
             kld_loss = math.log(std_prior) - logvar + 0.5 * (logvar.exp() + (mu - mean_prior).pow(2)) / std_prior**2 - 0.5
             kld_loss = kld_loss.mean() * alpha_current

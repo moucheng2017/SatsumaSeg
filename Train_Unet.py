@@ -202,9 +202,10 @@ def trainSingleModel(model,
 
             validate_iou, validate_h_dist = evaluate(validateloader, model, device, model_name, class_no, dilation)
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            if loss != 0.0:
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
             for param_group in optimizer.param_groups:
                 param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
