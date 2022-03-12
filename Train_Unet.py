@@ -183,9 +183,10 @@ def trainSingleModel(model,
             labels_masked = torch.masked_select(labels, lung_mask)
 
             if torch.sum(prob_outputs_masked) > 10.0:
-                loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
-            else:
                 loss = SoftDiceLoss()(prob_outputs_masked, labels_masked)
+                # loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
+            # else:
+            #     loss = SoftDiceLoss()(prob_outputs_masked, labels_masked)
 
             train_sup_loss.append(loss.item())
 
