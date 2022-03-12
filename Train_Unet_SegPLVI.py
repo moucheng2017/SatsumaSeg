@@ -253,12 +253,17 @@ def trainSingleModel(model,
 
             if torch.sum(prob_outputs_l_masked) > 10.0:
                 loss_s = SoftDiceLoss()(prob_outputs_l_masked, labels_masked)
+            else:
+                loss_s = 0.0
             #     loss_s += SoftDiceLoss()(prob_outputs_l_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_l_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
             # else:
             #     loss_s += SoftDiceLoss()(prob_outputs_l_masked, labels_masked)
 
             # loss_s = SoftDiceLoss()(prob_outputs_l_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_l_masked.squeeze(), labels_masked.squeeze())
-            train_sup_loss.append(loss_s.item())
+            if loss_s != 0.0:
+                train_sup_loss.append(loss_s.item())
+            else:
+                train_sup_loss.append(0.0)
             # segmentation result on training labelled data
             class_outputs = (prob_outputs_l_masked > 0.5).float()
             # train iou
