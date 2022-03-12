@@ -288,9 +288,11 @@ def trainSingleModel(model,
                 train_unsup_loss.append(0.0)
 
             loss = loss_u + loss_s
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+
+            if loss != 0.0:
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
             for param_group in optimizer.param_groups:
                 param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
