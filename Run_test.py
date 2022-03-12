@@ -17,7 +17,7 @@ if __name__ == '__main__':
                 repeat=1,
                 train_batchsize=1,
                 num_steps=4000,
-                learning_rate=5e-4,
+                learning_rate=1e-4,
                 width=8,
                 log_tag='airway_segpl_vi',
                 unlabelled=1,
