@@ -17,14 +17,14 @@ if __name__ == '__main__':
                 repeat=1,
                 train_batchsize=2,
                 num_steps=2000,
-                learning_rate=1e-2,
+                learning_rate=0.02,
                 width=8,
                 log_tag='airway_segpl_vi',
                 unlabelled=2,
                 new_resolution=[4, 400, 400],
-                l2=1e-4,
+                l2=1e-5,
                 alpha=1.0,
-                warmup=0.5,
+                warmup=0.1,
                 mean=0.4,
                 std=0.125
                 )
