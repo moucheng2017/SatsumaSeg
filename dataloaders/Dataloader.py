@@ -101,6 +101,15 @@ class RandomGaussian(object):
         return input
 
 
+def normalisation(lung, image):
+    lung_mask = (lung > 0.5)  # make lung mask bool
+    image_masked = torch.masked_select(image, lung_mask)
+    lung_mean = np.nanmean(image_masked)
+    lung_std = np.nanstd(image_masked)
+    image = (image - lung_mean + 1e-10) / (lung_std + 1e-10)
+    return image
+
+
 class CT_Dataset(torch.utils.data.Dataset):
     '''
     Each volume should be at: Dimension X Height X Width
@@ -116,6 +125,13 @@ class CT_Dataset(torch.utils.data.Dataset):
         # self.augmentation_gaussian = RandomGaussian()
 
     def __getitem__(self, index):
+        # Lung masks:
+        all_lungs = sorted(glob.glob(os.path.join(self.lung_folder, '*.nii.gz*')))
+        lung = nib.load(all_lungs[index])
+        lung = lung.get_fdata()
+        lung = np.array(lung, dtype='float32')
+        lung = np.transpose(lung, (2, 0, 1))
+        lung = np.expand_dims(lung, axis=0)
         # Images:
         all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
         imagename = all_images[index]
@@ -133,26 +149,18 @@ class CT_Dataset(torch.utils.data.Dataset):
         image[image < -1000.0] = -1000.0
         image[image > 500.0] = 500.0
 
-        # random contrast:
+        # Apply normalisation with values inside of lung
+        image = normalisation(lung, image)
+
+        # Random contrast:
         image = self.augmentation_contrast.randomintensity(image)
 
-        # apply normalisation
-        image = (image - np.nanmean(image) + 1e-10) / (np.nanstd(image) + 1e-10)
+        # Renormalisation:
+        image = normalisation(lung, image)
 
-        # extract image name
+        # Extract image name
         _, imagename = os.path.split(imagename)
         imagename, imagetxt = os.path.splitext(imagename)
-
-        # Lung masks:
-        all_lungs = sorted(glob.glob(os.path.join(self.lung_folder, '*.nii.gz*')))
-        lung = nib.load(all_lungs[index])
-        lung = lung.get_fdata()
-        lung = np.array(lung, dtype='float32')
-        lung = np.transpose(lung, (2, 0, 1))
-        lung = np.expand_dims(lung, axis=0)
-
-        # applying the lung mask
-        image = image*lung
 
         if self.labelled_flag is True:
             # Labels:
@@ -163,11 +171,9 @@ class CT_Dataset(torch.utils.data.Dataset):
             label = np.transpose(label, (2, 0, 1))
             label = np.expand_dims(label, axis=0)
             [image, label, lung] = self.augmentation_cropping.crop(image, label, lung)
-            # image = (image - np.nanmean(image)) / np.nanstd(image)
             return image, label, lung, imagename
         else:
             [image, lung] = self.augmentation_cropping.crop(image, lung)
-            # image = (image - np.nanmean(image)) / np.nanstd(image)
             return image, lung, imagename
 
     def __len__(self):
