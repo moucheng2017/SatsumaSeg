@@ -20,13 +20,13 @@ if __name__ == '__main__':
                 learning_rate=0.02,
                 width=8,
                 log_tag='airway_segpl_vi',
-                unlabelled=2,
-                new_resolution=[4, 400, 400],
+                unlabelled=4,
+                new_resolution=[6, 256, 256],
                 l2=1e-5,
-                alpha=1.0,
-                warmup=0.1,
+                alpha=5.0,
+                warmup=0.0,
                 mean=0.4,
-                std=0.125
+                std=0.12
                 )
 
     # trainModels(data_directory='/home/moucheng/projects_data',
