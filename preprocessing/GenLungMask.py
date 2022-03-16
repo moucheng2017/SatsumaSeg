@@ -3,16 +3,21 @@
 from lungmask import mask
 import SimpleITK as sitk
 from pathlib import Path
-import numpy as np
-from tqdm import tqdm
+import argparse
 
-def main():
+def args_parser():
+    parser = argparse.ArgumentParser('', add_help=False)
+    parser.add_argument('inputsource', type=str, help='path to dir holding the dataset')
+    parser.add_argument('outputdir', default='lung', type=str, help='path to dir to save the resultant')
+    return parser
+
+def main(args):
     # get all lung rawimage paths
-    images_dir = Path('/home/moucheng/projects_data/Pulmonary_data/airway/Mixed/test/imgs')
+    images_dir = Path(args.inputsource)
     image_paths = sorted(images_dir.glob('*.nii.gz'))
 
-    label_dir = Path('/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/segmentation/lung_label')
-
+    label_dir = Path(args.outputdir)
+    label_dir.mkdir(exist_ok=True)
 
     # load rawimage
     for i, path in enumerate(image_paths):
@@ -31,9 +36,10 @@ def main():
             seg_path_name = label_dir / (path.stem[:-4] + '_lunglabel.nii.gz')
             sitk.WriteImage(result_itk, str(seg_path_name))
         except RuntimeError:
-            print(f'Fail :{path}')
+            print(f'FAILED :{path}')
 
 
 if __name__ == '__main__':
-    main()
-    print('COMPLETE lung label gen')
+    parser = argparse.ArgumentParser('Generate lung mask using UNET model trained on diverse data', parents=[args_parser()])
+    args = parser.parse_args()
+    main(args)
