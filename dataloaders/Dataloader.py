@@ -7,6 +7,8 @@ import numpy as np
 
 import nibabel as nib
 
+import numpy.ma as ma
+
 
 class RandomCropping(object):
     def __init__(self, output_size, skip_slices):
@@ -102,8 +104,7 @@ class RandomGaussian(object):
 
 
 def normalisation(lung, image):
-    lung_mask = (lung > 0.5)  # make lung mask bool
-    image_masked = torch.masked_select(image, lung_mask)
+    image_masked = ma.masked_where(lung > 0.5, image)
     lung_mean = np.nanmean(image_masked)
     lung_std = np.nanstd(image_masked)
     image = (image - lung_mean + 1e-10) / (lung_std + 1e-10)

@@ -2,7 +2,7 @@ import torch
 # sys.path.append("..")
 from Train_Unet_SegPLVI import trainModels
 # from Train_Unet import trainModels
-torch.manual_seed(0)
+# torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
@@ -20,11 +20,11 @@ if __name__ == '__main__':
                 learning_rate=0.02,
                 width=8,
                 log_tag='airway_segpl_vi',
-                unlabelled=4,
-                new_resolution=[6, 256, 256],
+                unlabelled=2,
+                new_resolution=[4, 224, 224],
                 l2=1e-5,
-                alpha=5.0,
-                warmup=0.0,
+                alpha=1.0,
+                warmup=0.5,
                 mean=0.4,
                 std=0.12
                 )
