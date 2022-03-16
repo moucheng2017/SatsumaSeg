@@ -304,14 +304,14 @@ def trainSingleModel(model,
                 loss.backward()
                 optimizer.step()
 
-                # K-L loss for threshold model:
-                kld_loss = math.log(std_prior) - logvar + 0.5 * (logvar.exp() + (mu - mean_prior).pow(2)) / std_prior**2 - 0.5
-                kld_loss = kld_loss.mean() * alpha_current
-                train_kl_loss.append(kld_loss.item())
-                # update the threshold model
-                optimizer_t.zero_grad()
-                kld_loss.backward()
-                optimizer_t.step()
+            # K-L loss for threshold model:
+            kld_loss = math.log(std_prior) - logvar + 0.5 * (logvar.exp() + (mu - mean_prior).pow(2)) / std_prior**2 - 0.5
+            kld_loss = kld_loss.mean() * alpha_current
+            train_kl_loss.append(kld_loss.item())
+            # update the threshold model
+            optimizer_t.zero_grad()
+            kld_loss.backward()
+            optimizer_t.step()
 
             for param_group in optimizer.param_groups:
                 param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)

@@ -22,7 +22,7 @@ class RandomCropping(object):
         # for unsupervised learning, we only need to crop the volume, arg1: volume
         # new_resolution = 224
         # begining slices and ending slices are not informative so discarded:
-        discared_slices = 5
+        discared_slices = 10
         new_d = self.output_size[0]
         new_h = self.output_size[1]
         new_w = self.output_size[2]
