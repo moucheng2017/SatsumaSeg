@@ -11,7 +11,8 @@ import numpy.ma as ma
 
 
 class RandomCropping(object):
-    def __init__(self, output_size, skip_slices):
+    def __init__(self, output_size,
+                       skip_slices):
 
         # output_size: d x h x w
         self.output_size = output_size
@@ -45,19 +46,37 @@ class RandomCropping(object):
             # skip every 3 slices, so equivalently, we look at longer span:
             # each_input = each_input[:, ::ratio, :, :]
             if h > new_h:
-                 each_output = each_input[
-                               :,
-                               top_d:top_d+skip*new_d:skip,
-                               top_h:top_h+new_h,
-                               top_w:top_w+new_w
-                               ]
+                if new_d > 1:
+                     each_output = each_input[
+                                   :,
+                                   top_d:top_d+skip*new_d:skip,
+                                   top_h:top_h+new_h,
+                                   top_w:top_w+new_w
+                                   ]
+                else:
+                    each_output = each_input[
+                                  :,
+                                  top_d,
+                                  top_h:top_h + new_h,
+                                  top_w:top_w + new_w
+                                  ]
+
             else:
-                 each_output = each_input[
-                               :,
-                               top_d:top_d+skip*new_d:skip,
-                               :,
-                               :
-                               ]
+                if new_d > 1:
+                     each_output = each_input[
+                                   :,
+                                   top_d:top_d+skip*new_d:skip,
+                                   :,
+                                   :
+                                   ]
+                else:
+                    each_output = each_input[
+                                  :,
+                                  top_d,
+                                  :,
+                                  :
+                                  ]
+                    # print(np.shape(each_output))
             outputs.append(each_output)
 
         return outputs
@@ -119,6 +138,7 @@ class CT_Dataset(torch.utils.data.Dataset):
         self.imgs_folder = imgs_folder
         self.labels_folder = labels_folder
         self.lung_folder = lung_folder
+        # self.dimension = dim
 
         self.labelled_flag = labelled
         self.augmentation_contrast = RandomContrast()
@@ -133,19 +153,23 @@ class CT_Dataset(torch.utils.data.Dataset):
         lung = np.array(lung, dtype='float32')
         lung = np.transpose(lung, (2, 0, 1))
         lung = np.expand_dims(lung, axis=0)
+
         # Images:
         all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
         imagename = all_images[index]
+
         # load image and preprocessing:
         image = nib.load(imagename)
         image = image.get_fdata()
         image = np.array(image, dtype='float32')
+
         # transform dimension:
         # original dimension: (H x W x D)
         image = np.transpose(image, (2, 0, 1))
         # (D x H x W)
         image = np.expand_dims(image, axis=0)
         # (C x D x H x W)
+
         # Now applying lung window:
         image[image < -1000.0] = -1000.0
         image[image > 500.0] = 500.0

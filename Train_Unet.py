@@ -16,7 +16,8 @@ from tensorboardX import SummaryWriter
 from Utils import evaluate
 from Loss import SoftDiceLoss
 # =================================
-from Models import Unet3D
+from Models3D import Unet3D
+from Models2D import Unet2D
 import errno
 
 from analysis.VolumeSegmentation import test_all_models
@@ -41,8 +42,14 @@ def trainModels(dataset_name,
 
         repeat_str = str(j)
 
-        Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
-        Exp_name = 'sup_unet' + \
+        if new_resolution[0] > 1:
+            Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
+            Exp_name = 'Sup3D'
+        else:
+            Exp = Unet2D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
+            Exp_name = 'Sup2D'
+
+        Exp_name = Exp_name + \
                    '_e' + str(repeat_str) + \
                    '_l' + str(learning_rate) + \
                    '_b' + str(train_batchsize) + \

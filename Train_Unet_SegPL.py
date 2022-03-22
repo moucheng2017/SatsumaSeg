@@ -17,7 +17,8 @@ from tensorboardX import SummaryWriter
 from Utils import evaluate, test, sigmoid_rampup
 from Loss import SoftDiceLoss
 # =================================
-from Models import Unet3D
+from Models3D import Unet3D
+from Models2D import Unet2D
 from analysis.VolumeSegmentation import test_all_models
 import errno
 
@@ -48,10 +49,15 @@ def trainModels(
 
         repeat_str = str(j)
 
-        Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
+        if new_resolution[0] > 1:
+            Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
+            Exp_name = 'SegPL3D'
+        else:
+            Exp = Unet2D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
+            Exp_name = 'SegPL2D'
 
         if threshold < 1.0:
-            Exp_name = 'SegPL' + \
+            Exp_name = Exp_name + \
                        '_e' + str(repeat_str) + \
                        '_l' + str(learning_rate) + \
                        '_t' + str(threshold) + \
@@ -67,7 +73,7 @@ def trainModels(
                        '_x' + str(new_resolution[1])
         else:
             # random threshld between 0 and 1 which is sampled from half of the normal distribution
-            Exp_name = 'SegPL' + \
+            Exp_name = Exp_name + \
                        '_e' + str(repeat_str) + \
                        '_l' + str(learning_rate) + \
                        '_t_r' + \
@@ -88,7 +94,6 @@ def trainModels(
                                                                                     new_resolution,
                                                                                     unlabelled)
 
-        # ===================
         trainSingleModel(model=Exp,
                          model_name=Exp_name,
                          num_steps=num_steps,
