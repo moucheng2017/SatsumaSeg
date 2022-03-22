@@ -17,7 +17,8 @@ from tensorboardX import SummaryWriter
 from Utils import evaluate, test, sigmoid_rampup
 from Loss import SoftDiceLoss
 # =================================
-from Models import Unet3D, ThresholdModel
+from Models3D import Unet3D, ThresholdModel3D
+from Models2D import Unet2D, ThresholdModel2D
 from analysis.VolumeSegmentation import test_all_models
 import errno
 
@@ -50,10 +51,16 @@ def trainModels(
 
         repeat_str = str(j)
 
-        Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
-        Exp_T = ThresholdModel(c=width)
+        if new_resolution[0] > 1:
+            Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
+            Exp_T = ThresholdModel3D(c=width)
+            Exp_name = 'VISegPL3D'
+        else:
+            Exp = Unet2D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
+            Exp_T = ThresholdModel2D(c=width)
+            Exp_name = 'VISegPL2D'
 
-        Exp_name = 'VISegPL' + \
+        Exp_name = Exp_name + \
                    '_e' + str(repeat_str) + \
                    '_l' + str(learning_rate) + \
                    '_m' + str(mean) + \
@@ -75,7 +82,6 @@ def trainModels(
                                                                                     new_resolution,
                                                                                     unlabelled)
 
-        # ===================
         trainSingleModel(model=Exp,
                          model_t=Exp_T,
                          model_name=Exp_name,
@@ -208,10 +214,10 @@ def trainSingleModel(model,
             unlabelled_img, unlabelled_lung, unlabelled_name = next(iterator_train_unlabelled)
 
         train_imgs_l = labelled_img.to(device=device, dtype=torch.float32)
-        b_l, d, c, h, w = train_imgs_l.size()
+        b_l = train_imgs_l.size()[0]
 
         train_imgs_u = unlabelled_img.to(device=device, dtype=torch.float32)
-        b_u, d, c, h, w = train_imgs_u.size()
+        b_u = train_imgs_u.size()[0]
 
         # print(train_imgs_u.size())
         # print(train_imgs_l.size())

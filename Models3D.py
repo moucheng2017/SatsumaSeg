@@ -51,9 +51,9 @@ class DoubleRandomDilatedConv(nn.Module):
         return output
 
 
-class ThresholdModel(nn.Module):
+class ThresholdModel3D(nn.Module):
     def __init__(self, c=8):
-        super(ThresholdModel, self).__init__()
+        super(ThresholdModel3D, self).__init__()
 
         self.threshold_net = nn.Sequential(
             nn.Conv3d(in_channels=c, out_channels=c*8, kernel_size=(3, 3, 3), stride=(1, 1, 1), dilation=(1, 1, 1), padding=(1, 1, 1), bias=False),
