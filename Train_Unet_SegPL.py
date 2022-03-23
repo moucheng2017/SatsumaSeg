@@ -247,7 +247,7 @@ def trainSingleModel(model,
             labels_masked = torch.masked_select(labels, lung_mask_labelled)
 
             if torch.sum(prob_outputs_masked) > 10.0:
-                loss_s = SoftDiceLoss()(prob_outputs_masked, labels_masked)
+                loss_s = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
             else:
                 loss_s = 0.0
                 # loss_s = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
@@ -282,8 +282,8 @@ def trainSingleModel(model,
             # foreground_in_pseudo_labels = [torch.sum(pseudo_label_masked[i, :, :, :, :]) for i in range(pseudo_label_masked.size()[0])]
             loss_u = 0.0
             if 10.0 < torch.sum(pseudo_label_masked) < torch.numel(pseudo_label_masked):
-                # loss_u += SoftDiceLoss()(prob_outputs_u_masked, pseudo_label_masked) + nn.BCELoss(reduction='mean')(prob_outputs_u_masked.squeeze() + 1e-10, pseudo_label_masked.squeeze() + 1e-10)
-                loss_u += SoftDiceLoss()(prob_outputs_u_masked, pseudo_label_masked)
+                loss_u += SoftDiceLoss()(prob_outputs_u_masked, pseudo_label_masked) + nn.BCELoss(reduction='mean')(prob_outputs_u_masked.squeeze() + 1e-10, pseudo_label_masked.squeeze() + 1e-10)
+                # loss_u += SoftDiceLoss()(prob_outputs_u_masked, pseudo_label_masked)
 
             loss_u = loss_u * alpha_current
 
