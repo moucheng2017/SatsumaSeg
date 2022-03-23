@@ -60,7 +60,7 @@ def trainModels(dataset_name,
                    '_z' + str(new_resolution[0]) + \
                    '_x' + str(new_resolution[1])
 
-        trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset, test_dataset = getData(data_directory, dataset_name, train_batchsize, new_resolution)
+        trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory, dataset_name, train_batchsize, new_resolution)
 
         # ===================
         trainSingleModel(model=Exp,
@@ -83,7 +83,7 @@ def trainModels(dataset_name,
 def getData(data_directory, dataset_name, train_batchsize, new_resolution):
 
     data_directory = data_directory + '/' + dataset_name
-    data_directory_eval_test = data_directory + dataset_name
+    # data_directory_eval_test = data_directory + dataset_name
 
     folder_labelled = data_directory + '/labelled'
 
@@ -104,19 +104,19 @@ def getData(data_directory, dataset_name, train_batchsize, new_resolution):
     validate_label_folder = data_directory + '/validate/lbls'
     validate_lung_folder = data_directory + '/validate/lung'
 
+    validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, new_resolution, labelled=True)
+    validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
+
     testdata_path = data_directory + '/test'
 
-    test_image_folder = data_directory + '/test/imgs'
-    test_label_folder = data_directory + '/test/lbls'
-    test_lung_folder = data_directory + '/test/lung'
+    # test_image_folder = data_directory + '/test/imgs'
+    # test_label_folder = data_directory + '/test/lbls'
+    # test_lung_folder = data_directory + '/test/lung'
+    #
+    # test_dataset = CT_Dataset(test_image_folder, test_label_folder, test_lung_folder, new_resolution, labelled=True)
+    # testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
-    validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, new_resolution, labelled=True)
-    test_dataset = CT_Dataset(test_image_folder, test_label_folder, test_lung_folder, new_resolution, labelled=True)
-
-    validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
-    testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
-
-    return trainloader_labelled, validateloader, testdata_path, train_dataset_labelled, validate_dataset, test_dataset
+    return trainloader_labelled, validateloader, testdata_path, train_dataset_labelled, validate_dataset
 # =====================================================================================================================================
 
 
@@ -190,7 +190,7 @@ def trainSingleModel(model,
             labels_masked = torch.masked_select(labels, lung_mask)
 
             if torch.sum(prob_outputs_masked) > 10.0:
-                loss = SoftDiceLoss()(prob_outputs_masked, labels_masked)
+                loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
             else:
                 loss = 0.0
                 # loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
