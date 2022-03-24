@@ -35,11 +35,11 @@ if __name__ == '__main__':
                 input_dim=1,
                 class_no=2,
                 repeat=1,
-                train_batchsize=6,
+                train_batchsize=5,
                 num_steps=2000,
-                learning_rate=1e-5,
+                learning_rate=1e-3,
                 width=64,
-                log_tag='airway_pat',
+                log_tag='airway_balanced',
                 new_resolution=[1, 480, 480],
                 l2=1e-2
                 )
