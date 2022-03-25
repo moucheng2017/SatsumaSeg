@@ -18,7 +18,7 @@ if __name__ == '__main__':
                 train_batchsize=4,
                 num_steps=3000,
                 learning_rate=1e-3,
-                width=32,
+                width=24,
                 log_tag='airway_balanced',
                 unlabelled=1,
                 new_resolution=[1, 480, 480],
