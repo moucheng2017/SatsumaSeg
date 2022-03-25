@@ -112,7 +112,7 @@ def trainModels(
                          )
 
 
-def getData(data_directory, dataset_name, train_batchsize, new_resolution, ratio):
+def getData(data_directory, dataset_name, train_batchsize, new_resolution, ratio, val_batchsize=5):
 
     data_directory = data_directory + '/' + dataset_name
 
@@ -137,7 +137,7 @@ def getData(data_directory, dataset_name, train_batchsize, new_resolution, ratio
     validate_lung_folder = data_directory + '/validate/lung'
 
     validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, new_resolution, labelled=True)
-    validateloader = data.DataLoader(validate_dataset, batch_size=1, shuffle=True, num_workers=0, drop_last=True)
+    validateloader = data.DataLoader(validate_dataset, batch_size=val_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
     # testdata_path = data_directory + '/test'
     # test_image_folder = data_directory + '/test/imgs'
