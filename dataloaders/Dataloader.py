@@ -179,7 +179,7 @@ class CT_Dataset(torch.utils.data.Dataset):
 
         # Random contrast and Renormalisation:
         image_diff_contrast = self.augmentation_contrast.randomintensity(image)
-        image = 0.5*image + 0.5*image_diff_contrast
+        image = 0.8*image + 0.2*image_diff_contrast
         image = normalisation(lung, image)
 
         # Extract image name
