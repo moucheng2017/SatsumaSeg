@@ -219,10 +219,10 @@ def trainSingleModel(model,
             unlabelled_img, unlabelled_lung, unlabelled_name = next(iterator_train_unlabelled)
 
         train_imgs_l = labelled_img.to(device=device, dtype=torch.float32)
-        b_l, d, c, h, w = train_imgs_l.size()
+        b_l = train_imgs_l.size()[0]
 
         train_imgs_u = unlabelled_img.to(device=device, dtype=torch.float32)
-        b_u, d, c, h, w = train_imgs_u.size()
+        b_u = train_imgs_u.size()[0]
 
         # print(train_imgs_u.size())
         # print(train_imgs_l.size())
