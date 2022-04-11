@@ -17,10 +17,10 @@ if __name__ == '__main__':
                 class_no=2,
                 repeat=1,
                 train_batchsize=5,
-                num_steps=3000,
+                num_steps=1200,
                 learning_rate=1e-3,
                 width=64,
-                log_tag='220200309',
+                log_tag='22020411',
                 new_resolution=[1, 480, 480],
                 l2=1e-2
                 )
