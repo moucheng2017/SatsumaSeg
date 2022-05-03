@@ -20,7 +20,7 @@ from Models3D import Unet3D
 from Models2D import Unet2D
 import errno
 
-from analysis.VolumeSegmentation import test_all_models
+from analysis.Inference3D import test_all_models
 
 
 def trainModels(dataset_name,
