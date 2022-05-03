@@ -82,7 +82,7 @@ def segment_whole_volume(model,
     subvolume = volume[:, d-train_size[0]:d, h-train_size[1]:h, w-train_size[2]:w]
     subvolume = (subvolume - np.nanmean(subvolume)) / np.nanstd(subvolume)
     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
-    subseg = model(subvolume.unsqueeze(0))
+    subseg, _ = model(subvolume.unsqueeze(0))
 
     if class_no == 2:
         subseg = torch.sigmoid(subseg)
@@ -105,15 +105,18 @@ def segmentation_one_case_one_model(model_path,
     model = torch.load(model_path)
     test_data_path = data_path + '/imgs'
     test_label_path = data_path + '/lbls'
+    test_lung_path = data_path + '/lung'
 
     all_cases = [os.path.join(test_data_path, f) for f in listdir(test_data_path)]
     all_cases.sort()
     all_labels = [os.path.join(test_label_path, f) for f in listdir(test_label_path)]
     all_labels.sort()
+    all_lungs = [os.path.join(test_lung_path, f) for f in listdir(test_lung_path)]
+    all_lungs.sort()
 
     segmentation_iou_all_cases = []
 
-    for each_case, each_label in zip(all_cases, all_labels):
+    for each_case, each_label, each_lung in zip(all_cases, all_labels, all_lungs):
 
         # print(each_case)
         volume_nii = nib.load(each_case)
@@ -121,6 +124,9 @@ def segmentation_one_case_one_model(model_path,
 
         label_nii = nib.load(each_label)
         label = label_nii.get_fdata()
+
+        lung_nii = nib.load(each_lung)
+        lung = lung_nii.get_fdata()
 
         saved_segmentation = np.zeros_like(volume)
 
@@ -162,6 +168,8 @@ def segmentation_one_case_one_model(model_path,
 
         mean_iu, _, __ = segmentation_scores(label, saved_segmentation, classno)
         segmentation_iou_all_cases.append(mean_iu)
+
+        saved_segmentation = saved_segmentation*lung
 
         if save_flag is True:
             segmentation_nii = nib.Nifti1Image(saved_segmentation,
@@ -215,18 +223,19 @@ def test_all_models(model_path,
 
 
 if __name__ == '__main__':
-    model_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/trained_models/' \
-                 'sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384_3999.pt'
+    model_path = '/home/moucheng/PhD/2022_12_Clinical/22020411/Sup3D_e1_l0.001_b2_w64_s1200_d0_r0.01_z3_x480/trained_models/' \
+                 'Sup3D_e1_l0.001_b2_w64_s1200_d0_r0.01_z3_x480_1199.pt'
 
-    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Mixed/test'
+    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test'
 
-    save_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/Mixed/20200206/sup_unet_e1_l0.0001_b2_w16_s4000_d4_r0.05_z16_x384/segmentation/model3999'
+    save_path = '/home/moucheng/projects_data/Pulmonary_data/airway/segmentation'
 
     segmentation_one_case_one_model(model_path,
                                     data_path,
                                     save_path,
-                                    size=[16, 480, 480],
-                                    classno=2)
+                                    size=[3, 480, 480],
+                                    classno=2,
+                                    save_flag=True)
 
 
 

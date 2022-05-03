@@ -19,7 +19,7 @@ from Loss import SoftDiceLoss
 # =================================
 from Models3D import Unet3D, ThresholdModel3D
 from Models2D import Unet2D, ThresholdModel2D
-from analysis.VolumeSegmentation import test_all_models
+from analysis.Inference3D import test_all_models
 import errno
 
 # This is for binary segmentation only for now
