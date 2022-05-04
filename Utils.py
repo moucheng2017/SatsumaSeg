@@ -24,6 +24,42 @@ from Metrics import segmentation_scores, hd95, preprocessing_accuracy, f1_score
 from PIL import Image
 from torch.utils import data
 
+from Loss import SoftDiceLoss
+
+
+def train_base(labelled_img,
+               labelled_label,
+               labelled_lung,
+               device,
+               model):
+
+    train_imgs = labelled_img.to(device=device, dtype=torch.float32)
+    labels = labelled_label.to(device=device, dtype=torch.float32)
+    lung = labelled_lung.to(device=device, dtype=torch.float32)
+
+    # print(train_imgs.size())
+
+    if torch.sum(labels) > 10.0:
+        outputs, _ = model(train_imgs, [1, 1, 1, 1], [1, 1, 1, 1])
+        prob_outputs = torch.sigmoid(outputs)
+
+        lung_mask = (lung > 0.5)
+        prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask)
+        labels_masked = torch.masked_select(labels, lung_mask)
+
+        if torch.sum(prob_outputs_masked) > 10.0:
+            loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze() + 1e-10, labels_masked.squeeze() + 1e-10)
+        else:
+            loss = 0.0
+
+        class_outputs = (prob_outputs_masked > 0.5).float()
+        train_mean_iu_ = segmentation_scores(labels_masked, class_outputs, 2)
+    else:
+        train_mean_iu_ = 0
+        loss = 0.0
+
+    return loss, train_mean_iu_
+
 
 # def stitch_subvolumes():
 # this function is to stich up all subvolume into the whole

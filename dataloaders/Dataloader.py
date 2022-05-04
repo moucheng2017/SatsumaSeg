@@ -23,17 +23,23 @@ class RandomCropping(object):
         # for unsupervised learning, we only need to crop the volume, arg1: volume
         # new_resolution = 224
         # begining slices and ending slices are not informative so discarded:
-        discared_slices = 10
-        new_d = self.output_size[0]
-        new_h = self.output_size[1]
-        new_w = self.output_size[2]
 
-        skip = random.choice(self.skip_slices)
-        # skip_x = random.choice(self.skip_slices)
+        discared_slices = 10
 
         for volume in volumes:
             c, d, h, w = np.shape(volume)
-            assert d > new_d
+
+        if self.output_size is None:
+            new_d = 1
+            new_h = h
+            new_w = w
+        else:
+            new_d = self.output_size[0]
+            new_h = self.output_size[1]
+            new_w = self.output_size[2]
+
+        skip = random.choice(self.skip_slices)
+        # skip_x = random.choice(self.skip_slices)
 
         if h > new_h:
             top_h = np.random.randint(0, h - new_h)

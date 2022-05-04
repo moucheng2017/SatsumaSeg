@@ -13,7 +13,7 @@ import numpy.ma as ma
 class RandomCroppingOrthogonal(object):
     def __init__(self,
                  slices_no=3,
-                 discarded_slices=10):
+                 discarded_slices=5):
         # Sample slices along each direction
         # Always output single channle for label
         self.slices_no = slices_no
@@ -24,22 +24,21 @@ class RandomCroppingOrthogonal(object):
         # for unsupervised learning, we only need to crop the volume, arg1: volume
 
         for volume in volumes:
-            c, d, h, w = np.shape(volume)
+            d, h, w = np.shape(volume)
 
-        sample_position_d = np.random.randint(self.discarded_slices+self.slices_no, d - self.discared_slices - self.slices_no)
-        sample_position_h = np.random.randint(self.discarded_slices+self.slices_no, h - self.discared_slices - self.slices_no)
-        sample_position_w = np.random.randint(self.discarded_slices+self.slices_no, w - self.discared_slices - self.slices_no)
+        sample_position_d = np.random.randint(self.discarded_slices+self.slices_no, d - self.discarded_slices - self.slices_no)
+        sample_position_h = np.random.randint(self.discarded_slices+self.slices_no, h - self.discarded_slices - self.slices_no)
+        sample_position_w = np.random.randint(self.discarded_slices+self.slices_no, w - self.discarded_slices - self.slices_no)
 
         outputs = {"plane_d": [],
                    "plane_h": [],
                    "plane_w": []}
 
-        # skip every 3 slices, so equivalently, we look at longer span:
-        # each_input = each_input[:, ::ratio, :, :]
-        # for key, value in outputs.items():
-        #     for each_input in volumes:
-
-
+        for each_input in volumes:
+            # transpose all patches to channel x height x width
+            outputs["plane_d"].append(each_input[sample_position_d:sample_position_d + self.slices_no, :, :])
+            outputs["plane_h"].append(np.transpose(each_input[:, sample_position_h:sample_position_h + self.slices_no, :], axes=(1, 0, 2)))
+            outputs["plane_w"].append(np.transpose(each_input[:, :, sample_position_w:sample_position_w + self.slices_no], axes=(2, 0, 1)))
 
         return outputs
 
@@ -57,12 +56,13 @@ class RandomContrast(object):
         if augmentation_flag >= 0.5:
             # bin = np.random.choice(self.bin_range)
             bin = random.randint(self.bin_range[0], self.bin_range[1])
-            c, d, h, w = np.shape(input)
+            # c, d, h, w = np.shape(input)
+            c, h, w = np.shape(input)
             image_histogram, bins = np.histogram(input.flatten(), bin, density=True)
             cdf = image_histogram.cumsum()  # cumulative distribution function
             cdf = 255 * cdf / cdf[-1]  # normalize
             output = np.interp(input.flatten(), bins[:-1], cdf)
-            output = np.reshape(output, (c, d, h, w))
+            output = np.reshape(output, (c, h, w))
         else:
             output = input
 
@@ -96,16 +96,14 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
     '''
     Each volume should be at: Dimension X Height X Width
     '''
-    def __init__(self, imgs_folder, labels_folder, lung_folder, new_size, labelled):
+    def __init__(self, imgs_folder, labels_folder, lung_folder, slices_no, labelled):
         self.imgs_folder = imgs_folder
         self.labels_folder = labels_folder
         self.lung_folder = lung_folder
-        # self.dimension = dim
 
         self.labelled_flag = labelled
-        self.augmentation_contrast = RandomContrast()
-        self.augmentation_cropping = RandomCropping(new_size, [1])
-        # self.augmentation_gaussian = RandomGaussian()
+        self.augmentation_contrast = RandomContrast([10, 255])
+        self.augmentation_cropping = RandomCroppingOrthogonal(slices_no)
 
     def __getitem__(self, index):
         # Lung masks:
@@ -114,7 +112,7 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
         lung = lung.get_fdata()
         lung = np.array(lung, dtype='float32')
         lung = np.transpose(lung, (2, 0, 1))
-        lung = np.expand_dims(lung, axis=0)
+        # lung = np.expand_dims(lung, axis=0)
 
         # Images:
         all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
@@ -129,7 +127,7 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
         # original dimension: (H x W x D)
         image = np.transpose(image, (2, 0, 1))
         # (D x H x W)
-        image = np.expand_dims(image, axis=0)
+        # image = np.expand_dims(image, axis=0)
         # (C x D x H x W)
 
         # Now applying lung window:
@@ -140,9 +138,9 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
         image = normalisation(lung, image)
 
         # Random contrast and Renormalisation:
-        # image_diff_contrast = self.augmentation_contrast.randomintensity(image)
-        # image = 0.7*image + 0.3*image_diff_contrast
-        # image = normalisation(lung, image)
+        image_another_contrast = self.augmentation_contrast.randomintensity(image)
+        image = 0.5*image + 0.5*image_another_contrast
+        image = normalisation(lung, image)
 
         # Extract image name
         _, imagename = os.path.split(imagename)
@@ -155,12 +153,13 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
             label = label.get_fdata()
             label = np.array(label, dtype='float32')
             label = np.transpose(label, (2, 0, 1))
-            label = np.expand_dims(label, axis=0)
-            [image, label, lung] = self.augmentation_cropping.crop(image, label, lung)
-            return image, label, lung, imagename
+            # label = np.expand_dims(label, axis=0)
+            # [image, label, lung] = self.augmentation_cropping.crop(image, label, lung)
+            inputs_dict = self.augmentation_cropping.crop(image, label, lung)
+            return inputs_dict, imagename
         else:
-            [image, lung] = self.augmentation_cropping.crop(image, lung)
-            return image, lung, imagename
+            inputs_dict = self.augmentation_cropping.crop(image, lung)
+            return inputs_dict, imagename
 
     def __len__(self):
         # You should change 0 to the total size of your dataset.
@@ -169,8 +168,5 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
 
 if __name__ == '__main__':
     dummy_input = np.random.rand(512, 512, 480)
-    cropping_augmentation = RandomCropping(64, [1])
-    output = cropping_augmentation.crop(dummy_input, dummy_input)
-    print(np.shape(output))
 
 
