@@ -10,44 +10,42 @@ import shutil
 import torch.nn.functional as F
 
 from Metrics import segmentation_scores
+from dataloaders.DataloaderOrthogonal import CT_Dataset_Orthogonal
 from dataloaders.Dataloader import CT_Dataset
 from tensorboardX import SummaryWriter
 
 from Utils import evaluate
 from Loss import SoftDiceLoss
-# =================================
-from Models3D import Unet3D
-from Models2D import Unet2D
+# ==============================================
+from Models2DOrthogonal import Unet2DMultiChannel
 import errno
 
+from Utils import train_base
+
 from analysis.Inference3D import test_all_models
+
+# This script trains a weird model:
+# We train on three planes simulatenously
 
 
 def trainModels(dataset_name,
                 data_directory,
-                downsample,
                 input_dim,
-                class_no,
                 repeat,
                 train_batchsize,
                 num_steps,
                 learning_rate,
                 width,
                 log_tag,
-                new_resolution=[12, 224, 224],
+                slices_no=5,
                 l2=0.01
                 ):
 
     for j in range(1, repeat + 1):
 
         repeat_str = str(j)
-
-        if new_resolution[0] > 1:
-            Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
-            Exp_name = 'Sup3D'
-        else:
-            Exp = Unet2D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
-            Exp_name = 'Sup2D'
+        Exp = Unet2DMultiChannel(in_ch=input_dim, width=width, output_channels=slices_no)
+        Exp_name = 'OrthogonalSup2D'
 
         Exp_name = Exp_name + \
                    '_e' + str(repeat_str) + \
@@ -55,12 +53,10 @@ def trainModels(dataset_name,
                    '_b' + str(train_batchsize) + \
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
-                   '_d' + str(downsample) + \
                    '_r' + str(l2) + \
-                   '_z' + str(new_resolution[0]) + \
-                   '_x' + str(new_resolution[1])
+                   '_z' + str(slices_no)
 
-        trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory, dataset_name, train_batchsize, new_resolution)
+        trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory, dataset_name, train_batchsize, slices_no)
 
         # ===================
         trainSingleModel(model=Exp,
@@ -73,14 +69,12 @@ def trainModels(dataset_name,
                          trainloader_with_labels=trainloader_withlabels,
                          validateloader=validateloader,
                          testdata_path=test_data_path,
-                         class_no=class_no,
                          log_tag=log_tag,
                          l2=l2,
-                         dilation=1,
-                         size=new_resolution)
+                         dilation=1)
 
 
-def getData(data_directory, dataset_name, train_batchsize, new_resolution, val_batchsize=5):
+def getData(data_directory, dataset_name, train_batchsize, slices_no, val_batchsize=5):
 
     data_directory = data_directory + '/' + dataset_name
     # data_directory_eval_test = data_directory + dataset_name
@@ -91,7 +85,7 @@ def getData(data_directory, dataset_name, train_batchsize, new_resolution, val_b
     train_label_folder_labelled = folder_labelled + '/lbls'
     train_lung_folder_labelled = folder_labelled + '/lung'
 
-    train_dataset_labelled = CT_Dataset(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, new_resolution, labelled=True)
+    train_dataset_labelled = CT_Dataset_Orthogonal(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, slices_no, labelled=True)
 
     # train_image_folder_unlabelled = data_directory + '/unlabelled/patches'
     # train_label_folder_unlabelled = data_directory + '/unlabelled/labels'
@@ -104,7 +98,7 @@ def getData(data_directory, dataset_name, train_batchsize, new_resolution, val_b
     validate_label_folder = data_directory + '/validate/lbls'
     validate_lung_folder = data_directory + '/validate/lung'
 
-    validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, new_resolution, labelled=True)
+    validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, None, labelled=True)
     validateloader = data.DataLoader(validate_dataset, batch_size=val_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
     testdata_path = data_directory + '/test'
@@ -132,9 +126,7 @@ def trainSingleModel(model,
                      dilation,
                      testdata_path,
                      log_tag,
-                     l2,
-                     class_no,
-                     size):
+                     l2):
 
     device = torch.device('cuda')
     save_model_name = model_name
@@ -168,75 +160,56 @@ def trainSingleModel(model,
     for step in range(num_steps):
 
         model.train()
-        train_iou = []
-        train_sup_loss = []
+        train_iou_d = []
+        train_iou_h = []
+        train_iou_w = []
 
         try:
-            labelled_img, labelled_label, labelled_lung, labelled_name = next(iterator_train_labelled)
+            labelled_dict, labelled_name = next(iterator_train_labelled)
         except StopIteration:
             iterator_train_labelled = iter(trainloader_with_labels)
-            labelled_img, labelled_label, labelled_lung, labelled_name = next(iterator_train_labelled)
+            labelled_dict, labelled_name = next(iterator_train_labelled)
 
-        train_imgs = labelled_img.to(device=device, dtype=torch.float32)
-        labels = labelled_label.to(device=device, dtype=torch.float32)
-        lung = labelled_lung.to(device=device, dtype=torch.float32)
+        loss_d, train_mean_iu_d_ = train_base(labelled_dict["plane_d"][0], labelled_dict["plane_d"][1], labelled_dict["plane_d"][2], device, model)
+        loss_h, train_mean_iu_h_ = train_base(labelled_dict["plane_h"][0], labelled_dict["plane_h"][1], labelled_dict["plane_h"][2], device, model)
+        loss_w, train_mean_iu_w_ = train_base(labelled_dict["plane_w"][0], labelled_dict["plane_w"][1], labelled_dict["plane_w"][2], device, model)
+        loss = loss_w + loss_d + loss_h
 
-        if torch.sum(labels) > 10.0:
-            outputs, _ = model(train_imgs, [dilation, dilation, dilation, dilation], [dilation, dilation, dilation, dilation])
-            prob_outputs = torch.sigmoid(outputs)
+        train_iou_d.append(train_mean_iu_d_)
+        train_iou_h.append(train_mean_iu_h_)
+        train_iou_w.append(train_mean_iu_w_)
 
-            lung_mask = (lung > 0.5)
-            prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask)
-            labels_masked = torch.masked_select(labels, lung_mask)
+        validate_iou, validate_h_dist = evaluate(validateloader, model, device, model_name, 2, dilation)
 
-            if torch.sum(prob_outputs_masked) > 10.0:
-                loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
-            else:
-                loss = 0.0
-                # loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
-            # else:
-            #     loss = SoftDiceLoss()(prob_outputs_masked, labels_masked)
+        if loss != 0.0:
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-            if loss != 0.0:
-                train_sup_loss.append(loss.item())
-            else:
-                train_sup_loss.append(0.0)
+        for param_group in optimizer.param_groups:
+            param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
 
-            class_outputs = (prob_outputs_masked > 0.5).float()
+        print(
+            'Step [{}/{}], '
+            'lr: {:.4f},'
+            'Train iou d: {:.4f}, '
+            'Train iou h: {:.4f}, '
+            'Train iou w: {:.4f}, '
+            'val iou:{:.4f}, '.format(step + 1, num_steps,
+                                      optimizer.param_groups[0]["lr"],
+                                      np.nanmean(train_iou_d),
+                                      np.nanmean(train_iou_h),
+                                      np.nanmean(train_iou_w),
+                                      np.nanmean(validate_iou)))
 
-            train_mean_iu_ = segmentation_scores(labels_masked, class_outputs, class_no)
-            train_iou.append(train_mean_iu_)
+        # # # ================================================================== #
+        # # #                        TensorboardX Logging                        #
+        # # # # ================================================================ #
 
-            validate_iou, validate_h_dist = evaluate(validateloader, model, device, model_name, class_no, dilation)
-
-            if loss != 0.0:
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-
-            for param_group in optimizer.param_groups:
-                param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
-
-            print(
-                'Step [{}/{}], '
-                'lr: {:.4f},'
-                'Train sup loss: {:.4f}, '
-                'Train iou: {:.4f}, '
-                'val iou:{:.4f}, '.format(step + 1, num_steps,
-                                          optimizer.param_groups[0]["lr"],
-                                          np.nanmean(train_sup_loss),
-                                          np.nanmean(train_iou),
-                                          np.nanmean(validate_iou)))
-
-            # # # ================================================================== #
-            # # #                        TensorboardX Logging                        #
-            # # # # ================================================================ #
-
-            writer.add_scalars('acc metrics', {'train iou': np.nanmean(train_iou),
-                                               # 'val hausdorff dist': np.nanmean(validate_h_dist),
-                                               'val iou': np.nanmean(validate_iou)}, step + 1)
-
-            writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss)}, step + 1)
+        writer.add_scalars('acc metrics', {'train iou d': np.nanmean(train_iou_d),
+                                           'train iou h': np.nanmean(train_iou_h),
+                                           'train iou w': np.nanmean(train_iou_w),
+                                           'val iou': np.nanmean(validate_iou)}, step + 1)
 
         if step > num_steps - 5:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'

@@ -141,13 +141,10 @@ def trainSingleModel(model,
     saved_information_path = '../Results/' + dataset_name + '/' + log_tag
     if not os.path.exists(saved_information_path):
         os.makedirs(saved_information_path, exist_ok=True)
-    # os.mkdir(saved_information_path, exist_ok=True)
     saved_log_path = saved_information_path + '/Logs'
-    # os.mkdir(saved_log_path, exist_ok=True)
     if not os.path.exists(saved_log_path):
         os.makedirs(saved_log_path, exist_ok=True)
     saved_model_path = saved_information_path + '/' + save_model_name + '/trained_models'
-    # os.mkdir(saved_model_path, exist_ok=True)
     if not os.path.exists(saved_model_path):
         os.makedirs(saved_model_path, exist_ok=True)
 
@@ -193,9 +190,6 @@ def trainSingleModel(model,
                 loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
             else:
                 loss = 0.0
-                # loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze()+1e-10, labels_masked.squeeze()+1e-10)
-            # else:
-            #     loss = SoftDiceLoss()(prob_outputs_masked, labels_masked)
 
             if loss != 0.0:
                 train_sup_loss.append(loss.item())
