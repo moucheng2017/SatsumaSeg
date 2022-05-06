@@ -11,10 +11,9 @@ import torch.nn.functional as F
 
 from Metrics import segmentation_scores
 from dataloaders.DataloaderOrthogonal import CT_Dataset_Orthogonal
-from dataloaders.Dataloader import CT_Dataset
 from tensorboardX import SummaryWriter
 
-from Utils import evaluate
+from Utils import validate_three_planes
 from Loss import SoftDiceLoss
 # ==============================================
 from Models2DOrthogonal import Unet2DMultiChannel
@@ -37,14 +36,13 @@ def trainModels(dataset_name,
                 learning_rate,
                 width,
                 log_tag,
-                slices_no=5,
                 l2=0.01
                 ):
 
     for j in range(1, repeat + 1):
 
         repeat_str = str(j)
-        Exp = Unet2DMultiChannel(in_ch=input_dim, width=width, output_channels=slices_no)
+        Exp = Unet2DMultiChannel(in_ch=input_dim, width=width, output_channels=input_dim)
         Exp_name = 'OrthogonalSup2D'
 
         Exp_name = Exp_name + \
@@ -54,27 +52,30 @@ def trainModels(dataset_name,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_r' + str(l2) + \
-                   '_z' + str(slices_no)
+                   '_z' + str(input_dim)
 
-        trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory, dataset_name, train_batchsize, slices_no)
+        trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory,
+                                                                                                                      dataset_name,
+                                                                                                                      train_batchsize,
+                                                                                                                      [input_dim, 480, 480],
+                                                                                                                      [192, input_dim, 480],
+                                                                                                                      [192, 480, input_dim],
+                                                                                                                      5)
 
-        # ===================
+        # ========================
         trainSingleModel(model=Exp,
                          model_name=Exp_name,
                          num_steps=num_steps,
                          learning_rate=learning_rate,
                          dataset_name=dataset_name,
-                         train_dataset_with_labels=train_dataset_with_labels,
-                         train_batchsize=train_batchsize,
                          trainloader_with_labels=trainloader_withlabels,
                          validateloader=validateloader,
-                         testdata_path=test_data_path,
                          log_tag=log_tag,
                          l2=l2,
                          dilation=1)
 
 
-def getData(data_directory, dataset_name, train_batchsize, slices_no, val_batchsize=5):
+def getData(data_directory, dataset_name, train_batchsize, d, h, w, val_batchsize=5):
 
     data_directory = data_directory + '/' + dataset_name
     # data_directory_eval_test = data_directory + dataset_name
@@ -85,7 +86,7 @@ def getData(data_directory, dataset_name, train_batchsize, slices_no, val_batchs
     train_label_folder_labelled = folder_labelled + '/lbls'
     train_lung_folder_labelled = folder_labelled + '/lung'
 
-    train_dataset_labelled = CT_Dataset_Orthogonal(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, slices_no, labelled=True)
+    train_dataset_labelled = CT_Dataset_Orthogonal(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, d, h, w, labelled=True)
 
     # train_image_folder_unlabelled = data_directory + '/unlabelled/patches'
     # train_label_folder_unlabelled = data_directory + '/unlabelled/labels'
@@ -98,7 +99,8 @@ def getData(data_directory, dataset_name, train_batchsize, slices_no, val_batchs
     validate_label_folder = data_directory + '/validate/lbls'
     validate_lung_folder = data_directory + '/validate/lung'
 
-    validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, None, labelled=True)
+    # validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, None, labelled=True)
+    validate_dataset = CT_Dataset_Orthogonal(validate_image_folder, validate_label_folder, validate_lung_folder, d, h, w, labelled=True)
     validateloader = data.DataLoader(validate_dataset, batch_size=val_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
     testdata_path = data_directory + '/test'
@@ -119,12 +121,9 @@ def trainSingleModel(model,
                      num_steps,
                      learning_rate,
                      dataset_name,
-                     train_dataset_with_labels,
-                     train_batchsize,
                      trainloader_with_labels,
                      validateloader,
                      dilation,
-                     testdata_path,
                      log_tag,
                      l2):
 
@@ -174,12 +173,16 @@ def trainSingleModel(model,
         loss_h, train_mean_iu_h_ = train_base(labelled_dict["plane_h"][0], labelled_dict["plane_h"][1], labelled_dict["plane_h"][2], device, model)
         loss_w, train_mean_iu_w_ = train_base(labelled_dict["plane_w"][0], labelled_dict["plane_w"][1], labelled_dict["plane_w"][2], device, model)
         loss = loss_w + loss_d + loss_h
+        del labelled_dict
 
         train_iou_d.append(train_mean_iu_d_)
         train_iou_h.append(train_mean_iu_h_)
         train_iou_w.append(train_mean_iu_w_)
 
-        validate_iou, validate_h_dist = evaluate(validateloader, model, device, model_name, 2, dilation)
+        validate_ious = validate_three_planes(validateloader, device, model)
+        validate_iou = validate_ious["val d plane"] + validate_ious["val h plane"] + validate_ious["val w plane"]
+        validate_iou = validate_iou / 3
+        del validate_ious
 
         if loss != 0.0:
             optimizer.zero_grad()

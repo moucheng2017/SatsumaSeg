@@ -119,22 +119,40 @@ class Unet2DMultiChannel(nn.Module):
         # print(x4.size())
         y = self.upsample0(x4)
         # print(y.size())
-        # print(y.size())
         # print(x3.size())
-        if y.size()[-2] != x3.size()[-2] or y.size()[-1] != x3.size()[-1]:
-            diffY = torch.tensor([x3.size()[-1] - y.size()[-1]])
-            diffX = torch.tensor([x3.size()[-2] - y.size()[-2]])
-            y = F.pad(y, [0, diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+
+        # if y.size()[-2] != x3.size()[-2] or y.size()[-1] != x3.size()[-1]:
+        #     diffY = torch.tensor([x3.size()[-1] - y.size()[-1]])
+        #     diffX = torch.tensor([x3.size()[-2] - y.size()[-2]])
+        #     y = F.pad(y, [0, diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
 
         y3 = torch.cat([y, x3], dim=1)
         y3 = self.dconv3(y3, dilation_decoder[0])
         y2 = self.upsample1(y3)
+
+        # if y2.size()[-2] != x2.size()[-2] or y2.size()[-1] != x2.size()[-1]:
+        #     diffY = torch.tensor([x2.size()[-1] - y2.size()[-1]])
+        #     diffX = torch.tensor([x2.size()[-2] - y2.size()[-2]])
+        #     y2 = F.pad(y2, [0, diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+
         y2 = torch.cat([y2, x2], dim=1)
         y2 = self.dconv2(y2, dilation_decoder[1])
         y1 = self.upsample2(y2)
+
+        # if y1.size()[-2] != x1.size()[-2] or y1.size()[-1] != x1.size()[-1]:
+        #     diffY = torch.tensor([x1.size()[-1] - y1.size()[-1]])
+        #     diffX = torch.tensor([x1.size()[-2] - y1.size()[-2]])
+        #     y1 = F.pad(y1, [0, diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+
         y1 = torch.cat([y1, x1], dim=1)
         y1 = self.dconv1(y1, dilation_decoder[2])
         y0 = self.upsample3(y1)
+
+        # if y0.size()[-2] != x0.size()[-2] or y0.size()[-1] != x0.size()[-1]:
+        #     diffY = torch.tensor([x0.size()[-1] - y0.size()[-1]])
+        #     diffX = torch.tensor([x0.size()[-2] - y0.size()[-2]])
+        #     y0 = F.pad(y0, [0, diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+
         y0 = torch.cat([y0, x0], dim=1)
         y0 = self.dconv0(y0, dilation_decoder[3])
         y = self.dconv_last(y0)
