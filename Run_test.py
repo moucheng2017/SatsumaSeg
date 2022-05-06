@@ -48,13 +48,12 @@ if __name__ == '__main__':
     # Orthogonal planes:
     trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data',
                 dataset_name='airway',
-                input_dim=3,
+                input_dim=5,
                 repeat=1,
                 train_batchsize=2,
                 num_steps=5000,
                 learning_rate=1e-3,
                 width=64,
-                slices_no=3,
                 log_tag='airway_balanced',
                 l2=1e-2
                 )

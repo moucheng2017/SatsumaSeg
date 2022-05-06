@@ -61,6 +61,52 @@ def train_base(labelled_img,
     return loss, train_mean_iu_
 
 
+def validate_base(val_img,
+                  val_lbl,
+                  val_lung,
+                  device,
+                  model):
+
+        val_img = val_img.to(device, dtype=torch.float32)
+        val_lbl = val_lbl.to(device, dtype=torch.float32)
+        val_lung = val_lung.to(device, dtype=torch.float32)
+
+        val_output, _ = model(val_img)
+        val_output = torch.sigmoid(val_output)
+        val_output = (val_output > 0.95).float()
+
+        lung_mask = (val_lung > 0.5)
+
+        val_class_outputs_masked = torch.masked_select(val_output, lung_mask)
+        val_label_masked = torch.masked_select(val_lbl, lung_mask)
+
+        eval_mean_iu_ = segmentation_scores(val_label_masked.squeeze(), val_class_outputs_masked.squeeze(), 2)
+        return eval_mean_iu_
+
+
+def validate_three_planes(validate_loader, device, model):
+    val_iou_d = []
+    val_iou_h = []
+    val_iou_w = []
+
+    model.eval()
+    with torch.no_grad():
+        iterator_val_labelled = iter(validate_loader)
+
+        for i in range(len(validate_loader)):
+            try:
+                val_dict, _ = next(iterator_val_labelled)
+            except StopIteration:
+                iterator_val_labelled = iter(validate_loader)
+                val_dict, _ = next(iterator_val_labelled)
+
+            val_iou_d.append(validate_base(val_dict["plane_d"][0], val_dict["plane_d"][1], val_dict["plane_d"][2], device, model))
+            val_iou_h.append(validate_base(val_dict["plane_h"][0], val_dict["plane_h"][1], val_dict["plane_h"][2], device, model))
+            val_iou_w.append(validate_base(val_dict["plane_w"][0], val_dict["plane_w"][1], val_dict["plane_w"][2], device, model))
+
+    return {"val d plane": val_iou_d, "val h plane": val_iou_h, "val w plane": val_iou_w}
+
+
 # def stitch_subvolumes():
 # this function is to stich up all subvolume into the whole
 
@@ -188,6 +234,7 @@ def evaluate(validateloader, model, device, model_name, class_no, dilation):
         validate_h_dist = []
 
         for i, (val_images, val_label, val_lung, imagename) in enumerate(validateloader):
+            print(val_images.size())
             val_img = val_images.to(device=device, dtype=torch.float32)
             # val_img = val_images.to(device=device, dtype=torch.float32).unsqueeze(1)
             val_label = val_label.to(device=device, dtype=torch.float32)
@@ -202,7 +249,7 @@ def evaluate(validateloader, model, device, model_name, class_no, dilation):
 
             if class_no == 2:
                 val_outputs = torch.sigmoid(val_outputs)
-                val_class_outputs = (val_outputs > 0.5).float()
+                val_class_outputs = (val_outputs > 0.95).float()
             else:
                 _, val_class_outputs = torch.max(val_outputs, dim=1)
 

@@ -12,23 +12,34 @@ import numpy.ma as ma
 
 class RandomCroppingOrthogonal(object):
     def __init__(self,
-                 slices_no=3,
+                 cropping_d,
+                 cropping_h,
+                 cropping_w,
                  discarded_slices=5):
-        # Sample slices along each direction
-        # Always output single channle for label
-        self.slices_no = slices_no
         self.discarded_slices = discarded_slices
+        self.volume_d = cropping_d
+        self.volume_h = cropping_h
+        self.volume_w = cropping_w
 
     def crop(self, *volumes):
+
         # for supervised learning, we need to crop both volume and the label, arg1: volume, arg2: label
         # for unsupervised learning, we only need to crop the volume, arg1: volume
 
         for volume in volumes:
             d, h, w = np.shape(volume)
 
-        sample_position_d = np.random.randint(self.discarded_slices+self.slices_no, d - self.discarded_slices - self.slices_no)
-        sample_position_h = np.random.randint(self.discarded_slices+self.slices_no, h - self.discarded_slices - self.slices_no)
-        sample_position_w = np.random.randint(self.discarded_slices+self.slices_no, w - self.discarded_slices - self.slices_no)
+        sample_position_d_d = np.random.randint(self.discarded_slices, d - self.volume_d[0] - self.discarded_slices)
+        sample_position_d_h = np.random.randint(self.discarded_slices, h - self.volume_d[1] - self.discarded_slices)
+        sample_position_d_w = np.random.randint(self.discarded_slices, w - self.volume_d[2] - self.discarded_slices)
+
+        sample_position_h_d = np.random.randint(self.discarded_slices, d - self.volume_h[0] - self.discarded_slices)
+        sample_position_h_h = np.random.randint(self.discarded_slices, h - self.volume_h[1] - self.discarded_slices)
+        sample_position_h_w = np.random.randint(self.discarded_slices, w - self.volume_h[2] - self.discarded_slices)
+
+        sample_position_w_d = np.random.randint(self.discarded_slices, d - self.volume_w[0] - self.discarded_slices)
+        sample_position_w_h = np.random.randint(self.discarded_slices, h - self.volume_w[1] - self.discarded_slices)
+        sample_position_w_w = np.random.randint(self.discarded_slices, w - self.volume_w[2] - self.discarded_slices)
 
         outputs = {"plane_d": [],
                    "plane_h": [],
@@ -36,9 +47,9 @@ class RandomCroppingOrthogonal(object):
 
         for each_input in volumes:
             # transpose all patches to channel x height x width
-            outputs["plane_d"].append(each_input[sample_position_d:sample_position_d + self.slices_no, :, :])
-            outputs["plane_h"].append(np.transpose(each_input[:, sample_position_h:sample_position_h + self.slices_no, :], axes=(1, 0, 2)))
-            outputs["plane_w"].append(np.transpose(each_input[:, :, sample_position_w:sample_position_w + self.slices_no], axes=(2, 0, 1)))
+            outputs["plane_d"].append(each_input[sample_position_d_d:sample_position_d_d + self.volume_d[0], sample_position_d_h:sample_position_d_h + self.volume_d[1], sample_position_d_w:sample_position_d_w + self.volume_d[2]])
+            outputs["plane_h"].append(np.transpose(each_input[sample_position_h_d:sample_position_h_d + self.volume_h[0], sample_position_h_h:sample_position_h_h + self.volume_h[1], sample_position_h_w:sample_position_h_w + self.volume_h[2]], axes=(1, 0, 2)))
+            outputs["plane_w"].append(np.transpose(each_input[sample_position_w_d:sample_position_w_d + self.volume_w[0], sample_position_w_h:sample_position_w_h + self.volume_w[1], sample_position_w_w:sample_position_w_w + self.volume_w[2]], axes=(2, 0, 1)))
 
         return outputs
 
@@ -96,14 +107,16 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
     '''
     Each volume should be at: Dimension X Height X Width
     '''
-    def __init__(self, imgs_folder, labels_folder, lung_folder, slices_no, labelled):
+    def __init__(self, imgs_folder, labels_folder, lung_folder, cropping_d, cropping_h, cropping_w, labelled):
         self.imgs_folder = imgs_folder
         self.labels_folder = labels_folder
         self.lung_folder = lung_folder
 
         self.labelled_flag = labelled
         self.augmentation_contrast = RandomContrast([10, 255])
-        self.augmentation_cropping = RandomCroppingOrthogonal(slices_no)
+        self.augmentation_cropping = RandomCroppingOrthogonal(cropping_d=cropping_d,
+                                                              cropping_h=cropping_h,
+                                                              cropping_w=cropping_w)
 
     def __getitem__(self, index):
         # Lung masks:
