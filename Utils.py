@@ -31,7 +31,8 @@ def train_base(labelled_img,
                labelled_label,
                labelled_lung,
                device,
-               model):
+               model,
+               t=1.0):
 
     train_imgs = labelled_img.to(device=device, dtype=torch.float32)
     labels = labelled_label.to(device=device, dtype=torch.float32)
@@ -41,7 +42,7 @@ def train_base(labelled_img,
 
     if torch.sum(labels) > 10.0:
         outputs, _ = model(train_imgs, [1, 1, 1, 1], [1, 1, 1, 1])
-        prob_outputs = torch.sigmoid(outputs)
+        prob_outputs = torch.sigmoid(outputs / t)
 
         lung_mask = (lung > 0.5)
         prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask)
@@ -52,7 +53,7 @@ def train_base(labelled_img,
         else:
             loss = 0.0
 
-        class_outputs = (prob_outputs_masked > 0.5).float()
+        class_outputs = (prob_outputs_masked > 0.95).float()
         train_mean_iu_ = segmentation_scores(labels_masked, class_outputs, 2)
     else:
         train_mean_iu_ = 0
@@ -84,7 +85,10 @@ def validate_base(val_img,
         return eval_mean_iu_
 
 
-def validate_three_planes(validate_loader, device, model):
+def validate_three_planes(validate_loader,
+                          device,
+                          model):
+
     val_iou_d = []
     val_iou_h = []
     val_iou_w = []
