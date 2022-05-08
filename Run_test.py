@@ -51,9 +51,10 @@ if __name__ == '__main__':
                 input_dim=5,
                 repeat=1,
                 train_batchsize=2,
-                num_steps=5000,
+                num_steps=2000,
                 learning_rate=1e-3,
                 width=64,
                 log_tag='airway_balanced',
-                l2=1e-2
+                l2=1e-2,
+                temp=1.0
                 )

@@ -36,6 +36,7 @@ def trainModels(dataset_name,
                 learning_rate,
                 width,
                 log_tag,
+                temp=0.5,
                 l2=0.01
                 ):
 
@@ -52,14 +53,15 @@ def trainModels(dataset_name,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_r' + str(l2) + \
-                   '_z' + str(input_dim)
+                   '_z' + str(input_dim) + \
+                   '_t' + str(temp)
 
         trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory,
                                                                                                                       dataset_name,
                                                                                                                       train_batchsize,
                                                                                                                       [input_dim, 480, 480],
-                                                                                                                      [192, input_dim, 480],
-                                                                                                                      [192, 480, input_dim],
+                                                                                                                      [256, input_dim, 480],
+                                                                                                                      [256, 480, input_dim],
                                                                                                                       5)
 
         # ========================
@@ -72,13 +74,12 @@ def trainModels(dataset_name,
                          validateloader=validateloader,
                          log_tag=log_tag,
                          l2=l2,
-                         dilation=1)
+                         temp=temp)
 
 
 def getData(data_directory, dataset_name, train_batchsize, d, h, w, val_batchsize=5):
 
     data_directory = data_directory + '/' + dataset_name
-    # data_directory_eval_test = data_directory + dataset_name
 
     folder_labelled = data_directory + '/labelled'
 
@@ -88,29 +89,16 @@ def getData(data_directory, dataset_name, train_batchsize, d, h, w, val_batchsiz
 
     train_dataset_labelled = CT_Dataset_Orthogonal(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, d, h, w, labelled=True)
 
-    # train_image_folder_unlabelled = data_directory + '/unlabelled/patches'
-    # train_label_folder_unlabelled = data_directory + '/unlabelled/labels'
-    # train_dataset_unlabelled = CustomDataset(train_image_folder_unlabelled, train_label_folder_unlabelled, 'none', labelled=True)
-
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
-    # trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=train_batchsize*ratio, shuffle=True, num_workers=0, drop_last=False)
 
     validate_image_folder = data_directory + '/validate/imgs'
     validate_label_folder = data_directory + '/validate/lbls'
     validate_lung_folder = data_directory + '/validate/lung'
 
-    # validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, None, labelled=True)
     validate_dataset = CT_Dataset_Orthogonal(validate_image_folder, validate_label_folder, validate_lung_folder, d, h, w, labelled=True)
     validateloader = data.DataLoader(validate_dataset, batch_size=val_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
     testdata_path = data_directory + '/test'
-
-    # test_image_folder = data_directory + '/test/imgs'
-    # test_label_folder = data_directory + '/test/lbls'
-    # test_lung_folder = data_directory + '/test/lung'
-    #
-    # test_dataset = CT_Dataset(test_image_folder, test_label_folder, test_lung_folder, new_resolution, labelled=True)
-    # testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
 
     return trainloader_labelled, validateloader, testdata_path, train_dataset_labelled, validate_dataset
 # =====================================================================================================================================
@@ -123,7 +111,7 @@ def trainSingleModel(model,
                      dataset_name,
                      trainloader_with_labels,
                      validateloader,
-                     dilation,
+                     temp,
                      log_tag,
                      l2):
 
@@ -132,13 +120,10 @@ def trainSingleModel(model,
     saved_information_path = '../Results/' + dataset_name + '/' + log_tag
     if not os.path.exists(saved_information_path):
         os.makedirs(saved_information_path, exist_ok=True)
-    # os.mkdir(saved_information_path, exist_ok=True)
     saved_log_path = saved_information_path + '/Logs'
-    # os.mkdir(saved_log_path, exist_ok=True)
     if not os.path.exists(saved_log_path):
         os.makedirs(saved_log_path, exist_ok=True)
     saved_model_path = saved_information_path + '/' + save_model_name + '/trained_models'
-    # os.mkdir(saved_model_path, exist_ok=True)
     if not os.path.exists(saved_model_path):
         os.makedirs(saved_model_path, exist_ok=True)
 
@@ -169,19 +154,23 @@ def trainSingleModel(model,
             iterator_train_labelled = iter(trainloader_with_labels)
             labelled_dict, labelled_name = next(iterator_train_labelled)
 
-        loss_d, train_mean_iu_d_ = train_base(labelled_dict["plane_d"][0], labelled_dict["plane_d"][1], labelled_dict["plane_d"][2], device, model)
-        loss_h, train_mean_iu_h_ = train_base(labelled_dict["plane_h"][0], labelled_dict["plane_h"][1], labelled_dict["plane_h"][2], device, model)
-        loss_w, train_mean_iu_w_ = train_base(labelled_dict["plane_w"][0], labelled_dict["plane_w"][1], labelled_dict["plane_w"][2], device, model)
+        loss_d, train_mean_iu_d_ = train_base(labelled_dict["plane_d"][0], labelled_dict["plane_d"][1], labelled_dict["plane_d"][2], device, model, temp)
+        loss_h, train_mean_iu_h_ = train_base(labelled_dict["plane_h"][0], labelled_dict["plane_h"][1], labelled_dict["plane_h"][2], device, model, temp)
+        loss_w, train_mean_iu_w_ = train_base(labelled_dict["plane_w"][0], labelled_dict["plane_w"][1], labelled_dict["plane_w"][2], device, model, temp)
         loss = loss_w + loss_d + loss_h
         del labelled_dict
-
+        del labelled_name
         train_iou_d.append(train_mean_iu_d_)
         train_iou_h.append(train_mean_iu_h_)
         train_iou_w.append(train_mean_iu_w_)
+        train_iou_d = np.nanmean(train_iou_d)
+        train_iou_h = np.nanmean(train_iou_h)
+        train_iou_w = np.nanmean(train_iou_w)
 
         validate_ious = validate_three_planes(validateloader, device, model)
-        validate_iou = validate_ious["val d plane"] + validate_ious["val h plane"] + validate_ious["val w plane"]
-        validate_iou = validate_iou / 3
+        validate_iou_d = np.nanmean(validate_ious["val d plane"])
+        validate_iou_h = np.nanmean(validate_ious["val h plane"])
+        validate_iou_w = np.nanmean(validate_ious["val w plane"])
         del validate_ious
 
         if loss != 0.0:
@@ -198,21 +187,28 @@ def trainSingleModel(model,
             'Train iou d: {:.4f}, '
             'Train iou h: {:.4f}, '
             'Train iou w: {:.4f}, '
-            'val iou:{:.4f}, '.format(step + 1, num_steps,
+            'val iou d:{:.4f}, '
+            'val iou h:{:.4f}, '
+            'val iou w:{:.4f}, '.format(step + 1, num_steps,
                                       optimizer.param_groups[0]["lr"],
-                                      np.nanmean(train_iou_d),
-                                      np.nanmean(train_iou_h),
-                                      np.nanmean(train_iou_w),
-                                      np.nanmean(validate_iou)))
+                                      train_iou_d,
+                                      train_iou_h,
+                                      train_iou_w,
+                                      validate_iou_d,
+                                      validate_iou_h,
+                                      validate_iou_w))
+
 
         # # # ================================================================== #
         # # #                        TensorboardX Logging                        #
         # # # # ================================================================ #
 
-        writer.add_scalars('acc metrics', {'train iou d': np.nanmean(train_iou_d),
-                                           'train iou h': np.nanmean(train_iou_h),
-                                           'train iou w': np.nanmean(train_iou_w),
-                                           'val iou': np.nanmean(validate_iou)}, step + 1)
+        writer.add_scalars('acc metrics', {'train iou d': train_iou_d,
+                                           'train iou h': train_iou_h,
+                                           'train iou w': train_iou_w,
+                                           'val iou d': validate_iou_d,
+                                           'val iou h': validate_iou_h,
+                                           'val iou w': validate_iou_w}, step + 1)
 
         if step > num_steps - 5:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
