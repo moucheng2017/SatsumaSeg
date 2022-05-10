@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import torch
 # torch.manual_seed(0)
 import errno
@@ -32,13 +31,15 @@ def train_base(labelled_img,
                labelled_lung,
                device,
                model,
-               t=1.0):
+               t=1.0,
+               single_channel_label=False):
 
     train_imgs = labelled_img.to(device=device, dtype=torch.float32)
     labels = labelled_label.to(device=device, dtype=torch.float32)
     lung = labelled_lung.to(device=device, dtype=torch.float32)
 
-    # print(train_imgs.size())
+    if single_channel_label is True:
+        labels = labels[:, labels.size()[1] // 2, :, :].unsqueeze(1)
 
     if torch.sum(labels) > 10.0:
         outputs, _ = model(train_imgs, [1, 1, 1, 1], [1, 1, 1, 1])
