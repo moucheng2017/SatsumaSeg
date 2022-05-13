@@ -223,17 +223,19 @@ def test_all_models(model_path,
 
 
 if __name__ == '__main__':
-    model_path = '/home/moucheng/PhD/2022_12_Clinical/22020411/Sup3D_e1_l0.001_b2_w64_s1200_d0_r0.01_z3_x480/trained_models/' \
-                 'Sup3D_e1_l0.001_b2_w64_s1200_d0_r0.01_z3_x480_1199.pt'
+    model_path = '/home/moucheng/PhD/2022_12_Clinical/20220511/Results/airway/airway_balanced/' \
+                 'Sup3D_e1_l0.001_b2_w64_s5000_d3_r0.01_z8_x480/trained_models/'
+
+    model_name = 'Sup3D_e1_l0.001_b2_w64_s5000_d3_r0.01_z8_x480_4996.pt'
 
     data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test'
 
-    save_path = '/home/moucheng/projects_data/Pulmonary_data/airway/segmentation'
+    save_path = '/home/moucheng/PhD/2022_12_Clinical/segmentation_20220511'
 
-    segmentation_one_case_one_model(model_path,
+    segmentation_one_case_one_model(os.path.join(model_path, model_name),
                                     data_path,
                                     save_path,
-                                    size=[3, 480, 480],
+                                    size=[8, 480, 480],
                                     classno=2,
                                     save_flag=True)
 

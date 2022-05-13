@@ -60,8 +60,8 @@ def trainModels(dataset_name,
                                                                                                                       dataset_name,
                                                                                                                       train_batchsize,
                                                                                                                       [input_dim, 480, 480],
-                                                                                                                      [256, input_dim, 480],
-                                                                                                                      [256, 480, input_dim],
+                                                                                                                      [320, input_dim, 480],
+                                                                                                                      [320, 480, input_dim],
                                                                                                                       5)
 
         # ========================
@@ -210,7 +210,8 @@ def trainSingleModel(model,
                                            'val iou h': validate_iou_h,
                                            'val iou w': validate_iou_w}, step + 1)
 
-        if step > num_steps - 5:
+        # if step > num_steps - 20:
+        if step > num_steps - 100:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
             torch.save(model, path_model)

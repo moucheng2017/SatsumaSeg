@@ -160,6 +160,7 @@ def trainSingleModel(model,
         loss = loss_w + loss_d + loss_h
         del labelled_dict
         del labelled_name
+
         train_iou_d.append(train_mean_iu_d_)
         train_iou_h.append(train_mean_iu_h_)
         train_iou_w.append(train_mean_iu_w_)
@@ -190,13 +191,13 @@ def trainSingleModel(model,
             'val iou d:{:.4f}, '
             'val iou h:{:.4f}, '
             'val iou w:{:.4f}, '.format(step + 1, num_steps,
-                                      optimizer.param_groups[0]["lr"],
-                                      train_iou_d,
-                                      train_iou_h,
-                                      train_iou_w,
-                                      validate_iou_d,
-                                      validate_iou_h,
-                                      validate_iou_w))
+                                        optimizer.param_groups[0]["lr"],
+                                        train_iou_d,
+                                        train_iou_h,
+                                        train_iou_w,
+                                        validate_iou_d,
+                                        validate_iou_h,
+                                        validate_iou_w))
 
 
         # # # ================================================================== #
