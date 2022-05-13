@@ -356,7 +356,7 @@ def trainSingleModel(model,
             writer.add_scalars('hyperparameter values', {'threshold current labelled': float(threshold_learnt_l.cpu().detach().mean()),
                                                          'threshold current unlabelled': float(threshold_learnt_u.cpu().detach().mean())}, step + 1)
 
-        if step % 100 == 0 or step > num_steps - 100:
+        if step > 0 and step % 400 == 0 or step > num_steps - 100:
             # save checker points
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
