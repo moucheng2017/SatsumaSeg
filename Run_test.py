@@ -50,11 +50,11 @@ if __name__ == '__main__':
                 dataset_name='airway',
                 input_dim=10,
                 repeat=1,
-                train_batchsize=2,
-                num_steps=2000,
+                train_batchsize=5,
+                num_steps=5000,
                 learning_rate=1e-3,
                 width=32,
                 log_tag='local_2022_05_13',
-                l2=1e-2,
+                l2=1e-3,
                 temp=2.0
                 )
