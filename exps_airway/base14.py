@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     trainModels(data_directory='/SAN/medic/PerceptronHead/data/lung/private/',
                 dataset_name='airway',
-                input_dim=10,
+                input_dim=50,
                 repeat=1,
                 train_batchsize=6,
                 num_steps=5000,

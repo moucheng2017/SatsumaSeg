@@ -152,7 +152,7 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
 
         # Random contrast and Renormalisation:
         image_another_contrast = self.augmentation_contrast.randomintensity(image)
-        image = 0.5*image + 0.5*image_another_contrast
+        image = 0.7*image + 0.3*image_another_contrast
         image = normalisation(lung, image)
 
         # Extract image name

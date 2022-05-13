@@ -5,4 +5,4 @@
 #$ -l h_rt=168:00:00
 #$ -wd /SAN/medic/PerceptronHead/codes/SatsumaSeg/exps_airway
 
-~/miniconda3/envs/pytorch1.4/bin/python base10.py
+~/miniconda3/envs/pytorch1.4/bin/python base12.py
