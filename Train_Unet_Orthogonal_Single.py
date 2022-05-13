@@ -211,7 +211,13 @@ def trainSingleModel(model,
                                            'val iou h': validate_iou_h,
                                            'val iou w': validate_iou_w}, step + 1)
 
-        if step > num_steps - 5:
+        # if step > num_steps - 5:
+        #     save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
+        #     path_model = save_model_name_full
+        #     torch.save(model, path_model)
+
+        if step % 100 == 0 or step > num_steps - 100:
+            # save checker points
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
             torch.save(model, path_model)

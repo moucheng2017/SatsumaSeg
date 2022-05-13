@@ -325,7 +325,8 @@ def trainSingleModel(model,
             writer.add_scalars('loss values', {'sup loss': np.nanmean(train_sup_loss),
                                                'unsup loss': np.nanmean(train_unsup_loss)}, step + 1)
 
-        if step > num_steps - 5:
+        if step % 100 == 0 or step > num_steps - 100:
+            # save checker points
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
             torch.save(model, path_model)
