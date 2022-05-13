@@ -216,7 +216,7 @@ def trainSingleModel(model,
         #     path_model = save_model_name_full
         #     torch.save(model, path_model)
 
-        if step % 100 == 0 or step > num_steps - 100:
+        if step > 0 and step % 400 == 0 or step > num_steps - 100:
             # save checker points
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
