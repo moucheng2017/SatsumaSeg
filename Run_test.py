@@ -7,6 +7,21 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 if __name__ == '__main__':
+
+    # Orthogonal planes:
+    trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data',
+                dataset_name='airway',
+                input_dim=5,
+                repeat=1,
+                train_batchsize=6,
+                num_steps=5000,
+                learning_rate=1e-3,
+                width=32,
+                log_tag='local_2022_05_22',
+                l2=1e-3,
+                temp=2.0
+                )
+
     # with torch.autograd.set_detect_anomaly(True):
     # SegPL-VI:
     # trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data',
@@ -45,16 +60,4 @@ if __name__ == '__main__':
     #             l2=1e-2
     #             )
 
-    # Orthogonal planes:
-    trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data',
-                dataset_name='airway',
-                input_dim=10,
-                repeat=1,
-                train_batchsize=5,
-                num_steps=5000,
-                learning_rate=1e-3,
-                width=32,
-                log_tag='local_2022_05_13',
-                l2=1e-3,
-                temp=2.0
-                )
+
