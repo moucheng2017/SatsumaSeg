@@ -16,6 +16,11 @@ class RandomCroppingOrthogonal(object):
                  cropping_h,
                  cropping_w,
                  discarded_slices=5):
+        '''
+        cropping_d: 3 d dimension of cropped sub volume cropping on h x w
+        cropping_h: 3 d dimension of cropped sub volume cropping on w x d
+        cropping_w: 3 d dimension of cropped sub volume cropping on h x d
+        '''
         self.discarded_slices = discarded_slices
         self.volume_d = cropping_d
         self.volume_h = cropping_h

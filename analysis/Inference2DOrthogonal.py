@@ -86,24 +86,24 @@ def adjustcontrast(data,
         return outputs
 
 
-def segment_single_case(volume,
-                        model,
-                        new_size):
+def seg_d_direction(volume,
+                    model,
+                    new_size):
 
     c, d, h, w = volume.size()
     print('volume has ' + str(d) + ' slices')
 
-    location_list = {
-        "left_up": [0, 0],
-        "center_up": [0, (w-new_size) // 2],
-        "right_up": [0, w-new_size],
-        "left_middle": [(h - new_size)//2, 0],
-        "center_middle": [(h - new_size)//2, (w-new_size) // 2],
-        "right_middle": [(h - new_size)//2, w-new_size],
-        "left_bottom": [h-new_size, 0],
-        "center_bottom": [h-new_size, (w-new_size) // 2],
-        "right_bottom": [h-new_size, w-new_size]
-    }
+    # location_list = {
+    #     "left_up": [0, 0],
+    #     "center_up": [0, (w-new_size[2]) // 2],
+    #     "right_up": [0, w-new_size[2]],
+    #     "left_middle": [(h - new_size[1])//2, 0],
+    #     "center_middle": [(h - new_size[1])//2, (w-new_size[2]) // 2],
+    #     "right_middle": [(h - new_size[1])//2, w-new_size[2]],
+    #     "left_bottom": [h-new_size[1], 0],
+    #     "center_bottom": [h-new_size[1], (w-new_size[2]) // 2],
+    #     "right_bottom": [h-new_size[1], w-new_size[2]]
+    # }
 
     # location_list = {
     #     "left_up": [0, 0],
@@ -118,23 +118,55 @@ def segment_single_case(volume,
 
     # print(seg.size())
 
-    for dd in range(d):
-        img = volume[:, dd, :, :]
-        # use 9 samples:
-        for each_location, each_coordiate in location_list.items():
-            cropped = img[:, each_coordiate[0]:each_coordiate[0] + new_size, each_coordiate[1]:each_coordiate[1] + new_size]
-            cropped = torch.unsqueeze(cropped, dim=0)
-            seg_patch, _ = model(cropped)
-            seg_patch = torch.sigmoid(seg_patch)
-            seg[each_coordiate[0]:each_coordiate[0] + new_size, each_coordiate[1]:each_coordiate[1] + new_size, dd] = seg_patch.detach().cpu().numpy()
+    for dd in range(0, d-new_size[0]):
+        img = volume[:, dd:dd+new_size[0], :, :] # c x dd x h x w
+        # # use 9 samples:
+        # for each_location, each_coordiate in location_list.items():
+        #     cropped = img[:, :, each_coordiate[0]:each_coordiate[0] + new_size, each_coordiate[1]:each_coordiate[1] + new_size]
+        #     cropped = torch.unsqueeze(cropped, dim=0)
+        #     seg_patch, _ = model(cropped)
+        #     seg_patch = torch.sigmoid(seg_patch)
+        #     seg[each_coordiate[0]:each_coordiate[0] + new_size, each_coordiate[1]:each_coordiate[1] + new_size, dd] = seg_patch.detach().cpu().numpy()
+
         # use sliding windows:
-        for h_ in range(0, h-new_size, 40):
-            for w_ in range(0, w-new_size, 40):
-                cropped = img[:, h_:h_ + new_size, w_:w_ + new_size]
+        for h_ in range(0, h-new_size, new_size // 2):
+            for w_ in range(0, w-new_size, new_size // 2):
+                cropped = img[:, h_:h_ + new_size[1], w_:w_ + new_size[2]]
                 cropped = torch.unsqueeze(cropped, dim=0)
                 seg_patch, _ = model(cropped)
                 seg_patch = torch.sigmoid(seg_patch)
-                seg[h_:h_ + new_size, w_:w_ + new_size, dd] = seg_patch.detach().cpu().numpy()
+                seg_patch = seg_patch.squeeze().detach().cpu().numpy()
+                seg[h_:h_ + new_size[1], w_:w_ + new_size[2], dd] = np.transpose(seg_patch, (1, 2, 0))
+        print('slice ' + str(dd) + ' is done...')
+
+    return seg
+
+
+def seg_h_direction(volume,
+                    model,
+                    new_size
+                    ):
+    '''
+    new_size: d x h x w
+    '''
+    c, d, h, w = volume.size()
+    print('volume has ' + str(d) + ' slices')
+
+    seg = np.zeros_like(volume.cpu().detach().numpy().squeeze())
+    seg = np.transpose(seg, (1, 2, 0))
+
+    for hh in range(0, h-new_size[1]):
+        img = volume[:, :, hh:hh+new_size[1], :]
+        # use sliding windows:
+        for d_ in range(0, d-new_size[0], new_size[0] // 2):
+            for w_ in range(0, w-new_size[2], new_size[2] // 2):
+                cropped = img[:, d_:d_ + new_size[0], :, w_:w_ + new_size[2]]
+                cropped = np.transpose(cropped, axes=(1, 0, 2))
+                cropped = torch.unsqueeze(cropped, dim=0)
+                seg_patch, _ = model(cropped)
+                # seg_patch = torch.sigmoid(seg_patch)
+                # seg_patch = seg_patch.squeeze().detach().cpu().numpy()
+                # seg[h_:h_ + new_size, w_:w_ + new_size, dd] = np.transpose(seg_patch, (1, 2, 0))
         print('slice ' + str(dd) + ' is done...')
 
     return seg
