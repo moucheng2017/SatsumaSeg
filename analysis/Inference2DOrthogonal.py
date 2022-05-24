@@ -129,14 +129,14 @@ def seg_d_direction(volume,
         #     seg[each_coordiate[0]:each_coordiate[0] + new_size, each_coordiate[1]:each_coordiate[1] + new_size, dd] = seg_patch.detach().cpu().numpy()
 
         # use sliding windows:
-        for h_ in range(0, h-new_size, new_size // 2):
-            for w_ in range(0, w-new_size, new_size // 2):
+        for h_ in range(0, h-new_size[1], new_size[1] // 2):
+            for w_ in range(0, w-new_size[2], new_size[2] // 2):
                 cropped = img[:, h_:h_ + new_size[1], w_:w_ + new_size[2]]
                 cropped = torch.unsqueeze(cropped, dim=0)
                 seg_patch, _ = model(cropped)
                 seg_patch = torch.sigmoid(seg_patch)
                 seg_patch = seg_patch.squeeze().detach().cpu().numpy()
-                seg[h_:h_ + new_size[1], w_:w_ + new_size[2], dd] = np.transpose(seg_patch, (1, 2, 0))
+                seg[h_:h_ + new_size[1], w_:w_ + new_size[2], dd:dd+new_size[0]] = np.transpose(seg_patch, (1, 2, 0))
         print('slice ' + str(dd) + ' is done...')
 
     return seg
@@ -164,19 +164,36 @@ def seg_h_direction(volume,
                 cropped = np.transpose(cropped, axes=(1, 0, 2))
                 cropped = torch.unsqueeze(cropped, dim=0)
                 seg_patch, _ = model(cropped)
-                # seg_patch = torch.sigmoid(seg_patch)
-                # seg_patch = seg_patch.squeeze().detach().cpu().numpy()
-                # seg[h_:h_ + new_size, w_:w_ + new_size, dd] = np.transpose(seg_patch, (1, 2, 0))
-        print('slice ' + str(dd) + ' is done...')
+                seg_patch = torch.sigmoid(seg_patch)
+                seg_patch = seg_patch.squeeze().detach().cpu().numpy()
+                seg[hh:hh + new_size[1], w_:w_ + new_size[2], d_:d_+new_size[0]] = np.transpose(seg_patch, (1, 2, 0))
+        print('slice ' + str(hh) + ' is done...')
 
+    return seg
+
+
+def merge_segs(folder):
+    all_files = os.listdir(folder)
+    seg = None
+    for each_seg in all_files:
+        each_seg = np.load(each_seg)
+        seg += each_seg
+
+    seg = seg / len(all_files)
+    seg = (seg > 0.9).float()
     return seg
 
 
 def segment2D(test_data_path,
               lung_path,
               model_path,
-              contrast_no,
-              new_size):
+              threshold,
+              new_size_d,
+              new_size_h,
+              new_size_w):
+
+    d = [new_size_d, new_size_h, new_size_w]
+    h = [new_size_h, new_size_d, new_size_w]
 
     # nii --> np:
     data = nii2np(test_data_path)
@@ -186,31 +203,14 @@ def segment2D(test_data_path,
     model = torch.load(model_path)
     model.eval()
 
-    if contrast_no > 1:
-        # ensemble on random contrast augmented of image:
-        augmented_data_list = adjustcontrast(data, lung, adjust_times=contrast_no)
-
-        # np --> tensor:
-        augmented_data_list = np2tensor_batch(augmented_data_list)
-
-        # prepare output:
-        output = np.zeros_like(augmented_data_list[0].cpu().detach().numpy().squeeze())
-        output = np.transpose(output, (1, 2, 0))
-
-        # inference on each contrast:
-        for augmented_data in augmented_data_list:
-            output += segment_single_case(augmented_data, model, new_size)
-
-        # ensemble on all of the contrast
-        output = output / len(augmented_data_list)
-
-    else:
-        data = np2tensor(data)
-        output = segment_single_case(data, model, new_size)
+    data = np2tensor(data)
+    output_d = seg_d_direction(data, model, d)
+    output_h = seg_h_direction(data, model, h)
+    output = (output_d + output_h) / 2
 
     lung = np.transpose(lung.squeeze(), (1, 2, 0))
     output = output*lung
-    output = np.where(output > 0.5, 1, 0)
+    output = np.where(output > threshold, 1, 0)
 
     return np.squeeze(output)
 
@@ -219,6 +219,9 @@ def save_seg(save_path,
              save_name,
              nii_path,
              saved_data):
+
+    if not os.path.exists(save_path):
+        os.makedirs(save_path, exist_ok=True)
 
     nii = nibabel.load(nii_path)
     segmentation_nii = nibabel.Nifti1Image(saved_data,
@@ -230,20 +233,26 @@ def save_seg(save_path,
 
 if __name__ == "__main__":
     case = '6357B'
-    new_size = 480
-    contrast_aug = 0
+    new_size_d = 5
+    new_size_h = 320
+    new_size_w = 320
+    threshold = 0.4
 
-    save_path = '/home/moucheng/projects_data/Pulmonary_data/airway/segmentation'
+    save_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/seg'
     data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/imgs/' + case + '.nii.gz'
     lung_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/lung/' + case + '_lunglabel.nii.gz'
-    model_path = '/home/moucheng/PhD/2022_12_Clinical/22020411/Sup2D_e1_l0.001_b5_w64_s1200_d4_r0.01_z1_x480/trained_models/Sup2D_e1_l0.001_b5_w64_s1200_d4_r0.01_z1_x480_1196.pt'
-    save_name = case + '_seg2D_contrast_aug_' + str(contrast_aug) + '.nii.gz'
+    model_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/airway/2022_05_13/OrthogonalSup2D_e1_l0.001_b6_w64_s5000_r0.01_z5_t2.0/trained_models/'
+    model_name = 'OrthogonalSup2D_e1_l0.001_b6_w64_s5000_r0.01_z5_t2.0_2000.pt'
+    model_path_full = model_path + model_name
+    save_name = case + '_seg2D_t' + str(threshold) + '.nii.gz'
 
     segmentation = segment2D(data_path,
                              lung_path,
-                             model_path,
-                             contrast_aug,
-                             new_size)
+                             model_path_full,
+                             threshold,
+                             new_size_d,
+                             new_size_h,
+                             new_size_w)
 
     save_seg(save_path, save_name, data_path, segmentation)
     print(np.shape(segmentation))
