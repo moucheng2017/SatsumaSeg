@@ -34,6 +34,7 @@ def nii2np(file_path):
     data = nibabel.load(file_path)
     data = data.get_fdata()
     data = np.array(data, dtype='float32')
+    print(np.shape(data))
     # Now applying lung window:
     data[data < -1000.0] = -1000.0
     data[data > 500.0] = 500.0
@@ -88,86 +89,89 @@ def adjustcontrast(data,
 
 def seg_d_direction(volume,
                     model,
-                    new_size):
+                    new_size,
+                    sliding_window):
 
     c, d, h, w = volume.size()
+    print(volume.size())
+
     print('volume has ' + str(d) + ' slices')
-
-    # location_list = {
-    #     "left_up": [0, 0],
-    #     "center_up": [0, (w-new_size[2]) // 2],
-    #     "right_up": [0, w-new_size[2]],
-    #     "left_middle": [(h - new_size[1])//2, 0],
-    #     "center_middle": [(h - new_size[1])//2, (w-new_size[2]) // 2],
-    #     "right_middle": [(h - new_size[1])//2, w-new_size[2]],
-    #     "left_bottom": [h-new_size[1], 0],
-    #     "center_bottom": [h-new_size[1], (w-new_size[2]) // 2],
-    #     "right_bottom": [h-new_size[1], w-new_size[2]]
-    # }
-
-    # location_list = {
-    #     "left_up": [0, 0],
-    #     "right_up": [0, w-new_size],
-    #     "center_middle": [(h - new_size)//2, (w-new_size) // 2],
-    #     "left_bottom": [h-new_size, 0],
-    #     "right_bottom": [h-new_size, w-new_size]
-    # }
 
     seg = np.zeros_like(volume.cpu().detach().numpy().squeeze())
     seg = np.transpose(seg, (1, 2, 0))
 
-    # print(seg.size())
-
-    for dd in range(0, d-new_size[0]):
-        img = volume[:, dd:dd+new_size[0], :, :] # c x dd x h x w
-        # # use 9 samples:
-        # for each_location, each_coordiate in location_list.items():
-        #     cropped = img[:, :, each_coordiate[0]:each_coordiate[0] + new_size, each_coordiate[1]:each_coordiate[1] + new_size]
-        #     cropped = torch.unsqueeze(cropped, dim=0)
-        #     seg_patch, _ = model(cropped)
-        #     seg_patch = torch.sigmoid(seg_patch)
-        #     seg[each_coordiate[0]:each_coordiate[0] + new_size, each_coordiate[1]:each_coordiate[1] + new_size, dd] = seg_patch.detach().cpu().numpy()
-
+    for dd in range(0, d-new_size[0], sliding_window):
+        img = volume[:, dd:dd+new_size[0], :, :]
         # use sliding windows:
-        for h_ in range(0, h-new_size[1], new_size[1] // 2):
-            for w_ in range(0, w-new_size[2], new_size[2] // 2):
-                cropped = img[:, h_:h_ + new_size[1], w_:w_ + new_size[2]]
-                cropped = torch.unsqueeze(cropped, dim=0)
+        for h_ in range(0, h-new_size[1], sliding_window):
+            for w_ in range(0, w-new_size[2], sliding_window):
+                cropped = img[:, :, h_:h_ + new_size[1], w_:w_ + new_size[2]]
                 seg_patch, _ = model(cropped)
                 seg_patch = torch.sigmoid(seg_patch)
                 seg_patch = seg_patch.squeeze().detach().cpu().numpy()
                 seg[h_:h_ + new_size[1], w_:w_ + new_size[2], dd:dd+new_size[0]] = np.transpose(seg_patch, (1, 2, 0))
-        print('slice ' + str(dd) + ' is done...')
+        print('d plane slice ' + str(dd) + ' is done...')
 
     return seg
 
 
 def seg_h_direction(volume,
                     model,
-                    new_size
+                    new_size,
+                    sliding_window):
+    '''
+    new_size: d x h x w
+    '''
+    # new_size[1]
+    c, d, h, w = volume.size()
+    print('volume has ' + str(h) + ' slices')
+
+    seg = np.zeros_like(volume.cpu().detach().numpy().squeeze())
+    seg = np.transpose(seg, (1, 2, 0))
+
+    for hh in range(0, h-new_size[1], sliding_window):
+        img = volume[:, :, hh:hh+new_size[1], :]
+        # use sliding windows:
+        for d_ in range(0, d-new_size[0], sliding_window):
+            for w_ in range(0, w-new_size[2], sliding_window):
+                cropped = img[:, d_:d_ + new_size[0], :, w_:w_ + new_size[2]] # 1 x 320 x 5 x 320, C x D x H x W
+                cropped = cropped.permute(0, 2, 1, 3) # 1 x 5 x 320 x 320, C x H x D x W
+                seg_patch, _ = model(cropped)
+                seg_patch = torch.sigmoid(seg_patch)
+                seg_patch = seg_patch.squeeze().detach().cpu().numpy() # H x D x W
+                # seg[hh:hh + new_size[1], w_:w_ + new_size[2], d_:d_ + new_size[0]] = seg_patch
+                seg[hh:hh + new_size[1], w_:w_ + new_size[2], d_:d_+new_size[0]] = np.transpose(seg_patch, (0, 2, 1))
+        print('h plane slice ' + str(hh) + ' is done...')
+
+    return seg
+
+
+def seg_w_direction(volume,
+                    model,
+                    new_size,
+                    sliding_window
                     ):
     '''
     new_size: d x h x w
     '''
     c, d, h, w = volume.size()
-    print('volume has ' + str(d) + ' slices')
+    print('volume has ' + str(w) + ' slices')
 
     seg = np.zeros_like(volume.cpu().detach().numpy().squeeze())
     seg = np.transpose(seg, (1, 2, 0))
 
-    for hh in range(0, h-new_size[1]):
-        img = volume[:, :, hh:hh+new_size[1], :]
+    for ww in range(0, w-new_size[2], sliding_window):
+        img = volume[:, :, :, ww:ww+new_size[2]]
         # use sliding windows:
-        for d_ in range(0, d-new_size[0], new_size[0] // 2):
-            for w_ in range(0, w-new_size[2], new_size[2] // 2):
-                cropped = img[:, d_:d_ + new_size[0], :, w_:w_ + new_size[2]]
-                cropped = np.transpose(cropped, axes=(1, 0, 2))
-                cropped = torch.unsqueeze(cropped, dim=0)
+        for d_ in range(0, d-new_size[0], sliding_window):
+            for h_ in range(0, h-new_size[1], sliding_window):
+                cropped = img[:, d_:d_ + new_size[0], h_:h_ + new_size[1], :] # 1 x 320 x 320 x 5, C x D x H x W
+                cropped = cropped.permute(0, 3, 1, 2) # 1 x 5 x 320 x 320, C x W x D x H
                 seg_patch, _ = model(cropped)
                 seg_patch = torch.sigmoid(seg_patch)
-                seg_patch = seg_patch.squeeze().detach().cpu().numpy()
-                seg[hh:hh + new_size[1], w_:w_ + new_size[2], d_:d_+new_size[0]] = np.transpose(seg_patch, (1, 2, 0))
-        print('slice ' + str(hh) + ' is done...')
+                seg_patch = seg_patch.squeeze().detach().cpu().numpy() # W x D x H
+                seg[h_:h_ + new_size[1], ww:ww + new_size[2], d_:d_+new_size[0]] = np.transpose(seg_patch, (2, 0, 1))
+        print('w plane slice ' + str(ww) + ' is done...')
 
     return seg
 
@@ -190,10 +194,12 @@ def segment2D(test_data_path,
               threshold,
               new_size_d,
               new_size_h,
-              new_size_w):
+              new_size_w,
+              sliding_window):
 
     d = [new_size_d, new_size_h, new_size_w]
     h = [new_size_h, new_size_d, new_size_w]
+    w = [new_size_h, new_size_w, new_size_d]
 
     # nii --> np:
     data = nii2np(test_data_path)
@@ -204,15 +210,16 @@ def segment2D(test_data_path,
     model.eval()
 
     data = np2tensor(data)
-    output_d = seg_d_direction(data, model, d)
-    output_h = seg_h_direction(data, model, h)
-    output = (output_d + output_h) / 2
+    output_w = seg_w_direction(data, model, w, sliding_window)
+    output_h = seg_h_direction(data, model, h, sliding_window)
+    output_d = seg_d_direction(data, model, d, sliding_window)
+    output_prob = (output_d + output_h + output_w) / 3
 
     lung = np.transpose(lung.squeeze(), (1, 2, 0))
-    output = output*lung
-    output = np.where(output > threshold, 1, 0)
+    output_prob = output_prob*lung
+    output = np.where(output_prob > threshold, 1, 0)
 
-    return np.squeeze(output)
+    return np.squeeze(output), np.squeeze(output_prob)
 
 
 def save_seg(save_path,
@@ -234,9 +241,9 @@ def save_seg(save_path,
 if __name__ == "__main__":
     case = '6357B'
     new_size_d = 5
-    new_size_h = 320
-    new_size_w = 320
-    threshold = 0.4
+    new_resolution = 320
+    threshold = 0.5
+    sliding_window = 2
 
     save_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/seg'
     data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/imgs/' + case + '.nii.gz'
@@ -244,17 +251,21 @@ if __name__ == "__main__":
     model_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/airway/2022_05_13/OrthogonalSup2D_e1_l0.001_b6_w64_s5000_r0.01_z5_t2.0/trained_models/'
     model_name = 'OrthogonalSup2D_e1_l0.001_b6_w64_s5000_r0.01_z5_t2.0_2000.pt'
     model_path_full = model_path + model_name
-    save_name = case + '_seg2D_t' + str(threshold) + '.nii.gz'
+    save_name = case + '_seg2Dorthogonal_t' + str(threshold) + '_r' + str(new_resolution) + '_s' + str(sliding_window) + '.nii.gz'
+    save_name_prob = case + '_prob2Dorthogonal_t' + str(threshold) + '_r' + str(new_resolution) + '_s' + str(sliding_window) + '.nii.gz'
 
-    segmentation = segment2D(data_path,
-                             lung_path,
-                             model_path_full,
-                             threshold,
-                             new_size_d,
-                             new_size_h,
-                             new_size_w)
+    segmentation, probability = segment2D(data_path,
+                                          lung_path,
+                                          model_path_full,
+                                          threshold,
+                                          new_size_d,
+                                          new_resolution,
+                                          new_resolution,
+                                          sliding_window)
 
     save_seg(save_path, save_name, data_path, segmentation)
+    save_seg(save_path, save_name_prob, data_path, probability)
+
     print(np.shape(segmentation))
     print('End')
 
