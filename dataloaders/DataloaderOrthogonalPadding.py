@@ -10,13 +10,17 @@ import nibabel as nib
 import numpy.ma as ma
 
 
-class RandomCroppingAnyPlane(object):
-    # todo: adding sampling any planes on three directions then sample to the same size again
+class RandomCroppingOrthogonalPadding(object):
     def __init__(self,
                  cropping_d,
                  cropping_h,
                  cropping_w,
                  discarded_slices=5):
+        '''
+        cropping_d: 3 d dimension of cropped sub volume cropping on h x w
+        cropping_h: 3 d dimension of cropped sub volume cropping on w x d
+        cropping_w: 3 d dimension of cropped sub volume cropping on h x d
+        '''
         self.discarded_slices = discarded_slices
         self.volume_d = cropping_d
         self.volume_h = cropping_h
@@ -27,20 +31,23 @@ class RandomCroppingAnyPlane(object):
         # for supervised learning, we need to crop both volume and the label, arg1: volume, arg2: label
         # for unsupervised learning, we only need to crop the volume, arg1: volume
 
-        for volume in volumes:
+        for volume in enumerate(volumes):
             d, h, w = np.shape(volume)
+            volume = np.pad(volume, pad_width=((self.volume_d[0] // 2, self.volume_d[0] // 2),
+                                               (self.volume_d[1] // 2, self.volume_d[1] // 2),
+                                               (self.volume_d[2] // 2, self.volume_d[2] // 2)), mode='symmetric')
 
-        sample_position_d_d = np.random.randint(self.discarded_slices, d - self.volume_d[0] - self.discarded_slices)
-        sample_position_d_h = np.random.randint(self.discarded_slices, h - self.volume_d[1] - self.discarded_slices)
-        sample_position_d_w = np.random.randint(self.discarded_slices, w - self.volume_d[2] - self.discarded_slices)
+        sample_position_d_d = np.random.randint(self.discarded_slices, d - self.discarded_slices)
+        sample_position_d_h = np.random.randint(self.discarded_slices, h - self.discarded_slices)
+        sample_position_d_w = np.random.randint(self.discarded_slices, w - self.discarded_slices)
 
-        sample_position_h_d = np.random.randint(self.discarded_slices, d - self.volume_h[0] - self.discarded_slices)
-        sample_position_h_h = np.random.randint(self.discarded_slices, h - self.volume_h[1] - self.discarded_slices)
-        sample_position_h_w = np.random.randint(self.discarded_slices, w - self.volume_h[2] - self.discarded_slices)
+        sample_position_h_d = np.random.randint(self.discarded_slices, d - self.discarded_slices)
+        sample_position_h_h = np.random.randint(self.discarded_slices, h - self.discarded_slices)
+        sample_position_h_w = np.random.randint(self.discarded_slices, w - self.discarded_slices)
 
-        sample_position_w_d = np.random.randint(self.discarded_slices, d - self.volume_w[0] - self.discarded_slices)
-        sample_position_w_h = np.random.randint(self.discarded_slices, h - self.volume_w[1] - self.discarded_slices)
-        sample_position_w_w = np.random.randint(self.discarded_slices, w - self.volume_w[2] - self.discarded_slices)
+        sample_position_w_d = np.random.randint(self.discarded_slices, d - self.discarded_slices)
+        sample_position_w_h = np.random.randint(self.discarded_slices, h - self.discarded_slices)
+        sample_position_w_w = np.random.randint(self.discarded_slices, w - self.discarded_slices)
 
         outputs = {"plane_d": [],
                    "plane_h": [],
@@ -104,7 +111,7 @@ def normalisation(lung, image):
     return image
 
 
-class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
+class CT_Dataset_Orthogonal_Padding(torch.utils.data.Dataset):
     '''
     Each volume should be at: Dimension X Height X Width
     '''
@@ -115,9 +122,9 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
 
         self.labelled_flag = labelled
         self.augmentation_contrast = RandomContrast([10, 255])
-        self.augmentation_cropping = RandomCroppingAnyPlane(cropping_d=cropping_d,
-                                                            cropping_h=cropping_h,
-                                                            cropping_w=cropping_w)
+        self.augmentation_cropping = RandomCroppingOrthogonal(cropping_d=cropping_d,
+                                                              cropping_h=cropping_h,
+                                                              cropping_w=cropping_w)
 
     def __getitem__(self, index):
         # Lung masks:
@@ -153,7 +160,7 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
 
         # Random contrast and Renormalisation:
         image_another_contrast = self.augmentation_contrast.randomintensity(image)
-        image = 0.5*image + 0.5*image_another_contrast
+        image = 0.7*image + 0.3*image_another_contrast
         image = normalisation(lung, image)
 
         # Extract image name
