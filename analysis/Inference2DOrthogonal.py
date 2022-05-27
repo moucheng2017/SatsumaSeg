@@ -90,7 +90,8 @@ def adjustcontrast(data,
 def seg_d_direction(volume,
                     model,
                     new_size,
-                    sliding_window):
+                    sliding_window,
+                    temperature=2):
 
     c, d, h, w = volume.size()
     print(volume.size())
@@ -107,7 +108,7 @@ def seg_d_direction(volume,
             for w_ in range(0, w-new_size[2], sliding_window):
                 cropped = img[:, :, h_:h_ + new_size[1], w_:w_ + new_size[2]]
                 seg_patch, _ = model(cropped)
-                seg_patch = torch.sigmoid(seg_patch)
+                seg_patch = torch.sigmoid(seg_patch / temperature)
                 seg_patch = seg_patch.squeeze().detach().cpu().numpy()
                 seg[h_:h_ + new_size[1], w_:w_ + new_size[2], dd:dd+new_size[0]] = np.transpose(seg_patch, (1, 2, 0))
         print('d plane slice ' + str(dd) + ' is done...')
@@ -118,7 +119,9 @@ def seg_d_direction(volume,
 def seg_h_direction(volume,
                     model,
                     new_size,
-                    sliding_window):
+                    sliding_window,
+                    temperature=2
+                    ):
     '''
     new_size: d x h x w
     '''
@@ -137,7 +140,7 @@ def seg_h_direction(volume,
                 cropped = img[:, d_:d_ + new_size[0], :, w_:w_ + new_size[2]] # 1 x 320 x 5 x 320, C x D x H x W
                 cropped = cropped.permute(0, 2, 1, 3) # 1 x 5 x 320 x 320, C x H x D x W
                 seg_patch, _ = model(cropped)
-                seg_patch = torch.sigmoid(seg_patch)
+                seg_patch = torch.sigmoid(seg_patch / temperature)
                 seg_patch = seg_patch.squeeze().detach().cpu().numpy() # H x D x W
                 # seg[hh:hh + new_size[1], w_:w_ + new_size[2], d_:d_ + new_size[0]] = seg_patch
                 seg[hh:hh + new_size[1], w_:w_ + new_size[2], d_:d_+new_size[0]] = np.transpose(seg_patch, (0, 2, 1))
@@ -149,7 +152,8 @@ def seg_h_direction(volume,
 def seg_w_direction(volume,
                     model,
                     new_size,
-                    sliding_window
+                    sliding_window,
+                    temperature=2
                     ):
     '''
     new_size: d x h x w
@@ -168,7 +172,7 @@ def seg_w_direction(volume,
                 cropped = img[:, d_:d_ + new_size[0], h_:h_ + new_size[1], :] # 1 x 320 x 320 x 5, C x D x H x W
                 cropped = cropped.permute(0, 3, 1, 2) # 1 x 5 x 320 x 320, C x W x D x H
                 seg_patch, _ = model(cropped)
-                seg_patch = torch.sigmoid(seg_patch)
+                seg_patch = torch.sigmoid(seg_patch / temperature)
                 seg_patch = seg_patch.squeeze().detach().cpu().numpy() # W x D x H
                 seg[h_:h_ + new_size[1], ww:ww + new_size[2], d_:d_+new_size[0]] = np.transpose(seg_patch, (2, 0, 1))
         print('w plane slice ' + str(ww) + ' is done...')
@@ -195,7 +199,8 @@ def segment2D(test_data_path,
               new_size_d,
               new_size_h,
               new_size_w,
-              sliding_window):
+              sliding_window,
+              temperature=2):
 
     d = [new_size_d, new_size_h, new_size_w]
     h = [new_size_h, new_size_d, new_size_w]
@@ -210,9 +215,9 @@ def segment2D(test_data_path,
     model.eval()
 
     data = np2tensor(data)
-    output_w = seg_w_direction(data, model, w, sliding_window)
-    output_h = seg_h_direction(data, model, h, sliding_window)
-    output_d = seg_d_direction(data, model, d, sliding_window)
+    output_w = seg_w_direction(data, model, w, sliding_window, temperature)
+    output_h = seg_h_direction(data, model, h, sliding_window, temperature)
+    output_d = seg_d_direction(data, model, d, sliding_window, temperature)
     output_prob = (output_d + output_h + output_w) / 3
 
     lung = np.transpose(lung.squeeze(), (1, 2, 0))
@@ -220,6 +225,17 @@ def segment2D(test_data_path,
     output = np.where(output_prob > threshold, 1, 0)
 
     return np.squeeze(output), np.squeeze(output_prob)
+
+
+def ensemble(seg_path):
+    final_seg = None
+    all_segs = os.listdir(seg_path)
+    all_segs.sort()
+    all_segs = [os.path.join(seg_path, seg_name) for seg_name in all_segs if 'prob' in seg_name]
+    for seg in all_segs:
+        seg = np.load(seg)
+        final_seg += seg
+    return final_seg / len(all_segs)
 
 
 def save_seg(save_path,
@@ -243,7 +259,8 @@ if __name__ == "__main__":
     new_size_d = 5
     new_resolution = 320
     threshold = 0.5
-    sliding_window = 2
+    sliding_window = 5
+    temperature = 2
 
     save_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/seg'
     data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/imgs/' + case + '.nii.gz'
@@ -251,8 +268,8 @@ if __name__ == "__main__":
     model_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/airway/2022_05_13/OrthogonalSup2D_e1_l0.001_b6_w64_s5000_r0.01_z5_t2.0/trained_models/'
     model_name = 'OrthogonalSup2D_e1_l0.001_b6_w64_s5000_r0.01_z5_t2.0_2000.pt'
     model_path_full = model_path + model_name
-    save_name = case + '_seg2Dorthogonal_t' + str(threshold) + '_r' + str(new_resolution) + '_s' + str(sliding_window) + '.nii.gz'
-    save_name_prob = case + '_prob2Dorthogonal_t' + str(threshold) + '_r' + str(new_resolution) + '_s' + str(sliding_window) + '.nii.gz'
+    save_name = case + '_seg2Dorthogonal_t' + str(threshold) + '_r' + str(new_resolution) + '_s' + str(sliding_window) + '_t' + str(temperature) + '.nii.gz'
+    save_name_prob = case + '_prob2Dorthogonal_t' + str(threshold) + '_r' + str(new_resolution) + '_s' + str(sliding_window) + '_t' + str(temperature) + '.nii.gz'
 
     segmentation, probability = segment2D(data_path,
                                           lung_path,
@@ -261,7 +278,8 @@ if __name__ == "__main__":
                                           new_size_d,
                                           new_resolution,
                                           new_resolution,
-                                          sliding_window)
+                                          sliding_window,
+                                          temperature)
 
     save_seg(save_path, save_name, data_path, segmentation)
     save_seg(save_path, save_name_prob, data_path, probability)
