@@ -37,6 +37,18 @@ class RandomCroppingOrthogonalPadding(object):
                                                (self.volume_d[1] // 2, self.volume_d[1] // 2),
                                                (self.volume_d[2] // 2, self.volume_d[2] // 2)), mode='symmetric')
 
+        # sample_position_d_d = np.random.randint(self.discarded_slices, d - self.volume_d[0] // 2 - self.discarded_slices)
+        # sample_position_d_h = np.random.randint(self.discarded_slices, h - self.volume_d[1] // 2 - self.discarded_slices)
+        # sample_position_d_w = np.random.randint(self.discarded_slices, w - self.volume_d[2] // 2 - self.discarded_slices)
+        #
+        # sample_position_h_d = np.random.randint(self.discarded_slices, d - self.volume_h[0] // 2 - self.discarded_slices)
+        # sample_position_h_h = np.random.randint(self.discarded_slices, h - self.volume_h[1] // 2 - self.discarded_slices)
+        # sample_position_h_w = np.random.randint(self.discarded_slices, w - self.volume_h[2] // 2 - self.discarded_slices)
+        #
+        # sample_position_w_d = np.random.randint(self.discarded_slices, d - self.volume_w[0] // 2 - self.discarded_slices)
+        # sample_position_w_h = np.random.randint(self.discarded_slices, h - self.volume_w[1] // 2 - self.discarded_slices)
+        # sample_position_w_w = np.random.randint(self.discarded_slices, w - self.volume_w[2] // 2 - self.discarded_slices)
+
         sample_position_d_d = np.random.randint(self.discarded_slices, d - self.discarded_slices)
         sample_position_d_h = np.random.randint(self.discarded_slices, h - self.discarded_slices)
         sample_position_d_w = np.random.randint(self.discarded_slices, w - self.discarded_slices)
@@ -122,9 +134,9 @@ class CT_Dataset_Orthogonal_Padding(torch.utils.data.Dataset):
 
         self.labelled_flag = labelled
         self.augmentation_contrast = RandomContrast([10, 255])
-        self.augmentation_cropping = RandomCroppingOrthogonal(cropping_d=cropping_d,
-                                                              cropping_h=cropping_h,
-                                                              cropping_w=cropping_w)
+        self.augmentation_cropping = RandomCroppingOrthogonalPadding(cropping_d=cropping_d,
+                                                                     cropping_h=cropping_h,
+                                                                     cropping_w=cropping_w)
 
     def __getitem__(self, index):
         # Lung masks:
