@@ -10,7 +10,7 @@ import shutil
 import torch.nn.functional as F
 
 from Metrics import segmentation_scores
-from dataloaders.DataloaderOrthogonal import CT_Dataset_Orthogonal
+from dataloaders.DataloaderOrthogonalPadding import CT_Dataset_Orthogonal_Padding
 from tensorboardX import SummaryWriter
 
 import wandb
@@ -98,7 +98,7 @@ def getData(data_directory, dataset_name, train_batchsize, d, h, w, val_batchsiz
     train_label_folder_labelled = folder_labelled + '/lbls'
     train_lung_folder_labelled = folder_labelled + '/lung'
 
-    train_dataset_labelled = CT_Dataset_Orthogonal(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, d, h, w, labelled=True)
+    train_dataset_labelled = CT_Dataset_Orthogonal_Padding(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, d, h, w, labelled=True)
 
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
@@ -106,7 +106,7 @@ def getData(data_directory, dataset_name, train_batchsize, d, h, w, val_batchsiz
     validate_label_folder = data_directory + '/validate/lbls'
     validate_lung_folder = data_directory + '/validate/lung'
 
-    validate_dataset = CT_Dataset_Orthogonal(validate_image_folder, validate_label_folder, validate_lung_folder, d, h, w, labelled=True)
+    validate_dataset = CT_Dataset_Orthogonal_Padding(validate_image_folder, validate_label_folder, validate_lung_folder, d, h, w, labelled=True)
     validateloader = data.DataLoader(validate_dataset, batch_size=val_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
     testdata_path = data_directory + '/test'
