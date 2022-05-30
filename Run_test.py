@@ -1,6 +1,5 @@
 import torch
 # sys.path.append("..")
-# from Train_Unet_SegPLVI import trainModels
 from Train_Unet_Orthogonal import trainModels
 # torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
@@ -11,15 +10,18 @@ if __name__ == '__main__':
     # Orthogonal planes:
     trainModels(data_directory='/home/moucheng/projects_data/Pulmonary_data',
                 dataset_name='airway',
-                input_dim=5,
                 repeat=1,
-                train_batchsize=6,
+                train_batchsize=5,
+                val_batchsize=2,
                 num_steps=5000,
                 learning_rate=1e-3,
-                width=32,
-                log_tag='local_2022_05_22',
-                l2=1e-3,
-                temp=2.0
+                width=24,
+                log_tag='2022_05_30',
+                l2=0.01,
+                temp=2.0,
+                new_d=5,
+                new_h=384,
+                new_w=384,
                 )
 
     # with torch.autograd.set_detect_anomaly(True):
