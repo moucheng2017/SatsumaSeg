@@ -12,7 +12,7 @@ if __name__ == '__main__':
                 dataset_name='airway',
                 repeat=1,
                 train_batchsize=5,
-                val_batchsize=2,
+                val_batchsize=5,
                 num_steps=5000,
                 learning_rate=1e-3,
                 width=24,
@@ -20,9 +20,8 @@ if __name__ == '__main__':
                 l2=0.01,
                 temp=2.0,
                 new_d=5,
-                new_h=384,
-                new_w=384,
-                )
+                new_h=448,
+                new_w=448)
 
     # with torch.autograd.set_detect_anomaly(True):
     # SegPL-VI:

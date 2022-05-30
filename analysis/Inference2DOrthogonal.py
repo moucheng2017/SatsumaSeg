@@ -139,6 +139,14 @@ def seg_h_direction(volume,
             for w_ in range(0, w-new_size[2], sliding_window):
                 cropped = img[:, d_:d_ + new_size[0], :, w_:w_ + new_size[2]] # 1 x 320 x 5 x 320, C x D x H x W
                 cropped = cropped.permute(0, 2, 1, 3) # 1 x 5 x 320 x 320, C x H x D x W
+<<<<<<< HEAD
+                seg_patch, _ = model(cropped)
+                seg_patch = torch.sigmoid(seg_patch / temperature)
+                seg_patch = seg_patch.squeeze().detach().cpu().numpy() # H x D x W
+                # seg[hh:hh + new_size[1], w_:w_ + new_size[2], d_:d_ + new_size[0]] = seg_patch
+                seg[hh:hh + new_size[1], w_:w_ + new_size[2], d_:d_+new_size[0]] = np.transpose(seg_patch, (0, 2, 1))
+        print('h plane slice ' + str(hh) + ' is done...')
+=======
                 seg_patch, _ = model(cropped)
                 seg_patch = torch.sigmoid(seg_patch / temperature)
                 seg_patch = seg_patch.squeeze().detach().cpu().numpy() # H x D x W
@@ -176,10 +184,45 @@ def seg_w_direction(volume,
                 seg_patch = seg_patch.squeeze().detach().cpu().numpy() # W x D x H
                 seg[h_:h_ + new_size[1], ww:ww + new_size[2], d_:d_+new_size[0]] = np.transpose(seg_patch, (2, 0, 1))
         print('w plane slice ' + str(ww) + ' is done...')
+>>>>>>> 3c37b1dca3a7d2ea42b79f1f166c175fe20e538b
 
     return seg
 
 
+<<<<<<< HEAD
+def seg_w_direction(volume,
+                    model,
+                    new_size,
+                    sliding_window,
+                    temperature=2
+                    ):
+    '''
+    new_size: d x h x w
+    '''
+    c, d, h, w = volume.size()
+    print('volume has ' + str(w) + ' slices')
+
+    seg = np.zeros_like(volume.cpu().detach().numpy().squeeze())
+    seg = np.transpose(seg, (1, 2, 0))
+
+    for ww in range(0, w-new_size[2], sliding_window):
+        img = volume[:, :, :, ww:ww+new_size[2]]
+        # use sliding windows:
+        for d_ in range(0, d-new_size[0], sliding_window):
+            for h_ in range(0, h-new_size[1], sliding_window):
+                cropped = img[:, d_:d_ + new_size[0], h_:h_ + new_size[1], :] # 1 x 320 x 320 x 5, C x D x H x W
+                cropped = cropped.permute(0, 3, 1, 2) # 1 x 5 x 320 x 320, C x W x D x H
+                seg_patch, _ = model(cropped)
+                seg_patch = torch.sigmoid(seg_patch / temperature)
+                seg_patch = seg_patch.squeeze().detach().cpu().numpy() # W x D x H
+                seg[h_:h_ + new_size[1], ww:ww + new_size[2], d_:d_+new_size[0]] = np.transpose(seg_patch, (2, 0, 1))
+        print('w plane slice ' + str(ww) + ' is done...')
+
+    return seg
+
+
+=======
+>>>>>>> 3c37b1dca3a7d2ea42b79f1f166c175fe20e538b
 def merge_segs(folder):
     all_files = os.listdir(folder)
     seg = None
@@ -219,6 +262,7 @@ def segment2D(test_data_path,
     output_h = seg_h_direction(data, model, h, sliding_window, temperature)
     output_d = seg_d_direction(data, model, d, sliding_window, temperature)
     output_prob = (output_d + output_h + output_w) / 3
+<<<<<<< HEAD
 
     lung = np.transpose(lung.squeeze(), (1, 2, 0))
     output_prob = output_prob*lung
@@ -227,6 +271,16 @@ def segment2D(test_data_path,
     return np.squeeze(output), np.squeeze(output_prob)
 
 
+=======
+
+    lung = np.transpose(lung.squeeze(), (1, 2, 0))
+    output_prob = output_prob*lung
+    output = np.where(output_prob > threshold, 1, 0)
+
+    return np.squeeze(output), np.squeeze(output_prob)
+
+
+>>>>>>> 3c37b1dca3a7d2ea42b79f1f166c175fe20e538b
 def ensemble(seg_path):
     final_seg = None
     all_segs = os.listdir(seg_path)
@@ -257,10 +311,16 @@ def save_seg(save_path,
 if __name__ == "__main__":
     case = '6357B'
     new_size_d = 5
+<<<<<<< HEAD
     new_resolution_w = 320
     new_resolution_h = 480
     threshold = 0.5
     sliding_window = 1
+=======
+    new_resolution = 320
+    threshold = 0.5
+    sliding_window = 5
+>>>>>>> 3c37b1dca3a7d2ea42b79f1f166c175fe20e538b
     temperature = 2
 
     save_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/seg'
@@ -269,16 +329,26 @@ if __name__ == "__main__":
     model_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/airway/2022_05_13/OrthogonalSup2D_e1_l0.001_b6_w64_s5000_r0.01_z5_t2.0/trained_models/'
     model_name = 'OrthogonalSup2D_e1_l0.001_b6_w64_s5000_r0.01_z5_t2.0_2000.pt'
     model_path_full = model_path + model_name
+<<<<<<< HEAD
     save_name = case + '_seg2Dorthogonal_t' + str(threshold) + '_h' + str(new_resolution_h) + '_w' + str(new_resolution_w) + '_s' + str(sliding_window) + '_t' + str(temperature) + '.nii.gz'
     save_name_prob = case + '_prob2Dorthogonal_t' + str(threshold) + '_h' + str(new_resolution_h) + '_w' + str(new_resolution_w) + '_s' + str(sliding_window) + '_t' + str(temperature) + '.nii.gz'
+=======
+    save_name = case + '_seg2Dorthogonal_t' + str(threshold) + '_r' + str(new_resolution) + '_s' + str(sliding_window) + '_t' + str(temperature) + '.nii.gz'
+    save_name_prob = case + '_prob2Dorthogonal_t' + str(threshold) + '_r' + str(new_resolution) + '_s' + str(sliding_window) + '_t' + str(temperature) + '.nii.gz'
+>>>>>>> 3c37b1dca3a7d2ea42b79f1f166c175fe20e538b
 
     segmentation, probability = segment2D(data_path,
                                           lung_path,
                                           model_path_full,
                                           threshold,
                                           new_size_d,
+<<<<<<< HEAD
                                           new_resolution_h,
                                           new_resolution_w,
+=======
+                                          new_resolution,
+                                          new_resolution,
+>>>>>>> 3c37b1dca3a7d2ea42b79f1f166c175fe20e538b
                                           sliding_window,
                                           temperature)
 
