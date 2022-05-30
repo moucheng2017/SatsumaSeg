@@ -31,13 +31,16 @@ from analysis.Inference3D import test_all_models
 
 def trainModels(dataset_name,
                 data_directory,
-                input_dim,
                 repeat,
-                train_batchsize,
                 num_steps,
                 learning_rate,
                 width,
                 log_tag,
+                train_batchsize,
+                val_batchsize=5,
+                new_d=5,
+                new_h=480,
+                new_w=480,
                 temp=0.5,
                 l2=0.01
                 ):
@@ -50,7 +53,7 @@ def trainModels(dataset_name,
             "batch_size": train_batchsize
         }
         repeat_str = str(j)
-        Exp = Unet2DMultiChannel(in_ch=input_dim, width=width, output_channels=input_dim)
+        Exp = Unet2DMultiChannel(in_ch=new_d, width=width, output_channels=new_d)
         Exp_name = 'OrthogonalSup2D'
 
         Exp_name = Exp_name + \
@@ -60,18 +63,19 @@ def trainModels(dataset_name,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_r' + str(l2) + \
-                   '_z' + str(input_dim) + \
+                   '_z' + str(new_d) + \
+                   '_h' + str(new_h) + \
+                   '_w' + str(new_w) + \
                    '_t' + str(temp)
 
         trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory,
                                                                                                                       dataset_name,
                                                                                                                       train_batchsize,
-                                                                                                                      [input_dim, 480, 480],
-                                                                                                                      [320, input_dim, 480],
-                                                                                                                      [320, 480, input_dim],
-                                                                                                                      5)
+                                                                                                                      [new_d, new_h, new_w],
+                                                                                                                      [new_h, new_d, new_w],
+                                                                                                                      [new_h, new_w, new_d],
+                                                                                                                      val_batchsize)
 
-        # ========================
         trainSingleModel(model=Exp,
                          model_name=Exp_name,
                          num_steps=num_steps,

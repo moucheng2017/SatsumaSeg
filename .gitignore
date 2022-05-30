@@ -1,3 +1,6 @@
+# Ignore all wandb file:
+wandb/
+
 *.pyc
 *.pyo
 

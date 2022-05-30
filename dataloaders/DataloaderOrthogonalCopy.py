@@ -10,13 +10,17 @@ import nibabel as nib
 import numpy.ma as ma
 
 
-class RandomCroppingAnyPlane(object):
-    # todo: adding sampling any planes on three directions then sample to the same size again
+class RandomCroppingOrthogonal(object):
     def __init__(self,
                  cropping_d,
                  cropping_h,
                  cropping_w,
                  discarded_slices=5):
+        '''
+        cropping_d: 3 d dimension of cropped sub volume cropping on h x w
+        cropping_h: 3 d dimension of cropped sub volume cropping on w x d
+        cropping_w: 3 d dimension of cropped sub volume cropping on h x d
+        '''
         self.discarded_slices = discarded_slices
         self.volume_d = cropping_d
         self.volume_h = cropping_h
@@ -115,9 +119,9 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
 
         self.labelled_flag = labelled
         self.augmentation_contrast = RandomContrast([10, 255])
-        self.augmentation_cropping = RandomCroppingAnyPlane(cropping_d=cropping_d,
-                                                            cropping_h=cropping_h,
-                                                            cropping_w=cropping_w)
+        self.augmentation_cropping = RandomCroppingOrthogonal(cropping_d=cropping_d,
+                                                              cropping_h=cropping_h,
+                                                              cropping_w=cropping_w)
 
     def __getitem__(self, index):
         # Lung masks:
@@ -153,7 +157,7 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
 
         # Random contrast and Renormalisation:
         image_another_contrast = self.augmentation_contrast.randomintensity(image)
-        image = 0.5*image + 0.5*image_another_contrast
+        image = 0.7*image + 0.3*image_another_contrast
         image = normalisation(lung, image)
 
         # Extract image name
