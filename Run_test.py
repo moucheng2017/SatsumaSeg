@@ -12,7 +12,7 @@ if __name__ == '__main__':
                 dataset_name='airway',
                 repeat=1,
                 train_batchsize=5,
-                val_batchsize=5,
+                val_batchsize=3,
                 num_steps=5000,
                 learning_rate=1e-3,
                 width=24,
