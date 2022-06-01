@@ -13,7 +13,7 @@ from Metrics import segmentation_scores
 from dataloaders.DataloaderOrthogonal import CT_Dataset_Orthogonal
 from tensorboardX import SummaryWriter
 
-import wandb
+# import wandb
 
 from Utils import validate_three_planes
 from Loss import SoftDiceLoss
@@ -46,12 +46,12 @@ def trainModels(dataset_name,
                 ):
 
     for j in range(1, repeat + 1):
-        wandb.init(project="test-project", entity="satsuma")
-        wandb.config = {
-            "learning_rate": learning_rate,
-            "epochs": num_steps,
-            "batch_size": train_batchsize
-        }
+        # wandb.init(project="test-project", entity="satsuma")
+        # wandb.config = {
+        #     "learning_rate": learning_rate,
+        #     "epochs": num_steps,
+        #     "batch_size": train_batchsize
+        # }
         repeat_str = str(j)
         Exp = Unet2DMultiChannel(in_ch=new_d, width=width, output_channels=new_d)
         Exp_name = 'OrthogonalSup2D'
@@ -221,18 +221,18 @@ def trainSingleModel(model,
                                            'val iou h': validate_iou_h,
                                            'val iou w': validate_iou_w}, step + 1)
 
-        wandb.log({"loss": loss,
-                   "val iou": {
-                   "d": validate_iou_d,
-                   "h": validate_iou_h,
-                   "w": validate_iou_w},
-                   "train iou": {
-                   "d": train_iou_d,
-                   "h": train_iou_h,
-                   "w": train_iou_w}
-                   })
-
-        wandb.watch(model)
+        # wandb.log({"loss": loss,
+        #            "val iou": {
+        #            "d": validate_iou_d,
+        #            "h": validate_iou_h,
+        #            "w": validate_iou_w},
+        #            "train iou": {
+        #            "d": train_iou_d,
+        #            "h": train_iou_h,
+        #            "w": train_iou_w}
+        #            })
+        #
+        # wandb.watch(model)
 
         # # if step > num_steps - 20:
         # if step > num_steps - 100:
