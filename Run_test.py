@@ -16,7 +16,7 @@ if __name__ == '__main__':
                 num_steps=5000,
                 learning_rate=1e-4,
                 width=24,
-                log_tag='2022_05_30',
+                log_tag='2022_06_01',
                 l2=0.01,
                 temp=2.0,
                 new_d=5,
