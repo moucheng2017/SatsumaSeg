@@ -34,17 +34,17 @@ class RandomCroppingOrthogonal(object):
         for volume in volumes:
             d, h, w = np.shape(volume)
 
-        sample_position_d_d = np.random.randint(self.discarded_slices, d - self.discarded_slices)
-        sample_position_d_h = np.random.randint(self.discarded_slices, h - self.discarded_slices)
-        sample_position_d_w = np.random.randint(self.discarded_slices, w - self.discarded_slices)
+        sample_position_d_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
+        sample_position_d_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
+        sample_position_d_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
 
-        sample_position_h_d = np.random.randint(self.discarded_slices, d - self.discarded_slices)
-        sample_position_h_h = np.random.randint(self.discarded_slices, h - self.discarded_slices)
-        sample_position_h_w = np.random.randint(self.discarded_slices, w - self.discarded_slices)
+        sample_position_h_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
+        sample_position_h_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
+        sample_position_h_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
 
-        sample_position_w_d = np.random.randint(self.discarded_slices, d - self.discarded_slices)
-        sample_position_w_h = np.random.randint(self.discarded_slices, h - self.discarded_slices)
-        sample_position_w_w = np.random.randint(self.discarded_slices, w - self.discarded_slices)
+        sample_position_w_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
+        sample_position_w_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
+        sample_position_w_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
 
         outputs = {"plane_d": [],
                    "plane_h": [],
