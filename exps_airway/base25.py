@@ -21,7 +21,7 @@ if __name__ == '__main__':
                 log_tag='2022_06_08',
                 l2=0.01,
                 temp=1.0,
-                new_d=5,
+                new_d=10,
                 new_h=448,
                 new_w=448,
                 new_z=320)
