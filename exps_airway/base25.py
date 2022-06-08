@@ -6,7 +6,7 @@ torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-from Train_Unet_Orthogonal_Fast_Single import trainModels
+from Train_Unet_Orthogonal_Single import trainModels
 
 if __name__ == '__main__':
 
@@ -20,7 +20,7 @@ if __name__ == '__main__':
                 width=48,
                 log_tag='2022_06_08',
                 l2=0.01,
-                temp=2.0,
+                temp=1.0,
                 new_d=5,
                 new_h=448,
                 new_w=448,
