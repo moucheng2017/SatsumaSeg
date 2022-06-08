@@ -10,7 +10,7 @@ import shutil
 import torch.nn.functional as F
 
 from Metrics import segmentation_scores
-from dataloaders.DataloaderOrthogonal import CT_Dataset_Orthogonal
+from dataloaders.DataloaderOrthogonalNoPadding import CT_Dataset_Orthogonal_Fast
 from tensorboardX import SummaryWriter
 
 from Utils import validate_three_planes
@@ -29,13 +29,17 @@ from analysis.Inference3D import test_all_models
 
 def trainModels(dataset_name,
                 data_directory,
-                input_dim,
                 repeat,
-                train_batchsize,
                 num_steps,
                 learning_rate,
                 width,
                 log_tag,
+                train_batchsize,
+                val_batchsize=3,
+                new_d=5,
+                new_h=480,
+                new_w=480,
+                new_z=320,
                 temp=0.5,
                 l2=0.01
                 ):
@@ -43,8 +47,8 @@ def trainModels(dataset_name,
     for j in range(1, repeat + 1):
 
         repeat_str = str(j)
-        Exp = Unet2DMultiChannel(in_ch=input_dim, width=width, output_channels=1)
-        Exp_name = 'OrthogonalSup2DSingle'
+        Exp = Unet2DMultiChannel(in_ch=new_d, width=width, output_channels=1)
+        Exp_name = 'OrthogonalSup2DSingleFast'
 
         Exp_name = Exp_name + \
                    '_e' + str(repeat_str) + \
@@ -53,16 +57,18 @@ def trainModels(dataset_name,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_r' + str(l2) + \
-                   '_z' + str(input_dim) + \
+                   '_z' + str(new_d) + \
+                   '_h' + str(new_h) + \
+                   '_w' + str(new_w) + \
                    '_t' + str(temp)
 
         trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory,
                                                                                                                       dataset_name,
                                                                                                                       train_batchsize,
-                                                                                                                      [input_dim, 480, 480],
-                                                                                                                      [256, input_dim, 480],
-                                                                                                                      [256, 480, input_dim],
-                                                                                                                      5)
+                                                                                                                      [new_d, new_h, new_w],
+                                                                                                                      [new_z, new_d, new_w],
+                                                                                                                      [new_z, new_w, new_d],
+                                                                                                                      val_batchsize)
 
         # ========================
         trainSingleModel(model=Exp,
@@ -87,7 +93,7 @@ def getData(data_directory, dataset_name, train_batchsize, d, h, w, val_batchsiz
     train_label_folder_labelled = folder_labelled + '/lbls'
     train_lung_folder_labelled = folder_labelled + '/lung'
 
-    train_dataset_labelled = CT_Dataset_Orthogonal(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, d, h, w, labelled=True)
+    train_dataset_labelled = CT_Dataset_Orthogonal_Fast(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, d, h, w, labelled=True)
 
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
@@ -95,7 +101,7 @@ def getData(data_directory, dataset_name, train_batchsize, d, h, w, val_batchsiz
     validate_label_folder = data_directory + '/validate/lbls'
     validate_lung_folder = data_directory + '/validate/lung'
 
-    validate_dataset = CT_Dataset_Orthogonal(validate_image_folder, validate_label_folder, validate_lung_folder, d, h, w, labelled=True)
+    validate_dataset = CT_Dataset_Orthogonal_Fast(validate_image_folder, validate_label_folder, validate_lung_folder, d, h, w, labelled=True)
     validateloader = data.DataLoader(validate_dataset, batch_size=val_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
     testdata_path = data_directory + '/test'
@@ -216,7 +222,7 @@ def trainSingleModel(model,
         #     path_model = save_model_name_full
         #     torch.save(model, path_model)
 
-        if step > 500 and step % 500 == 0 or step > num_steps - 100:
+        if step > 400 and step % 200 == 0 or step > num_steps - 50:
             # save checker points
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
