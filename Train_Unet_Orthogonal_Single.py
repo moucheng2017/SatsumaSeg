@@ -41,7 +41,6 @@ def trainModels(dataset_name,
                 new_d=5,
                 new_h=384,
                 new_w=384,
-                new_z=320,
                 temp=0.5,
                 l2=0.01
                 ):
@@ -65,7 +64,7 @@ def trainModels(dataset_name,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_r' + str(l2) + \
-                   '_z' + str(new_d) + \
+                   '_d' + str(new_d) + \
                    '_h' + str(new_h) + \
                    '_w' + str(new_w) + \
                    '_t' + str(temp)
@@ -74,8 +73,8 @@ def trainModels(dataset_name,
                                                                                                                       dataset_name,
                                                                                                                       train_batchsize,
                                                                                                                       [new_d, new_h, new_w],
-                                                                                                                      [new_z, new_d, new_w],
-                                                                                                                      [new_z, new_w, new_d],
+                                                                                                                      [new_h, new_d, new_w],
+                                                                                                                      [new_h, new_w, new_d],
                                                                                                                       val_batchsize)
 
         trainSingleModel(model=Exp,

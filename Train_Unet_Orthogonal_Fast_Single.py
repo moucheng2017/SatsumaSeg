@@ -47,8 +47,8 @@ def trainModels(dataset_name,
     for j in range(1, repeat + 1):
 
         repeat_str = str(j)
-        Exp = Unet2DMultiChannel(in_ch=new_d, width=width, output_channels=1)
-        Exp_name = 'OrthogonalSup2DSingleFast'
+        Exp = Unet2DMultiChannel(in_ch=new_d, width=width, output_channels=new_d)
+        Exp_name = 'OrthogonalSup2DFastSingle'
 
         Exp_name = Exp_name + \
                    '_e' + str(repeat_str) + \
@@ -57,9 +57,10 @@ def trainModels(dataset_name,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_r' + str(l2) + \
-                   '_z' + str(new_d) + \
+                   '_d' + str(new_d) + \
                    '_h' + str(new_h) + \
                    '_w' + str(new_w) + \
+                   '_z' + str(new_z) + \
                    '_t' + str(temp)
 
         trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory,
