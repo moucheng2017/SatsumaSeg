@@ -64,9 +64,10 @@ def trainModels(dataset_name,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_r' + str(l2) + \
-                   '_z' + str(new_d) + \
+                   '_d' + str(new_d) + \
                    '_h' + str(new_h) + \
                    '_w' + str(new_w) + \
+                   '_z' + str(new_z) + \
                    '_t' + str(temp)
 
         trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory,
