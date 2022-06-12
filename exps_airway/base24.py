@@ -23,5 +23,4 @@ if __name__ == '__main__':
                 temp=2.0,
                 new_d=10,
                 new_h=448,
-                new_w=448,
-                new_z=320)
+                new_w=448)
