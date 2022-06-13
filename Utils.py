@@ -26,6 +26,12 @@ from torch.utils import data
 from Loss import SoftDiceLoss
 
 
+def dynamic_saving(current_model, current):
+    # history an empty dic
+    # return output
+    pass
+
+
 def train_base(labelled_img,
                labelled_label,
                labelled_lung,
