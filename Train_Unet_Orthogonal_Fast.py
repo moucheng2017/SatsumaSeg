@@ -126,7 +126,9 @@ def trainSingleModel(model,
                      validateloader,
                      temp,
                      log_tag,
-                     l2):
+                     l2,
+                     resume=False,
+                     last_model='/path/to/checkpoint'):
 
     device = torch.device('cuda')
     save_model_name = model_name
@@ -147,6 +149,10 @@ def trainSingleModel(model,
     writer = SummaryWriter(saved_log_path + '/Log_' + save_model_name)
 
     model.to(device)
+
+    # resume training:
+    if resume:
+        model = torch.load(last_model)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
 
@@ -242,8 +248,16 @@ def trainSingleModel(model,
         #     path_model = save_model_name_full
         #     torch.save(model, path_model)
 
-        if step > 2000 and step % 50 == 0 or step > num_steps - 50:
+        if step > 2000 and step % 50 == 0:
             # save checker points
+            save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
+            path_model = save_model_name_full
+            # torch.save(model, path_model)
+            torch.save({'epoch': step,
+                        'model_state_dict': model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'loss': loss}, path_model)
+        elif step > num_steps - 50:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
             torch.save(model, path_model)
