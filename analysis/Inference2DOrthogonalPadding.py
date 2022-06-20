@@ -326,8 +326,10 @@ def save_seg(save_path,
 if __name__ == "__main__":
     case = '6357B'
     new_size_d = 5
-    new_resolution_w = 320
-    new_resolution_h = 320
+    new_resolution_w = 480
+    new_resolution_h = 480
+    # new_resolution_w = 320
+    # new_resolution_h = 480
     threshold = 0.4
     sliding_window = 5
     temperature = 2.0
