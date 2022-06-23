@@ -1,6 +1,6 @@
 import torch
 # sys.path.append("..")
-from Train_Unet_Orthogonal import trainModels
+from Train_Unet_Orthogonal_Single import trainModels
 # torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
@@ -12,16 +12,19 @@ if __name__ == '__main__':
                 dataset_name='airway',
                 repeat=1,
                 train_batchsize=5,
-                val_batchsize=3,
+                val_batchsize=0,
                 num_steps=5000,
-                learning_rate=1e-3,
-                width=24,
-                log_tag='2022_06_04',
+                learning_rate=2e-4,
+                width=32,
+                log_tag='2022_06_23',
                 l2=1e-3,
                 temp=2.0,
                 new_d=5,
-                new_h=448,
-                new_w=448)
+                new_h=384,
+                new_w=384,
+                resume_epoch=0,
+                resume_training=False,
+                checkpoint_path='/some/path')
 
     # with torch.autograd.set_detect_anomaly(True):
     # SegPL-VI:
