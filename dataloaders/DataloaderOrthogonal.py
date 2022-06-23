@@ -34,17 +34,41 @@ class RandomCroppingOrthogonal(object):
         for volume in volumes:
             d, h, w = np.shape(volume)
 
-        sample_position_d_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
-        sample_position_d_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
-        sample_position_d_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
+        # sample_position_d_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
+        # sample_position_d_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
+        # sample_position_d_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
+        #
+        # sample_position_h_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
+        # sample_position_h_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
+        # sample_position_h_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
+        #
+        # sample_position_w_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
+        # sample_position_w_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
+        # sample_position_w_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
 
-        sample_position_h_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
-        sample_position_h_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
-        sample_position_h_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
+        # sample_position_d_d = np.random.randint(self.discarded_slices, d - self.volume_d[1] // 2)
+        # sample_position_d_h = np.random.randint(self.discarded_slices, h - self.volume_d[1] // 2)
+        # sample_position_d_w = np.random.randint(self.discarded_slices, w - self.volume_d[1] // 2)
+        #
+        # sample_position_h_d = np.random.randint(self.discarded_slices, d - self.volume_d[1] // 2)
+        # sample_position_h_h = np.random.randint(self.discarded_slices, h - self.volume_d[1] // 2)
+        # sample_position_h_w = np.random.randint(self.discarded_slices, w - self.volume_d[1] // 2)
+        #
+        # sample_position_w_d = np.random.randint(self.discarded_slices, d - self.volume_d[1] // 2)
+        # sample_position_w_h = np.random.randint(self.discarded_slices, h - self.volume_d[1] // 2)
+        # sample_position_w_w = np.random.randint(self.discarded_slices, w - self.volume_d[1] // 2)
 
-        sample_position_w_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
-        sample_position_w_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
-        sample_position_w_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
+        sample_position_d_d = np.random.randint(self.discarded_slices, d)
+        sample_position_d_h = np.random.randint(self.discarded_slices, h)
+        sample_position_d_w = np.random.randint(self.discarded_slices, w)
+
+        sample_position_h_d = np.random.randint(self.discarded_slices, d)
+        sample_position_h_h = np.random.randint(self.discarded_slices, h)
+        sample_position_h_w = np.random.randint(self.discarded_slices, w)
+
+        sample_position_w_d = np.random.randint(self.discarded_slices, d)
+        sample_position_w_h = np.random.randint(self.discarded_slices, h)
+        sample_position_w_w = np.random.randint(self.discarded_slices, w)
 
         outputs = {"plane_d": [],
                    "plane_h": [],
@@ -52,9 +76,13 @@ class RandomCroppingOrthogonal(object):
 
         for each_input in volumes:
 
-            each_input = np.pad(each_input, pad_width=((self.volume_d[1], self.volume_d[1]),
-                                                       (self.volume_d[1], self.volume_d[1]),
-                                                       (self.volume_d[1], self.volume_d[1])), mode='symmetric')
+            each_input = np.pad(each_input, pad_width=((self.volume_d[1] // 2, self.volume_d[1] // 2),
+                                                       (self.volume_d[1] // 2, self.volume_d[1] // 2),
+                                                       (self.volume_d[1] // 2, self.volume_d[1] // 2)), mode='symmetric')
+
+            # each_input = np.pad(each_input, pad_width=((0, self.volume_d[1] // 2),
+            #                                            (0, self.volume_d[1] // 2),
+            #                                            (0, self.volume_d[1] // 2)), mode='symmetric')
 
             # transpose all patches to channel x height x width
             outputs["plane_d"].append(each_input[sample_position_d_d:sample_position_d_d + self.volume_d[0], sample_position_d_h:sample_position_d_h + self.volume_d[1], sample_position_d_w:sample_position_d_w + self.volume_d[2]])

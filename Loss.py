@@ -16,6 +16,53 @@ import numpy as np
 from scipy.ndimage import distance_transform_edt
 
 
+def deterministic_noisy_label_loss(pred, cm, lung_mask, temp=2.0):
+    """
+    Under construction
+    """
+    # regularisation = 0.0
+    # print(pred.size())
+
+    b, c, h, w = pred.size()
+
+    # b*c x h*w ---> b*h*w x c x 1
+    pred_noisy = pred.view(b, c, h*w).permute(0, 2, 1).contiguous().view(b*h*w, c, 1)
+
+    # loss = 0
+    # kld_loss = 0
+    # b x c**2 x h x w ---> b*h*w x c x c
+    anti_corrpution_cm = cm.view(b, c ** 2, h * w).permute(0, 2, 1).contiguous().view(b * h * w, c * c).view(b * h * w, c, c)
+
+    # normalisation along the rows:
+    anti_corrpution_cm = anti_corrpution_cm / anti_corrpution_cm.sum(1, keepdim=True)
+
+    # matrix multiplication to calculate the predicted noisy segmentation:
+    # cm: b*h*w x c x c
+    # pred_clean: b*h*w x c x 1
+    pred_clean = torch.bmm(anti_corrpution_cm, pred_noisy).view(b*h*w, c)
+    pred_clean = pred_clean.view(b, h*w, c).permute(0, 2, 1).contiguous().view(b, c, h, w)
+
+    _, pseudo_labels = torch.max(pred, dim=1)
+    pred_clean = torch.softmax(pred_clean / temp, dim=1)
+    pred_clean_probs = pred_clean[:, -1, :, :].unsqueeze(1)
+    # pred_clean_probs, pred_clean_class = torch.max(pred_clean, dim=1)
+
+    # print(pred_clean_probs.size())
+    # print(pseudo_labels.size())
+
+    pred_clean_probs = torch.masked_select(pred_clean_probs.squeeze(), lung_mask)
+    pseudo_labels = torch.masked_select(pseudo_labels.squeeze(), lung_mask)
+
+    # print(pred_clean.size())
+    # print(pseudo_labels.size())
+
+    # loss = nn.CrossEntropyLoss(reduction='mean')(pred, label.view(b, h, w).long()) + nn.CrossEntropyLoss(reduction='mean')(pred_clean, pseudo_labels.long())
+    # loss = nn.CrossEntropyLoss(reduction='mean')(pred_clean, pseudo_labels.long())
+    loss = nn.BCELoss(reduction='mean')(pred_clean_probs.float(), pseudo_labels.float())
+
+    return loss
+
+
 def softmax_helper(x):
     # copy from: https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunet/utilities/nd_softmax.py
     rpt = [1 for _ in range(len(x.size()))]

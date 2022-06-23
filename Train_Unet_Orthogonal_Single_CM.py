@@ -18,7 +18,7 @@ from tensorboardX import SummaryWriter
 from Utils import validate_three_planes
 from Loss import SoftDiceLoss
 # ==============================================
-from Models2DOrthogonal import Unet2DMultiChannel
+from Models2DCM import Unet2DCM
 import errno
 
 from Utils import train_base
@@ -41,7 +41,7 @@ def trainModels(dataset_name,
                 new_d=5,
                 new_h=384,
                 new_w=384,
-                temp=0.5,
+                temp=2.0,
                 l2=0.01,
                 resume_epoch=0,
                 resume_training=False,
@@ -57,8 +57,8 @@ def trainModels(dataset_name,
         # }
 
         repeat_str = str(j)
-        Exp = Unet2DMultiChannel(in_ch=new_d, width=width, output_channels=1)
-        Exp_name = 'OrthogonalSup2DSingle'
+        Exp = Unet2DCM(in_ch=new_d, width=width, class_no=2, resolution=new_h)
+        Exp_name = 'ConfusionMatrixOrthogonalSup2DSingle'
 
         Exp_name = Exp_name + \
                    '_e' + str(repeat_str) + \
@@ -72,15 +72,13 @@ def trainModels(dataset_name,
                    '_w' + str(new_w) + \
                    '_t' + str(temp)
 
-        # trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory,
-        #                                                                                                               dataset_name,
-        #                                                                                                               train_batchsize,
-        #                                                                                                               [new_d, new_h, new_w],
-        #                                                                                                               [new_h, new_d, new_w],
-        #                                                                                                               [new_h, new_w, new_d],
-        #                                                                                                               val_batchsize)
-
-        trainloader_withlabels = getData(data_directory, dataset_name, train_batchsize, [new_d, new_h, new_w], [new_h, new_d, new_w], [new_h, new_w, new_d])
+        trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory,
+                                                                                                                      dataset_name,
+                                                                                                                      train_batchsize,
+                                                                                                                      [new_d, new_h, new_w],
+                                                                                                                      [new_h, new_d, new_w],
+                                                                                                                      [new_h, new_w, new_d],
+                                                                                                                      val_batchsize)
 
         trainSingleModel(model=Exp,
                          model_name=Exp_name,
@@ -88,6 +86,7 @@ def trainModels(dataset_name,
                          learning_rate=learning_rate,
                          dataset_name=dataset_name,
                          trainloader_with_labels=trainloader_withlabels,
+                         validateloader=validateloader,
                          log_tag=log_tag,
                          l2=l2,
                          temp=temp,
@@ -95,7 +94,7 @@ def trainModels(dataset_name,
                          last_model=checkpoint_path)
 
 
-def getData(data_directory, dataset_name, train_batchsize, d, h, w):
+def getData(data_directory, dataset_name, train_batchsize, d, h, w, val_batchsize=5):
 
     data_directory = data_directory + '/' + dataset_name
 
@@ -109,32 +108,17 @@ def getData(data_directory, dataset_name, train_batchsize, d, h, w):
 
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
-    # validate_image_folder = data_directory + '/validate/imgs'
-    # validate_label_folder = data_directory + '/validate/lbls'
-    # validate_lung_folder = data_directory + '/validate/lung'
-    #
-    # validate_dataset = CT_Dataset_Orthogonal(validate_image_folder, validate_label_folder, validate_lung_folder, d, h, w, labelled=True)
-    # validateloader = data.DataLoader(validate_dataset, batch_size=val_batchsize, shuffle=True, num_workers=0, drop_last=True)
-    #
-    # testdata_path = data_directory + '/test'
+    validate_image_folder = data_directory + '/validate/imgs'
+    validate_label_folder = data_directory + '/validate/lbls'
+    validate_lung_folder = data_directory + '/validate/lung'
 
-    # return trainloader_labelled, validateloader, testdata_path, train_dataset_labelled, validate_dataset
-    return trainloader_labelled
+    validate_dataset = CT_Dataset_Orthogonal(validate_image_folder, validate_label_folder, validate_lung_folder, d, h, w, labelled=True)
+    validateloader = data.DataLoader(validate_dataset, batch_size=val_batchsize, shuffle=True, num_workers=0, drop_last=True)
+
+    testdata_path = data_directory + '/test'
+
+    return trainloader_labelled, validateloader, testdata_path, train_dataset_labelled, validate_dataset
 # =====================================================================================================================================
-
-
-# def trainSingleModel(model,
-#                      model_name,
-#                      num_steps,
-#                      learning_rate,
-#                      dataset_name,
-#                      trainloader_with_labels,
-#                      validateloader,
-#                      temp,
-#                      log_tag,
-#                      l2,
-#                      resume=False,
-#                      last_model='/path/to/checkpoint'):
 
 
 def trainSingleModel(model,
@@ -143,6 +127,7 @@ def trainSingleModel(model,
                      learning_rate,
                      dataset_name,
                      trainloader_with_labels,
+                     validateloader,
                      temp,
                      log_tag,
                      l2,
@@ -192,9 +177,9 @@ def trainSingleModel(model,
             iterator_train_labelled = iter(trainloader_with_labels)
             labelled_dict, labelled_name = next(iterator_train_labelled)
 
-        loss_d, train_mean_iu_d_ = train_base(labelled_dict["plane_d"][0], labelled_dict["plane_d"][1], labelled_dict["plane_d"][2], device, model, temp, False, True)
-        loss_h, train_mean_iu_h_ = train_base(labelled_dict["plane_h"][0], labelled_dict["plane_h"][1], labelled_dict["plane_h"][2], device, model, temp, False, True)
-        loss_w, train_mean_iu_w_ = train_base(labelled_dict["plane_w"][0], labelled_dict["plane_w"][1], labelled_dict["plane_w"][2], device, model, temp, False, True)
+        loss_d, train_mean_iu_d_ = train_base(labelled_dict["plane_d"][0], labelled_dict["plane_d"][1], labelled_dict["plane_d"][2], device, model, temp, True, True)
+        loss_h, train_mean_iu_h_ = train_base(labelled_dict["plane_h"][0], labelled_dict["plane_h"][1], labelled_dict["plane_h"][2], device, model, temp, True, True)
+        loss_w, train_mean_iu_w_ = train_base(labelled_dict["plane_w"][0], labelled_dict["plane_w"][1], labelled_dict["plane_w"][2], device, model, temp, True, True)
         loss = loss_w + loss_d + loss_h
         del labelled_dict
         del labelled_name
@@ -206,11 +191,11 @@ def trainSingleModel(model,
         train_iou_h = np.nanmean(train_iou_h)
         train_iou_w = np.nanmean(train_iou_w)
 
-        # validate_ious = validate_three_planes(validateloader, device, model)
-        # validate_iou_d = np.nanmean(validate_ious["val d plane"])
-        # validate_iou_h = np.nanmean(validate_ious["val h plane"])
-        # validate_iou_w = np.nanmean(validate_ious["val w plane"])
-        # del validate_ious
+        validate_ious = validate_three_planes(validateloader, device, model)
+        validate_iou_d = np.nanmean(validate_ious["val d plane"])
+        validate_iou_h = np.nanmean(validate_ious["val h plane"])
+        validate_iou_w = np.nanmean(validate_ious["val w plane"])
+        del validate_ious
 
         if loss != 0.0:
             optimizer.zero_grad()
@@ -220,48 +205,35 @@ def trainSingleModel(model,
         for param_group in optimizer.param_groups:
             param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
 
-        # print(
-        #     'Step [{}/{}], '
-        #     'lr: {:.4f},'
-        #     'Train iou d: {:.4f}, '
-        #     'Train iou h: {:.4f}, '
-        #     'Train iou w: {:.4f}, '
-        #     'val iou d:{:.4f}, '
-        #     'val iou h:{:.4f}, '
-        #     'val iou w:{:.4f}, '.format(step + 1, num_steps,
-        #                               optimizer.param_groups[0]["lr"],
-        #                               train_iou_d,
-        #                               train_iou_h,
-        #                               train_iou_w,
-        #                               validate_iou_d,
-        #                               validate_iou_h,
-        #                               validate_iou_w))
-
         print(
             'Step [{}/{}], '
             'lr: {:.4f},'
             'Train iou d: {:.4f}, '
             'Train iou h: {:.4f}, '
-            'Train iou w: {:.4f}, '.format(step + 1, num_steps,
+            'Train iou w: {:.4f}, '
+            'val iou d:{:.4f}, '
+            'val iou h:{:.4f}, '
+            'val iou w:{:.4f}, '.format(step + 1, num_steps,
                                       optimizer.param_groups[0]["lr"],
                                       train_iou_d,
                                       train_iou_h,
-                                      train_iou_w))
+                                      train_iou_w,
+                                      validate_iou_d,
+                                      validate_iou_h,
+                                      validate_iou_w))
+
 
         # # # ================================================================== #
         # # #                        TensorboardX Logging                        #
         # # # # ================================================================ #
 
-        # writer.add_scalars('acc metrics', {'train iou d': train_iou_d,
-        #                                    'train iou h': train_iou_h,
-        #                                    'train iou w': train_iou_w,
-        #                                    'val iou d': validate_iou_d,
-        #                                    'val iou h': validate_iou_h,
-        #                                    'val iou w': validate_iou_w}, step + 1)
-
         writer.add_scalars('acc metrics', {'train iou d': train_iou_d,
                                            'train iou h': train_iou_h,
-                                           'train iou w': train_iou_w}, step + 1)
+                                           'train iou w': train_iou_w,
+                                           'val iou d': validate_iou_d,
+                                           'val iou h': validate_iou_h,
+                                           'val iou w': validate_iou_w}, step + 1)
+
         # wandb.log({"loss": loss,
         #            "val iou": {
         #            "d": validate_iou_d,

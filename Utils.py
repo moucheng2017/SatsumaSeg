@@ -23,6 +23,8 @@ from Metrics import segmentation_scores, hd95, preprocessing_accuracy, f1_score
 from PIL import Image
 from torch.utils import data
 
+from Loss import deterministic_noisy_label_loss
+
 from Loss import SoftDiceLoss
 
 
@@ -37,7 +39,8 @@ def train_base(labelled_img,
                labelled_lung,
                device,
                model,
-               t=1.0,
+               t=2.0,
+               cm_refine=False,
                single_channel_label=False):
 
     train_imgs = labelled_img.to(device=device, dtype=torch.float32)
@@ -45,19 +48,33 @@ def train_base(labelled_img,
     lung = labelled_lung.to(device=device, dtype=torch.float32)
 
     if single_channel_label is True:
-        # labels = labels[:, labels.size()[1] // 2, :, :].unsqueeze(1) # middle slice
-        labels = labels[:, -1, :, :].unsqueeze(1) # last slice
+        labels = labels[:, labels.size()[1] // 2, :, :].unsqueeze(1) # middle slice
+        lung = lung[:, lung.size()[1] // 2, :, :].unsqueeze(1)  # middle slice
+        # labels = labels[:, -1, :, :].unsqueeze(1) # last slice
+        # lung = lung[:, -1, :, :].unsqueeze(1)
 
     if torch.sum(labels) > 10.0:
-        outputs, _ = model(train_imgs, [1, 1, 1, 1], [1, 1, 1, 1])
-        prob_outputs = torch.sigmoid(outputs / t)
+        if cm_refine is False:
+            outputs, _ = model(train_imgs, [1, 1, 1, 1], [1, 1, 1, 1])
+            prob_outputs = torch.sigmoid(outputs / t)
+        else:
+            outputs, cm = model(train_imgs, [1, 1, 1, 1], [1, 1, 1, 1])
+            prob_outputs = torch.softmax(outputs / t, dim=1)
+            prob_outputs = prob_outputs[:, -1, :, :].unsqueeze(1)
+            # prob_outputs, class_output = torch.max(prob_outputs, dim=1)
 
         lung_mask = (lung > 0.5)
         prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask)
         labels_masked = torch.masked_select(labels, lung_mask)
+        # print(lung_mask.size())
+        # print(labels_masked.size())
 
         if torch.sum(prob_outputs_masked) > 10.0:
-            loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze() + 1e-10, labels_masked.squeeze() + 1e-10)
+            if cm_refine is False:
+                loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze() + 1e-10, labels_masked.squeeze() + 1e-10)
+            elif cm_refine is True:
+                loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze() + 1e-10, labels_masked.squeeze() + 1e-10)
+                loss += deterministic_noisy_label_loss(outputs, cm, lung_mask, t)
         else:
             loss = 0.0
 
@@ -74,15 +91,22 @@ def validate_base(val_img,
                   val_lbl,
                   val_lung,
                   device,
-                  model):
+                  model,
+                  cm=True):
 
         val_img = val_img.to(device, dtype=torch.float32)
         val_lbl = val_lbl.to(device, dtype=torch.float32)
         val_lung = val_lung.to(device, dtype=torch.float32)
 
         val_output, _ = model(val_img)
-        val_output = torch.sigmoid(val_output)
-        val_output = (val_output > 0.95).float()
+
+        if cm is False:
+            val_output = torch.sigmoid(val_output)
+            val_output = (val_output > 0.95).float()
+        else:
+            val_output_prob = torch.softmax(val_output, dim=1)
+            val_output = val_output_prob[:, -1, :, :].unsqueeze(1)
+            # val_output, val_class_output = torch.max(val_output_prob, dim=1)
 
         lung_mask = (val_lung > 0.5)
 

@@ -74,13 +74,28 @@ class ThresholdModel2D(nn.Module):
         return t_mean, t_logvar
 
 
-class Unet2D(nn.Module):
-    def __init__(self, in_ch, width, class_no, z_downsample=0):
-        super(Unet2D, self).__init__()
-        if class_no == 2:
-            self.final_in = 1
-        else:
-            self.final_in = class_no
+class cm_net(nn.Module):
+    """ This class defines the confusion matrix network
+    """
+    def __init__(self, c, h, w, class_no=2, latent=512):
+        super(cm_net, self).__init__()
+        self.fc_encoder = nn.Linear(c * h * w, latent)
+        self.fc_decoder = nn.Linear(latent, h * w * class_no ** 2)
+        self.act = nn.ReLU(inplace=True) # relu is better than prelu in mnist
+
+    def forward(self, x):
+        cm = torch.flatten(x, start_dim=1)
+        cm = self.fc_encoder(cm)
+        cm = self.act(cm)
+        cm = self.fc_decoder(cm)
+        cm = F.softplus(cm)
+        return cm
+
+
+class Unet2DCM(nn.Module):
+    def __init__(self, in_ch, width, class_no, resolution):
+        super(Unet2DCM, self).__init__()
+        self.final_in = class_no
 
         self.w1 = width
         self.w2 = width * 2
@@ -108,6 +123,8 @@ class Unet2D(nn.Module):
 
         self.dconv_last = nn.Conv2d(self.w1, self.final_in, (1, 1), bias=True)
 
+        self.cm_network = cm_net(c=width, h=resolution, w=resolution, class_no=class_no, latent=512)
+
     def forward(self, x, dilation_encoder=[1, 1, 1, 1], dilation_decoder=[1, 1, 1, 1]):
 
         x0 = self.econv0(x)
@@ -133,6 +150,8 @@ class Unet2D(nn.Module):
         y0 = self.upsample3(y1)
         y0 = torch.cat([y0, x0], dim=1)
         y0 = self.dconv0(y0, dilation_decoder[3])
-        y = self.dconv_last(y0)
 
-        return y, y0
+        y = self.dconv_last(y0)
+        cm = self.cm_network(y0)
+
+        return y, cm
