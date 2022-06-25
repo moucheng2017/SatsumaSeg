@@ -76,9 +76,9 @@ class RandomCroppingOrthogonal(object):
 
         for each_input in volumes:
 
-            each_input = np.pad(each_input, pad_width=((self.volume_d[1] // 2, self.volume_d[1] // 2),
-                                                       (self.volume_d[1] // 2, self.volume_d[1] // 2),
-                                                       (self.volume_d[1] // 2, self.volume_d[1] // 2)), mode='symmetric')
+            each_input = np.pad(each_input, pad_width=((0, self.volume_d[1]),
+                                                       (0, self.volume_d[1]),
+                                                       (0, self.volume_d[1])), mode='symmetric')
 
             # each_input = np.pad(each_input, pad_width=((0, self.volume_d[1] // 2),
             #                                            (0, self.volume_d[1] // 2),
