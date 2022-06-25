@@ -179,9 +179,9 @@ def trainSingleModel(model,
 
     iterator_train_labelled = iter(trainloader_with_labels)
 
-    train_mean_iu_d_tracker = 0
-    train_mean_iu_h_tracker = 0
-    train_mean_iu_w_tracker = 0
+    train_mean_iu_d_tracker = 0.0
+    train_mean_iu_h_tracker = 0.0
+    train_mean_iu_w_tracker = 0.0
 
     for step in range(num_steps):
 
