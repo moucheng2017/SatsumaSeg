@@ -158,12 +158,16 @@ def trainSingleModel(model,
 
     iterator_train_labelled = iter(trainloader_with_labels)
 
+    train_mean_iu_d_tracker = 0
+    train_mean_iu_h_tracker = 0
+    train_mean_iu_w_tracker = 0
+
     for step in range(num_steps):
 
         model.train()
-        train_iou_d = []
-        train_iou_h = []
-        train_iou_w = []
+        # train_iou_d = []
+        # train_iou_h = []
+        # train_iou_w = []
 
         try:
             labelled_dict, labelled_name = next(iterator_train_labelled)
@@ -177,12 +181,21 @@ def trainSingleModel(model,
         loss = loss_w + loss_d + loss_h
         del labelled_dict
         del labelled_name
-        train_iou_d.append(train_mean_iu_d_)
-        train_iou_h.append(train_mean_iu_h_)
-        train_iou_w.append(train_mean_iu_w_)
-        train_iou_d = np.nanmean(train_iou_d)
-        train_iou_h = np.nanmean(train_iou_h)
-        train_iou_w = np.nanmean(train_iou_w)
+
+        train_iou_d = 0.1*train_mean_iu_d_ + 0.9*train_mean_iu_d_tracker if train_mean_iu_d_ == 0.0 else train_mean_iu_d_
+        train_iou_h = 0.1 * train_mean_iu_h_ + 0.9 * train_mean_iu_h_tracker if train_mean_iu_h_ == 0.0 else train_mean_iu_h_
+        train_iou_w = 0.1 * train_mean_iu_w_ + 0.9 * train_mean_iu_w_tracker if train_mean_iu_w_ == 0.0 else train_mean_iu_w_
+
+        train_mean_iu_d_tracker = train_iou_d
+        train_mean_iu_h_tracker = train_iou_h
+        train_mean_iu_w_tracker = train_iou_w
+
+        # train_iou_d.append(train_mean_iu_d_)
+        # train_iou_h.append(train_mean_iu_h_)
+        # train_iou_w.append(train_mean_iu_w_)
+        # train_iou_d = np.nanmean(train_iou_d)
+        # train_iou_h = np.nanmean(train_iou_h)
+        # train_iou_w = np.nanmean(train_iou_w)
 
         validate_ious = validate_three_planes(validateloader, device, model)
         validate_iou_d = np.nanmean(validate_ious["val d plane"])

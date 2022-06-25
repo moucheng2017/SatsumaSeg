@@ -81,7 +81,7 @@ def train_base(labelled_img,
         class_outputs = (prob_outputs_masked > 0.95).float()
         train_mean_iu_ = segmentation_scores(labels_masked, class_outputs, 2)
     else:
-        train_mean_iu_ = 0
+        train_mean_iu_ = 0.0
         loss = 0.0
 
     return loss, train_mean_iu_

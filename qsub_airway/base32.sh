@@ -1,4 +1,4 @@
-#$ -l tmem=16G
+#$ -l tmem=32G
 #$ -l gpu=true,gpu_type=(v100|rtx6000)
 #$ -S /bin/bash
 #$ -j y
