@@ -204,9 +204,9 @@ def trainSingleModel(model,
         train_iou_h = train_mean_iu_h_tracker if train_mean_iu_h_ == 0.0 else train_mean_iu_h_
         train_iou_w = train_mean_iu_w_tracker if train_mean_iu_w_ == 0.0 else train_mean_iu_w_
 
-        train_mean_iu_d_tracker = train_mean_iu_d_tracker*0.99 + train_mean_iu_d_*0.01
-        train_mean_iu_h_tracker = train_mean_iu_h_tracker*0.99 + train_mean_iu_h_*0.01
-        train_mean_iu_w_tracker = train_mean_iu_w_tracker*0.99 + train_mean_iu_w_*0.01
+        train_mean_iu_d_tracker = train_mean_iu_d_
+        train_mean_iu_h_tracker = train_mean_iu_h_
+        train_mean_iu_w_tracker = train_mean_iu_w_
 
         if loss != 0.0:
             optimizer.zero_grad()
