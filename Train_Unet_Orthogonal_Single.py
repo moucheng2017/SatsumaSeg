@@ -179,12 +179,13 @@ def trainSingleModel(model,
 
     iterator_train_labelled = iter(trainloader_with_labels)
 
+    train_mean_iu_d_tracker = 0
+    train_mean_iu_h_tracker = 0
+    train_mean_iu_w_tracker = 0
+
     for step in range(num_steps):
 
         model.train()
-        train_iou_d = []
-        train_iou_h = []
-        train_iou_w = []
 
         try:
             labelled_dict, labelled_name = next(iterator_train_labelled)
@@ -199,18 +200,13 @@ def trainSingleModel(model,
         del labelled_dict
         del labelled_name
 
-        train_iou_d.append(train_mean_iu_d_)
-        train_iou_h.append(train_mean_iu_h_)
-        train_iou_w.append(train_mean_iu_w_)
-        train_iou_d = np.nanmean(train_iou_d)
-        train_iou_h = np.nanmean(train_iou_h)
-        train_iou_w = np.nanmean(train_iou_w)
+        train_iou_d = train_mean_iu_d_tracker if train_mean_iu_d_ == 0.0 else train_mean_iu_d_
+        train_iou_h = train_mean_iu_h_tracker if train_mean_iu_h_ == 0.0 else train_mean_iu_h_
+        train_iou_w = train_mean_iu_w_tracker if train_mean_iu_w_ == 0.0 else train_mean_iu_w_
 
-        # validate_ious = validate_three_planes(validateloader, device, model)
-        # validate_iou_d = np.nanmean(validate_ious["val d plane"])
-        # validate_iou_h = np.nanmean(validate_ious["val h plane"])
-        # validate_iou_w = np.nanmean(validate_ious["val w plane"])
-        # del validate_ious
+        train_mean_iu_d_tracker = train_mean_iu_d_tracker*0.99 + train_mean_iu_d_*0.01
+        train_mean_iu_h_tracker = train_mean_iu_h_tracker*0.99 + train_mean_iu_h_*0.01
+        train_mean_iu_w_tracker = train_mean_iu_w_tracker*0.99 + train_mean_iu_w_*0.01
 
         if loss != 0.0:
             optimizer.zero_grad()
@@ -219,23 +215,6 @@ def trainSingleModel(model,
 
         for param_group in optimizer.param_groups:
             param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
-
-        # print(
-        #     'Step [{}/{}], '
-        #     'lr: {:.4f},'
-        #     'Train iou d: {:.4f}, '
-        #     'Train iou h: {:.4f}, '
-        #     'Train iou w: {:.4f}, '
-        #     'val iou d:{:.4f}, '
-        #     'val iou h:{:.4f}, '
-        #     'val iou w:{:.4f}, '.format(step + 1, num_steps,
-        #                               optimizer.param_groups[0]["lr"],
-        #                               train_iou_d,
-        #                               train_iou_h,
-        #                               train_iou_w,
-        #                               validate_iou_d,
-        #                               validate_iou_h,
-        #                               validate_iou_w))
 
         print(
             'Step [{}/{}], '
@@ -252,13 +231,6 @@ def trainSingleModel(model,
         # # #                        TensorboardX Logging                        #
         # # # # ================================================================ #
 
-        # writer.add_scalars('acc metrics', {'train iou d': train_iou_d,
-        #                                    'train iou h': train_iou_h,
-        #                                    'train iou w': train_iou_w,
-        #                                    'val iou d': validate_iou_d,
-        #                                    'val iou h': validate_iou_h,
-        #                                    'val iou w': validate_iou_w}, step + 1)
-
         writer.add_scalars('acc metrics', {'train iou d': train_iou_d,
                                            'train iou h': train_iou_h,
                                            'train iou w': train_iou_w}, step + 1)
@@ -274,12 +246,6 @@ def trainSingleModel(model,
         #            })
         #
         # wandb.watch(model)
-
-        # # if step > num_steps - 20:
-        # if step > num_steps - 100:
-        #     save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
-        #     path_model = save_model_name_full
-        #     torch.save(model, path_model)
 
         if step > 2000 and step % 50 == 0:
             # save checker points

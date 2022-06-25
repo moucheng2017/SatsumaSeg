@@ -34,7 +34,7 @@ if __name__ == '__main__':
                 num_steps=4000,
                 learning_rate=1e-2,
                 width=64,
-                log_tag='2022_06_23',
+                log_tag='2022_06_24',
                 l2=1e-2,
                 temp=2.0,
                 new_d=7,
