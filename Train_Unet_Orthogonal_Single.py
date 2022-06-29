@@ -200,13 +200,13 @@ def trainSingleModel(model,
         del labelled_dict
         del labelled_name
 
-        train_iou_d = train_mean_iu_d_tracker if train_mean_iu_d_ == 0.0 else train_mean_iu_d_
-        train_iou_h = train_mean_iu_h_tracker if train_mean_iu_h_ == 0.0 else train_mean_iu_h_
-        train_iou_w = train_mean_iu_w_tracker if train_mean_iu_w_ == 0.0 else train_mean_iu_w_
+        train_iou_d = 0.1*train_mean_iu_d_ + 0.9*train_mean_iu_d_tracker if train_mean_iu_d_ == 0.0 else train_mean_iu_d_
+        train_iou_h = 0.1*train_mean_iu_h_ + 0.9*train_mean_iu_h_tracker if train_mean_iu_h_ == 0.0 else train_mean_iu_h_
+        train_iou_w = 0.1*train_mean_iu_w_ + 0.9*train_mean_iu_w_tracker if train_mean_iu_w_ == 0.0 else train_mean_iu_w_
 
-        train_mean_iu_d_tracker = train_mean_iu_d_
-        train_mean_iu_h_tracker = train_mean_iu_h_
-        train_mean_iu_w_tracker = train_mean_iu_w_
+        train_mean_iu_d_tracker = train_iou_d
+        train_mean_iu_h_tracker = train_iou_h
+        train_mean_iu_w_tracker = train_iou_w
 
         if loss != 0.0:
             optimizer.zero_grad()
@@ -256,6 +256,7 @@ def trainSingleModel(model,
                         'model_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
                         'loss': loss}, path_model)
+
         elif step > num_steps - 50:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
