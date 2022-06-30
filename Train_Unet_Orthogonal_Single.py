@@ -1,3 +1,4 @@
+import math
 import os
 import torch
 # torch.manual_seed(0)
@@ -200,14 +201,6 @@ def trainSingleModel(model,
         del labelled_dict
         del labelled_name
 
-        train_iou_d = 0.1*train_mean_iu_d_ + 0.9*train_mean_iu_d_tracker if train_mean_iu_d_ == 0.0 else train_mean_iu_d_
-        train_iou_h = 0.1*train_mean_iu_h_ + 0.9*train_mean_iu_h_tracker if train_mean_iu_h_ == 0.0 else train_mean_iu_h_
-        train_iou_w = 0.1*train_mean_iu_w_ + 0.9*train_mean_iu_w_tracker if train_mean_iu_w_ == 0.0 else train_mean_iu_w_
-
-        train_mean_iu_d_tracker = train_iou_d
-        train_mean_iu_h_tracker = train_iou_h
-        train_mean_iu_w_tracker = train_iou_w
-
         if loss != 0.0:
             optimizer.zero_grad()
             loss.backward()
@@ -215,6 +208,21 @@ def trainSingleModel(model,
 
         for param_group in optimizer.param_groups:
             param_group["lr"] = learning_rate * ((1 - float(step) / num_steps) ** 0.99)
+
+        if math.isnan(train_mean_iu_d_) is True or train_mean_iu_d_ == 0.0:
+            train_mean_iu_d_tracker, train_iou_d = train_mean_iu_d_tracker, train_mean_iu_d_tracker
+        else:
+            train_mean_iu_d_tracker, train_iou_d = 0.9*train_mean_iu_d_tracker + 0.1*train_mean_iu_d_, train_mean_iu_d_
+
+        if math.isnan(train_mean_iu_h_) is True or train_mean_iu_h_ == 0.0:
+            train_mean_iu_h_tracker, train_iou_h = train_mean_iu_h_tracker, train_mean_iu_h_tracker
+        else:
+            train_mean_iu_h_tracker, train_iou_h = 0.9*train_mean_iu_h_tracker + 0.1*train_mean_iu_h_, train_mean_iu_h_
+
+        if math.isnan(train_mean_iu_w_) is True or train_mean_iu_w_ == 0.0:
+            train_mean_iu_w_tracker, train_iou_w = train_mean_iu_w_tracker, train_mean_iu_w_tracker
+        else:
+            train_mean_iu_w_tracker, train_iou_w = 0.9*train_mean_iu_w_tracker + 0.1*train_mean_iu_w_, train_mean_iu_w_
 
         print(
             'Step [{}/{}], '
@@ -247,7 +255,7 @@ def trainSingleModel(model,
         #
         # wandb.watch(model)
 
-        if step > 2000 and step % 50 == 0:
+        if step > 2000 and step % 100 == 0:
             # save checker points
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
