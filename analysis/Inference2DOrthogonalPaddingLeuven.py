@@ -364,6 +364,7 @@ if __name__ == "__main__":
     os.makedirs(seg_folder, exist_ok=True)
 
     for img_path, lung_path in zip(imgs, lungs):
+
         all_imgs = os.listdir(img_path)
         all_lungs = os.listdir(lung_path)
         all_imgs = [os.path.join(img_path, file) for file in all_imgs]
@@ -372,11 +373,10 @@ if __name__ == "__main__":
         all_lungs.sort()
         save_path = img_path.split('/')[-1]
         save_path = os.path.join(seg_folder, save_path)
+
         for img, lung in zip(all_imgs, all_lungs):
-            # seg_path_name = store_case_path + '/' + each_file[:-7] + '_lunglabel.nii.gz'
             filename = img.split('/')[-1]
             save_name = filename + '_seg.nii.gz'
-            # save_name_prob = filename + '_prob.nii.gz'
             segmentation, probability = segment2D(img,
                                                   lung,
                                                   model_path_full,
@@ -389,6 +389,5 @@ if __name__ == "__main__":
                                                   padding,
                                                   bin_number)
             save_seg(save_path, save_name, img, segmentation)
-            # save_seg(save_path, save_name_prob, img, probability)
 
     print('End')
