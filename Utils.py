@@ -48,10 +48,13 @@ def train_base(labelled_img,
     lung = labelled_lung.to(device=device, dtype=torch.float32)
 
     if single_channel_label is True:
-        labels = labels[:, labels.size()[1] // 2, :, :].unsqueeze(1) # middle slice
-        lung = lung[:, lung.size()[1] // 2, :, :].unsqueeze(1)  # middle slice
+        # labels = labels[:, labels.size()[1] // 2, :, :].unsqueeze(1) # middle slice
+        # lung = lung[:, lung.size()[1] // 2, :, :].unsqueeze(1)  # middle slice
         # labels = labels[:, -1, :, :].unsqueeze(1) # last slice
         # lung = lung[:, -1, :, :].unsqueeze(1)
+        labels = labels.unsqueeze(1)
+        lung = lung.unsqueeze(1)
+        train_imgs = train_imgs.unsqueeze(1)
 
     if torch.sum(labels) > 10.0:
         if cm_refine is False:

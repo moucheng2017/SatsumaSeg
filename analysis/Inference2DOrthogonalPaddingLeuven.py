@@ -116,15 +116,18 @@ def seg_d_direction(volume,
 
     # padding:
     if padding_size > 1:
-        seg_padded = np.pad(seg, pad_width=((0, padding_size),
-                                            (0, padding_size),
-                                            (0, padding_size)), mode='symmetric')
+        seg_padded = np.pad(seg, pad_width=((padding_size//2, padding_size//2),
+                                            (padding_size//2, padding_size//2),
+                                            (padding_size//2, padding_size//2)), mode='symmetric')
 
         padded_h, padded_w, padded_d = np.shape(seg_padded)
 
+    # for dd in range(0, d+padding_size, sliding_window):
     for dd in range(0, d-new_size[0]+padding_size, sliding_window):
         img = volume[:, dd:dd+new_size[0], :, :]
         # use sliding windows:
+        # for h_ in range(0, h, sliding_window):
+        #     for w_ in range(0, w, sliding_window):
         for h_ in range(0, h-new_size[1], sliding_window):
             for w_ in range(0, w-new_size[2], sliding_window):
                 cropped = img[:, :, h_:h_ + new_size[1], w_:w_ + new_size[2]]
@@ -162,16 +165,19 @@ def seg_h_direction(volume,
 
     # padding:
     if padding_size > 1:
-        seg_padded = np.pad(seg, pad_width=((0, padding_size),
-                                            (0, padding_size),
-                                            (0, padding_size)), mode='symmetric')
+        seg_padded = np.pad(seg, pad_width=((padding_size//2, padding_size//2),
+                                            (padding_size//2, padding_size//2),
+                                            (padding_size//2, padding_size//2)), mode='symmetric')
         padded_h, padded_w, padded_d = np.shape(seg_padded)
 
     for hh in range(0, h-new_size[1]+padding_size, sliding_window):
+    # for hh in range(0, h+padding_size, sliding_window):
         img = volume[:, :, hh:hh+new_size[1], :]
         # use sliding windows:
         for d_ in range(0, d-new_size[0], sliding_window):
             for w_ in range(0, w-new_size[2], sliding_window):
+        # for d_ in range(0, d, sliding_window):
+        #     for w_ in range(0, w, sliding_window):
                 cropped = img[:, d_:d_ + new_size[0], :, w_:w_ + new_size[2]] # 1 x 320 x 5 x 320, C x D x H x W
                 cropped = cropped.permute(0, 2, 1, 3) # 1 x 5 x 320 x 320, C x H x D x W
                 seg_patch, _ = model(cropped)
@@ -206,17 +212,20 @@ def seg_w_direction(volume,
 
     # padding:
     if padding_size > 1:
-        seg_padded = np.pad(seg, pad_width=((0, padding_size),
-                                            (0, padding_size),
-                                            (0, padding_size)), mode='symmetric')
+        seg_padded = np.pad(seg, pad_width=((padding_size//2, padding_size//2),
+                                            (padding_size//2, padding_size//2),
+                                            (padding_size//2, padding_size//2)), mode='symmetric')
 
         padded_h, padded_w, padded_d = np.shape(seg_padded)
 
     for ww in range(0, w-new_size[2]+padding_size, sliding_window):
+    # for ww in range(0, w+padding_size, sliding_window):
         img = volume[:, :, :, ww:ww+new_size[2]]
         # use sliding windows:
         for d_ in range(0, d-new_size[0], sliding_window):
             for h_ in range(0, h-new_size[1], sliding_window):
+        # for d_ in range(0, d, sliding_window):
+        #     for h_ in range(0, h, sliding_window):
                 cropped = img[:, d_:d_ + new_size[0], h_:h_ + new_size[1], :] # 1 x 320 x 320 x 5, C x D x H x W
                 cropped = cropped.permute(0, 3, 1, 2) # 1 x 5 x 320 x 320, C x W x D x H
                 # print(np.shape(cropped))
@@ -272,11 +281,11 @@ def segment2D(test_data_path,
     model.eval()
 
     # normalisation:
-    data = normalisation(lung, data)
+    # data = normalisation(lung, data)
 
     # contrast augmentation:
-    data = adjustcontrast(data, bin_number)
-    data = normalisation(lung, data)
+    # data = adjustcontrast(data, bin_number)
+    # data = normalisation(lung, data)
 
     # np --> tensor
     data = np2tensor(data)
@@ -328,18 +337,18 @@ def save_seg(save_path,
 
 if __name__ == "__main__":
 
-    model_path = '/home/moucheng/projects_codes/Results/airway/2022_06_04/OrthogonalSup2D_e1_l0.001_b5_w24_s5000_r0.001_z5_h448_w448_t2.0/trained_models/'
-    model_name = 'OrthogonalSup2D_e1_l0.001_b5_w24_s5000_r0.001_z5_h448_w448_t2.0_2000.pt'
+    model_path = '/home/moucheng/projects_codes/Results/airway/local_2022_05_13/OrthogonalSup2D_e1_l0.001_b5_w32_s5000_r0.001_z10_t2.0/trained_models/'
+    model_name = 'OrthogonalSup2D_e1_l0.001_b5_w32_s5000_r0.001_z10_t2.0_2000.pt'
     model_path_full = model_path + model_name
 
-    new_size_d = 5
+    new_size_d = 10
     new_resolution_w = 448
     new_resolution_h = 448
     threshold = 0.4
-    sliding_window = 5
+    sliding_window = 1
     temperature = 2.0
     padding = 100
-    bin_number = 100
+    bin_number = 10
 
     imgs_folder = '/home/moucheng/projects_data/Pulmonary_data/Leuven familial fibrosis/nifti'
     imgs = os.listdir(imgs_folder)
@@ -351,7 +360,7 @@ if __name__ == "__main__":
     lungs = [os.path.join(lungmask_folder, lung) for lung in lungs]
     lungs.sort()
 
-    seg_folder = '/home/moucheng/projects_data/Pulmonary_data/Leuven familial fibrosis/seg'
+    seg_folder = '/home/moucheng/projects_data/Pulmonary_data/Leuven familial fibrosis/seg_r' + str(new_resolution_h) + '_s' + str(sliding_window) + '_no_norm_padding_both_side'
     os.makedirs(seg_folder, exist_ok=True)
 
     for img_path, lung_path in zip(imgs, lungs):
@@ -367,7 +376,7 @@ if __name__ == "__main__":
             # seg_path_name = store_case_path + '/' + each_file[:-7] + '_lunglabel.nii.gz'
             filename = img.split('/')[-1]
             save_name = filename + '_seg.nii.gz'
-            save_name_prob = filename + '_prob.nii.gz'
+            # save_name_prob = filename + '_prob.nii.gz'
             segmentation, probability = segment2D(img,
                                                   lung,
                                                   model_path_full,
@@ -380,31 +389,6 @@ if __name__ == "__main__":
                                                   padding,
                                                   bin_number)
             save_seg(save_path, save_name, img, segmentation)
-            save_seg(save_path, save_name_prob, img, probability)
+            # save_seg(save_path, save_name_prob, img, probability)
 
-    # save_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/seg_new'
-    # data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/imgs/' + case + '.nii.gz'
-    # lung_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/lung/' + case + '_lunglabel.nii.gz'
-    # model_path = '/home/moucheng/projects_codes/Results/cluster/Results/airway/2022_06_07/OrthogonalSup2DFast_e1_l0.001_b5_w48_s5000_r0.01_z5_h448_w448_t2.0/trained_models/'
-    # model_name = 'OrthogonalSup2DFast_e1_l0.001_b5_w48_s5000_r0.01_z5_h448_w448_t2.0_2800.pt'
-    # model_path_full = model_path + model_name
-    # save_name = case + '_aug_seg2Dorthogonal_t' + str(threshold) + '_h' + str(new_resolution_h) + '_w' + str(new_resolution_w) + '_s' + str(sliding_window) + '_temp' + str(temperature) + '_p' + str(padding) + '_b' + str(bin_number) + '.nii.gz'
-    # save_name_prob = case + '_aug_prob2Dorthogonal_t' + str(threshold) + '_h' + str(new_resolution_h) + '_w' + str(new_resolution_w) + '_s' + str(sliding_window) + '_temp' + str(temperature) + '_p' + str(padding) + '_b' + str(bin_number) + '.nii.gz'
-    #
-    # segmentation, probability = segment2D(data_path,
-    #                                       lung_path,
-    #                                       model_path_full,
-    #                                       threshold,
-    #                                       new_size_d,
-    #                                       new_resolution_h,
-    #                                       new_resolution_w,
-    #                                       sliding_window,
-    #                                       temperature,
-    #                                       padding,
-    #                                       bin_number)
-    #
-    # save_seg(save_path, save_name, data_path, segmentation)
-    # save_seg(save_path, save_name_prob, data_path, probability)
-    #
-    # print(np.shape(segmentation))
-    # print('End')
+    print('End')

@@ -11,7 +11,7 @@ import shutil
 import torch.nn.functional as F
 
 from Metrics import segmentation_scores
-from dataloaders.DataloaderOrthogonal import CT_Dataset_Orthogonal
+from dataloaders.DataloaderOrthogonal512 import CT_Dataset_Orthogonal
 from tensorboardX import SummaryWriter
 
 # import wandb
@@ -33,17 +33,16 @@ from analysis.Inference3D import test_all_models
 def trainModels(dataset_name,
                 data_directory,
                 repeat,
-                num_steps,
-                learning_rate,
-                width,
                 log_tag,
-                train_batchsize,
-                val_batchsize=3,
-                new_d=5,
-                new_h=384,
-                new_w=384,
-                temp=0.5,
-                l2=0.01,
+                num_steps=10000,
+                learning_rate=1e-3,
+                width=32,
+                train_batchsize=4,
+                norm=False,
+                contrast=False,
+                lung=True,
+                temp=2.0,
+                l2=1e-3,
                 resume_epoch=0,
                 resume_training=False,
                 checkpoint_path='/path/checkpoint/model'
@@ -58,7 +57,7 @@ def trainModels(dataset_name,
         # }
 
         repeat_str = str(j)
-        Exp = Unet2DMultiChannel(in_ch=new_d, width=width, output_channels=1)
+        Exp = Unet2DMultiChannel(in_ch=1, width=width, output_channels=1)
         Exp_name = 'OrthogonalSup2DSingle'
 
         Exp_name = Exp_name + \
@@ -68,20 +67,11 @@ def trainModels(dataset_name,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_r' + str(l2) + \
-                   '_d' + str(new_d) + \
-                   '_h' + str(new_h) + \
-                   '_w' + str(new_w) + \
+                   '_c_' + str(contrast) + \
+                   '_n_' + str(norm) + \
                    '_t' + str(temp)
 
-        # trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory,
-        #                                                                                                               dataset_name,
-        #                                                                                                               train_batchsize,
-        #                                                                                                               [new_d, new_h, new_w],
-        #                                                                                                               [new_h, new_d, new_w],
-        #                                                                                                               [new_h, new_w, new_d],
-        #                                                                                                               val_batchsize)
-
-        trainloader_withlabels = getData(data_directory, dataset_name, train_batchsize, [new_d, new_h, new_w], [new_h, new_d, new_w], [new_h, new_w, new_d])
+        trainloader_withlabels = getData(data_directory, dataset_name, train_batchsize, norm, contrast, lung)
 
         trainSingleModel(model=Exp,
                          model_name=Exp_name,
@@ -96,7 +86,7 @@ def trainModels(dataset_name,
                          last_model=checkpoint_path)
 
 
-def getData(data_directory, dataset_name, train_batchsize, d, h, w):
+def getData(data_directory, dataset_name, train_batchsize, norm=False, contrast_aug=False, lung_window=True):
 
     data_directory = data_directory + '/' + dataset_name
 
@@ -106,7 +96,14 @@ def getData(data_directory, dataset_name, train_batchsize, d, h, w):
     train_label_folder_labelled = folder_labelled + '/lbls'
     train_lung_folder_labelled = folder_labelled + '/lung'
 
-    train_dataset_labelled = CT_Dataset_Orthogonal(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, d, h, w, labelled=True)
+    train_dataset_labelled = CT_Dataset_Orthogonal(imgs_folder=train_image_folder_labelled,
+                                                   labels_folder=train_label_folder_labelled,
+                                                   lung_folder=train_lung_folder_labelled,
+                                                   labelled=True,
+                                                   full_resolution=512,
+                                                   normalisation=norm,
+                                                   contrast_aug=contrast_aug,
+                                                   lung_window=lung_window)
 
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
