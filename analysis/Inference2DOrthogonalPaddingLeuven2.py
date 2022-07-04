@@ -4,9 +4,17 @@ import random
 import numpy as np
 import os
 
+import glob
+import tifffile as tiff
+
+import errno
+import imageio
+
+from PIL import Image
+
 import numpy.ma as ma
-import inspect
 import sys
+import inspect
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -140,7 +148,7 @@ def seg_d_direction(volume,
         print('d plane slice ' + str(dd) + ' is done...')
 
     if padding_size > 1:
-        seg = seg_padded[padding_size//2:padded_h-padding_size//2, padding_size//2:padded_w-padding_size//2, padding_size//2:padded_d-padding_size//2]
+        seg = seg_padded[padding_size:padded_h-padding_size, padding_size:padded_w-padding_size, padding_size:padded_d-padding_size]
 
     return seg
 
@@ -189,7 +197,7 @@ def seg_h_direction(volume,
                     seg[hh:hh + new_size[1], w_:w_ + new_size[2], d_:d_+new_size[0]] = np.transpose(seg_patch, (0, 2, 1))
         print('h plane slice ' + str(hh) + ' is done...')
     if padding_size > 1:
-        seg = seg_padded[padding_size//2:padded_h - padding_size//2, padding_size//2:padded_w - padding_size//2, padding_size//2:padded_d - padding_size//2]
+        seg = seg_padded[padding_size:padded_h - padding_size, padding_size:padded_w - padding_size, padding_size:padded_d - padding_size]
     return seg
 
 
@@ -239,7 +247,7 @@ def seg_w_direction(volume,
 
         print('w plane slice ' + str(ww) + ' is done...')
     if padding_size > 1:
-        seg = seg_padded[padding_size//2:padded_h - padding_size//2, padding_size//2:padded_w - padding_size//2, padding_size//2:padded_d - padding_size//2]
+        seg = seg_padded[padding_size:padded_h - padding_size, padding_size:padded_w - padding_size, padding_size:padded_d - padding_size]
     return seg
 
 
@@ -344,9 +352,9 @@ if __name__ == "__main__":
     new_resolution_w = 448
     new_resolution_h = 448
     threshold = 0.4
-    sliding_window = 1
+    sliding_window = 10
     temperature = 1.0
-    padding = 200
+    padding = 0
     bin_number = 10
 
     imgs_folder = '/home/moucheng/projects_data/Pulmonary_data/Leuven familial fibrosis/nifti'
@@ -359,7 +367,7 @@ if __name__ == "__main__":
     lungs = [os.path.join(lungmask_folder, lung) for lung in lungs]
     lungs.sort()
 
-    seg_folder = '/home/moucheng/projects_data/Pulmonary_data/Leuven familial fibrosis/seg_w' + str(new_resolution_w) + '_h' + str(new_resolution_h) + '_s' + str(sliding_window) + '_no_norm'
+    seg_folder = '/home/moucheng/projects_data/Pulmonary_data/Leuven familial fibrosis/seg_r' + str(new_resolution_h) + '_s' + str(sliding_window) + '_no_norm'
     os.makedirs(seg_folder, exist_ok=True)
 
     for img_path, lung_path in zip(imgs, lungs):
