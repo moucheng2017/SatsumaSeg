@@ -26,9 +26,9 @@ def main(path):
 
 
 if __name__ == "__main__":
-    all_paths = ['/home/moucheng/projects_data/Pulmonary_data/airway/validate/imgs',
-                 '/home/moucheng/projects_data/Pulmonary_data/airway/validate/lbls',
-                 '/home/moucheng/projects_data/Pulmonary_data/airway/validate/lung']
+    all_paths = ['/home/moucheng/projects_data/Pulmonary_data/airway/unlabelled/imgs',
+                 # '/home/moucheng/projects_data/Pulmonary_data/airway//lbls',
+                 '/home/moucheng/projects_data/Pulmonary_data/airway/unlabelled/lung']
 
     for each_path in all_paths:
         main(each_path)
