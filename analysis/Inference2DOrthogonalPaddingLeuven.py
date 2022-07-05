@@ -346,7 +346,7 @@ if __name__ == "__main__":
     threshold = 0.4
     sliding_window = 1
     temperature = 1.0
-    padding = 200
+    padding = 0
     bin_number = 10
 
     imgs_folder = '/home/moucheng/projects_data/Pulmonary_data/Leuven familial fibrosis/nifti'
