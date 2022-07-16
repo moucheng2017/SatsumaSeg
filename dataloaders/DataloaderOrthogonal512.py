@@ -38,6 +38,7 @@ class RandomCroppingOrthogonal(object):
         for each_input in volumes:
 
             newd, newh, neww = np.shape(each_input)
+
             assert newd == self.resolution
             assert newh == self.resolution
             assert neww == self.resolution
