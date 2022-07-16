@@ -166,15 +166,17 @@ def trainSingleModel(model,
     writer = SummaryWriter(saved_log_path + '/Log_' + save_model_name)
 
     model.to(device)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
 
     # resume training:
     if resume is True:
-        model = torch.load(last_model)
-
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
+        checkpoint = torch.load(last_model)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        epoch_current = checkpoint['epoch']
+        loss_current = checkpoint['loss']
 
     start = timeit.default_timer()
-
     iterator_train_labelled = iter(trainloader_with_labels)
 
     train_mean_iu_d_tracker = 0.0
@@ -252,7 +254,8 @@ def trainSingleModel(model,
         #
         # wandb.watch(model)
 
-        if step > 2000 and step % 100 == 0:
+        # if step > 2000 and step % 100 == 0:
+        if step % 10 == 0:
             # save checker points
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
@@ -265,7 +268,10 @@ def trainSingleModel(model,
         elif step > num_steps - 50:
             save_model_name_full = saved_model_path + '/' + save_model_name + '_' + str(step) + '.pt'
             path_model = save_model_name_full
-            torch.save(model, path_model)
+            torch.save({'epoch': step,
+                        'model_state_dict': model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'loss': loss}, path_model)
 
     # save_model_name_full = saved_model_path + '/' + save_model_name + '.pt'
     # path_model = save_model_name_full
