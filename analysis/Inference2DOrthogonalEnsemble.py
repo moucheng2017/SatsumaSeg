@@ -1,5 +1,7 @@
 import nibabel
+import sys
 import torch
+sys.path.append("..")
 import random
 import numpy as np
 import os
