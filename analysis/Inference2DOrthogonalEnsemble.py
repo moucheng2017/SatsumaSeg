@@ -123,6 +123,7 @@ def seg_one_plaine(volume,
 
 def seg_three_plaines(volume,
                       model,
+                      lung,
                       temperature=2
                       ):
     seg0 = seg_one_plaine(volume, model, 0, temperature)
@@ -135,65 +136,11 @@ def seg_three_plaines(volume,
     del seg1
     del seg2
 
-    return seg
-
-
-def merge_segs(folder):
-    all_files = os.listdir(folder)
-    seg = None
-    for each_seg in all_files:
-        each_seg = np.load(each_seg)
-        seg += each_seg
-
-    seg = seg / len(all_files)
-    seg = (seg > 0.9).float()
-    return seg
-
-
-def segment2D(test_data_path,
-              lung_path,
-              model_path,
-              threshold,
-              new_size_d,
-              new_size_h,
-              new_size_w,
-              sliding_window,
-              temperature=2):
-
-    d = [new_size_d, new_size_h, new_size_w]
-    h = [new_size_h, new_size_d, new_size_w]
-    w = [new_size_h, new_size_w, new_size_d]
-
-    # nii --> np:
-    data = nii2np(test_data_path)
-    lung = nii2np(lung_path)
-
-    # load model:
-    model = torch.load(model_path)
-    model.eval()
-
-    data = np2tensor(data)
-    output_w = seg_w_direction(data, model, w, sliding_window, temperature)
-    output_h = seg_h_direction(data, model, h, sliding_window, temperature)
-    output_d = seg_d_direction(data, model, d, sliding_window, temperature)
-    output_prob = (output_d + output_h + output_w) / 3
-
     lung = np.transpose(lung.squeeze(), (1, 2, 0))
-    output_prob = output_prob*lung
-    output = np.where(output_prob > threshold, 1, 0)
+    seg = seg*lung
+    del lung
 
-    return np.squeeze(output), np.squeeze(output_prob)
-
-
-def ensemble(seg_path):
-    final_seg = None
-    all_segs = os.listdir(seg_path)
-    all_segs.sort()
-    all_segs = [os.path.join(seg_path, seg_name) for seg_name in all_segs if 'prob' in seg_name]
-    for seg in all_segs:
-        seg = np.load(seg)
-        final_seg += seg
-    return final_seg / len(all_segs)
+    return seg
 
 
 def save_seg(save_path,
@@ -212,39 +159,105 @@ def save_seg(save_path,
     nibabel.save(segmentation_nii, save_path_nii)
 
 
+def ensemble(seg_path,
+             threshold):
+    final_seg = None
+    all_segs = os.listdir(seg_path)
+    all_segs.sort()
+    all_segs = [os.path.join(seg_path, seg_name) for seg_name in all_segs if 'prob' in seg_name]
+    for seg in all_segs:
+        seg_ = np.load(seg)
+        final_seg += seg_
+        del seg_
+
+    output = final_seg / len(all_segs)
+    output = np.where(output > threshold, 1, 0)
+    return output
+
+
+def main(test_data_path,
+         case,
+         lung_path,
+         model_path,
+         temp,
+         threshold=0.8,
+         step_range=20000):
+
+    # generate save path:
+    save_path = os.path.abspath(model_path)
+    save_path = os.path.join(save_path, 'segmentation')
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    # sort out all models:
+    all_models = os.listdir(model_path)
+    all_models.sort()
+
+    # ran inference for each model:
+    for model_name in all_models:
+        step = model_name.split('_')[-1]
+        step = float(step.split('.')[0])
+        if step >= step_range:
+            model_name = os.path.join(model_path, model_name)
+
+            # nii --> np:
+            data = nii2np(test_data_path)
+            lung = nii2np(lung_path)
+
+            # load model:
+            model = torch.load(model_name)
+            model.eval()
+
+            # np --> tensor
+            data = np2tensor(data)
+
+            # segmentation 3 orthogonal planes:
+            seg = seg_three_plaines(data, model, lung, temp)
+
+            # save prepration:
+            save_name = case + '_s' + str(step) + '_prob.nii.gz'
+
+            # save seg:
+            save_seg(save_path,
+                     save_name,
+                     test_data_path,
+                     seg)
+
+    # ensemble all segmentation files:
+    final_seg = ensemble(save_path, threshold)
+    save_name = case + '_final_prob.nii.gz'
+    # save seg:
+    save_seg(save_path,
+             save_name,
+             test_data_path,
+             final_seg)
+
+    print('Done')
+
+
 if __name__ == "__main__":
+
     case = '6357B'
-    new_size_d = 5
-    new_resolution_w = 480
-    new_resolution_h = 320
     threshold = 0.5
     sliding_window = 1
     temperature = 2
 
-    save_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/seg'
-    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/imgs/' + case + '.nii.gz'
-    lung_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/lung/' + case + '_lunglabel.nii.gz'
-    model_path = '/home/moucheng/PhD/2022_12_Clinical/orthogonal2d/preliminary/airway/2022_05_13/OrthogonalSup2D_e1_l0.001_b6_w64_s5000_r0.01_z5_t2.0/trained_models/'
-    model_name = 'OrthogonalSup2D_e1_l0.001_b6_w64_s5000_r0.01_z5_t2.0_2000.pt'
-    model_path_full = model_path + model_name
-    save_name = case + '_seg2Dorthogonal_t' + str(threshold) + '_h' + str(new_resolution_h) + '_w' + str(new_resolution_w) + '_s' + str(sliding_window) + '_t' + str(temperature) + '.nii.gz'
-    save_name_prob = case + '_prob2Dorthogonal_t' + str(threshold) + '_h' + str(new_resolution_h) + '_w' + str(new_resolution_w) + '_s' + str(sliding_window) + '_t' + str(temperature) + '.nii.gz'
+    # data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/imgs/' + case + '.nii.gz'
+    # lung_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/lung/' + case + '_lunglabel.nii.gz'
+    # model_path = '/home/moucheng/projects_codes/Results/airway/2022_07_04/OrthogonalSup2DSingle_e1_l0.0001_b4_w24_s50000_r0.001_c_False_n_False_t1.0/trained_models/'
 
-    segmentation, probability = segment2D(data_path,
-                                          lung_path,
-                                          model_path_full,
-                                          threshold,
-                                          new_size_d,
-                                          new_resolution_h,
-                                          new_resolution_w,
-                                          sliding_window,
-                                          temperature)
+    data_path = '/SAN/medic/PerceptronHead/data/lung/private/airway/test/imgs/' + case + '.nii.gz'
+    lung_path = '/SAN/medic/PerceptronHead/data/lung/private/airway/test/lung/' + case + '_lunglabel.nii.gz'
+    model_path = '/SAN/medic/PerceptronHead/Results/OrthogonalSup2DSingle_e1_l0.0001_b4_w24_s50000_r0.001_c_False_n_False_t1.0/trained_models/'
 
-    save_seg(save_path, save_name, data_path, segmentation)
-    save_seg(save_path, save_name_prob, data_path, probability)
+    main(data_path,
+         case,
+         lung_path,
+         model_path,
+         temperature,
+         threshold,
+         step_range=20000)
 
-    print(np.shape(segmentation))
-    print('End')
 
 
 
