@@ -182,35 +182,12 @@ def save_seg(save_path,
     nibabel.save(segmentation_nii, save_path_nii)
 
 
-def ensemble(seg_path,
-             threshold):
-
-    final_seg = []
-    all_segs = os.listdir(seg_path)
-    all_segs.sort()
-    all_segs = [os.path.join(seg_path, seg_name) for seg_name in all_segs if 'prob' in seg_name]
-
-    for seg_path in all_segs:
-        seg = nib.load(seg_path)
-        seg = seg.get_fdata()
-        seg = np.array(seg, dtype='float32')
-        final_seg.append(seg)
-        os.remove(seg_path)
-
-    output = sum(final_seg) / len(final_seg)
-    output = np.where(output > threshold, 1, 0)
-    del final_seg
-    return output
-
-
 def main(test_data_path,
          case,
          lung_path,
          model_path,
          temp,
-         threshold=0.8,
-         step_lower=20000,
-         step_upper=20200):
+         threshold=0.8):
 
     # generate save path:
     path = Path(os.path.abspath(model_path))
@@ -219,88 +196,66 @@ def main(test_data_path,
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    # sort out all models:
-    all_models = os.listdir(model_path)
-    all_models.sort()
+    model_name = os.path.join(model_path, 'avg_model.pt')
 
-    # ran inference for each model:
-    for model_name in all_models:
+    # nii --> np:
+    data, d1 = nii2np(test_data_path)
+    lung, d2 = nii2np(lung_path)
+    assert d1 == d2
 
-        step = model_name.split('_')[-1]
-        step = float(step.split('.')[0])
+    # load model:
+    # print(model_name)
+    # model = torch.load(model_name)
+    # model.load_state_dict()
+    # print(model)
 
-        if step_lower < step < step_upper:
-            model_name = os.path.join(model_path, model_name)
+    # model = Unet2DMultiChannel(in_ch=1, width=24, output_channels=1)
+    # model.to('cuda')
+    # checkpoint = torch.load(model_name)
+    # model.load_state_dict(checkpoint['model_state_dict'])
+    model = torch.load(model_name)
+    model.to('cuda')
+    model.eval()
 
-            # nii --> np:
-            data, d1 = nii2np(test_data_path)
-            lung, d2 = nii2np(lung_path)
-            assert d1 == d2
+    # np --> tensor
+    data = np2tensor(data)
 
-            # load model:
-            # print(model_name)
-            # model = torch.load(model_name)
-            # model.load_state_dict()
-            # print(model)
+    # segmentation 3 orthogonal planes:
+    seg = seg_three_plaines(data, model, lung, temp)
+    seg = np.squeeze(seg)
+    seg = seg[:d1, :, :]
+    seg = np.transpose(seg, (1, 2, 0))
+    seg = np.where(seg > threshold, 1, 0)
 
-            model = Unet2DMultiChannel(in_ch=1, width=24, output_channels=1)
-            model.to('cuda')
-            checkpoint = torch.load(model_name)
-            model.load_state_dict(checkpoint['model_state_dict'])
-            model.eval()
-
-            # np --> tensor
-            data = np2tensor(data)
-
-            # segmentation 3 orthogonal planes:
-            seg = seg_three_plaines(data, model, lung, temp)
-
-            # seg = np.transpose(np.squeeze(seg), (2, 0, 1))
-            seg = np.squeeze(seg)
-            seg = seg[:d1, :, :]
-            seg = np.transpose(seg, (1, 2, 0))
-
-            # save prepration:
-            save_name = case + '_s' + str(step) + '_prob.nii.gz'
-
-            # save seg:
-            save_seg(save_path,
-                     save_name,
-                     test_data_path,
-                     seg)
-
-    # ensemble all segmentation files:
-    final_seg = ensemble(save_path, threshold)
-    save_name = case + '_final_prob.nii.gz'
+    # save prepration:
+    save_name = case + '_avg_seg.nii.gz'
 
     # save seg:
     save_seg(save_path,
              save_name,
              test_data_path,
-             final_seg)
+             seg)
 
     print('Done')
 
 
 if __name__ == "__main__":
+
     # Hyperparameters:
-    cases = ['6357B'] # testing case
+    case = '6357B' # testing case
     threshold = 0.4 # confidence threshold
     temperature = 2 # temperature scaling for sigmoid/softmax
 
-    for case in cases:
-        data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/imgs/' + case + '.nii.gz'
-        lung_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/lung/' + case + '_lunglabel.nii.gz'
-        model_path = '/home/moucheng/projects_codes/Results/airway/2022_07_04/OrthogonalSup2DSingle_e1_l0.0001_b4_w24_s50000_r0.001_c_False_n_False_t1.0/trained_models/'
+    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/imgs/' + case + '.nii.gz'
+    lung_path = '/home/moucheng/projects_data/Pulmonary_data/airway/test/lung/' + case + '_lunglabel.nii.gz'
+    model_path = '/home/moucheng/projects_codes/Results/airway/2022_07_04/OrthogonalSup2DSingle_e1_l0.0001_b4_w24_s50000_r0.001_c_False_n_False_t1.0/trained_models/'
 
-        main(data_path,
-             case,
-             lung_path,
-             model_path,
-             temperature,
-             threshold,
-             step_lower=20000,
-             step_upper=100000)
+    main(data_path,
+         case,
+         lung_path,
+         model_path,
+         temperature,
+         threshold)
 
 
 
