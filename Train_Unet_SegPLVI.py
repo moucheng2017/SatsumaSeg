@@ -4,22 +4,19 @@ import torch
 # # torch.backends.cudnn.benchmark = False
 import timeit
 import torch.nn as nn
-import random
 import numpy as np
 from torch.utils import data
 import shutil
-import torch.nn.functional as F
 import math
 from Metrics import segmentation_scores
 from dataloaders.Dataloader import CT_Dataset
 from tensorboardX import SummaryWriter
 
-from Utils import evaluate, test, sigmoid_rampup
+from Utils import evaluate, sigmoid_rampup
 from Loss import SoftDiceLoss
 # =================================
-from Models3D import Unet3D, ThresholdModel3D
+from arxiv.Models3D import Unet3D, ThresholdModel3D
 from Models2D import Unet2D, ThresholdModel2D
-from analysis.Inference3D import test_all_models
 import errno
 
 # This is for binary segmentation only for now
