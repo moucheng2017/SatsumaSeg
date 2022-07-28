@@ -92,66 +92,67 @@ class cm_net(nn.Module):
         return cm
 
 
-class Unet2DCM(nn.Module):
-    def __init__(self, in_ch, width, class_no, resolution):
-        super(Unet2DCM, self).__init__()
-        self.final_in = class_no
+class Unet(nn.Module):
+    """
+    U-net
+    """
+    def __init__(self, in_ch, width, depth, classes, norm='in'):
+        #
+        # ===============================================================================
+        # in_ch: dimension of input
+        # class_no: number of output class
+        # width: number of channels in the first encoder
+        # depth: down-sampling stages - 1
+        # ===============================================================================
+        super(Unet, self).__init__()
+        self.depth = depth
 
-        self.w1 = width
-        self.w2 = width * 2
-        self.w3 = width * 4
-        self.w4 = width * 8
+        self.decoders = nn.ModuleList()
+        self.encoders = nn.ModuleList()
 
-        encoder_downsamples = [(2, 2), (2, 2), (2, 2), (2, 2)]
-        upsamples_steps = [(2, 2), (2, 2), (2, 2), (2, 2)]
+        for i in range(self.depth):
 
-        self.econv0 = single_conv(in_channels=in_ch, out_channels=self.w1, step=1)
-        self.econv1 = DoubleRandomDilatedConv(in_channels=self.w1, out_channels=self.w2, step=encoder_downsamples[0])
-        self.econv2 = DoubleRandomDilatedConv(in_channels=self.w2, out_channels=self.w3, step=encoder_downsamples[1])
-        self.econv3 = DoubleRandomDilatedConv(in_channels=self.w3, out_channels=self.w4, step=encoder_downsamples[2])
-        self.bridge = DoubleRandomDilatedConv(in_channels=self.w4, out_channels=self.w4, step=encoder_downsamples[3])
+            if i == 0:
 
-        self.dconv3 = DoubleRandomDilatedConv(in_channels=self.w4+self.w4, out_channels=self.w3, step=1)
-        self.dconv2 = DoubleRandomDilatedConv(in_channels=self.w3+self.w3, out_channels=self.w2, step=1)
-        self.dconv1 = DoubleRandomDilatedConv(in_channels=self.w2+self.w2, out_channels=self.w1, step=1)
-        self.dconv0 = DoubleRandomDilatedConv(in_channels=self.w1+self.w1, out_channels=self.w1, step=1)
+                self.encoders.append(double_conv(in_channels=in_ch, out_channels=width, step=1, norm=norm))
+                self.decoders.append(double_conv(in_channels=width*2, out_channels=width, step=1, norm=norm))
 
-        self.upsample0 = nn.Upsample(scale_factor=upsamples_steps[0], mode='bilinear', align_corners=True)
-        self.upsample1 = nn.Upsample(scale_factor=upsamples_steps[1], mode='bilinear', align_corners=True)
-        self.upsample2 = nn.Upsample(scale_factor=upsamples_steps[2], mode='bilinear', align_corners=True)
-        self.upsample3 = nn.Upsample(scale_factor=upsamples_steps[3], mode='bilinear', align_corners=True)
+            elif i < (self.depth - 1):
 
-        self.dconv_last = nn.Conv2d(self.w1, self.final_in, (1, 1), bias=True)
+                self.encoders.append(double_conv(in_channels=width*(2**(i - 1)), out_channels=width*(2**i), step=2, norm=norm))
+                self.decoders.append(double_conv(in_channels=width*(2**(i + 1)), out_channels=width*(2**(i - 1)), step=1, norm=norm))
 
-        self.cm_network = cm_net(c=width, h=resolution, w=resolution, class_no=class_no, latent=512)
+            else:
 
-    def forward(self, x, dilation_encoder=[1, 1, 1, 1], dilation_decoder=[1, 1, 1, 1]):
+                self.encoders.append(double_conv(in_channels=width*(2**(i-1)), out_channels=width*(2**(i-1)), step=2, norm=norm))
+                self.decoders.append(double_conv(in_channels=width*(2**i), out_channels=width*(2**(i - 1)), step=1, norm=norm))
 
-        x0 = self.econv0(x)
-        x1 = self.econv1(x0, dilation_encoder[0])
-        x2 = self.econv2(x1, dilation_encoder[1])
-        x3 = self.econv3(x2, dilation_encoder[2])
-        x4 = self.bridge(x3, dilation_encoder[3])
-        y = self.upsample0(x4)
+        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.conv_last = nn.Conv2d(width, classes, 1, bias=True)
 
-        # if y.size()[3] != x3.size()[3]:
-        #     diffY = torch.tensor([x3.size()[4] - y.size()[4]])
-        #     diffX = torch.tensor([x3.size()[3] - y.size()[3]])
-        #     y = F.pad(y, [0, diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+    def forward(self, x):
 
-        y3 = torch.cat([y, x3], dim=1)
-        y3 = self.dconv3(y3, dilation_decoder[0])
-        y2 = self.upsample1(y3)
-        y2 = torch.cat([y2, x2], dim=1)
-        y2 = self.dconv2(y2, dilation_decoder[1])
-        y1 = self.upsample2(y2)
-        y1 = torch.cat([y1, x1], dim=1)
-        y1 = self.dconv1(y1, dilation_decoder[2])
-        y0 = self.upsample3(y1)
-        y0 = torch.cat([y0, x0], dim=1)
-        y0 = self.dconv0(y0, dilation_decoder[3])
+        y = x
+        encoder_features = []
 
-        y = self.dconv_last(y0)
-        cm = self.cm_network(y0)
+        for i in range(len(self.encoders)):
 
-        return y, cm
+            y = self.encoders[i](y)
+            encoder_features.append(y)
+
+        for i in range(len(encoder_features)):
+
+            y = self.upsample(y)
+            y_e = encoder_features[-(i+1)]
+
+            if y_e.shape[2] != y.shape[2]:
+                diffY = torch.tensor([y_e.size()[2] - y.size()[2]])
+                diffX = torch.tensor([y_e.size()[3] - y.size()[3]])
+
+                y = F.pad(y, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+
+            y = torch.cat([y_e, y], dim=1)
+            y = self.decoders[-(i+1)](y)
+
+        y = self.conv_last(y)
+        return y
