@@ -16,7 +16,7 @@ from Utils import evaluate, sigmoid_rampup
 from Loss import SoftDiceLoss
 # =================================
 from arxiv.Models3D import Unet3D, ThresholdModel3D
-from Models2D import Unet2D, ThresholdModel2D
+from Models2D import UnetBPL
 import errno
 
 # This is for binary segmentation only for now
@@ -36,7 +36,6 @@ def trainModels(
                 width,
                 log_tag,
                 unlabelled=5,
-                new_resolution=[12, 512, 512],
                 l2=0.01,
                 alpha=1.0,
                 warmup=0.1,
@@ -48,14 +47,8 @@ def trainModels(
 
         repeat_str = str(j)
 
-        if new_resolution[0] > 1:
-            Exp = Unet3D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
-            Exp_T = ThresholdModel3D(c=width)
-            Exp_name = 'VISegPL3D'
-        else:
-            Exp = Unet2D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
-            Exp_T = ThresholdModel2D(c=width)
-            Exp_name = 'VISegPL2D'
+        Exp = Unet2D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
+        Exp_name = 'VISegPL2D'
 
         Exp_name = Exp_name + \
                    '_e' + str(repeat_str) + \
