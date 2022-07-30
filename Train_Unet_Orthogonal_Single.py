@@ -4,27 +4,20 @@ import torch
 # torch.manual_seed(0)
 # # torch.backends.cudnn.benchmark = False
 import timeit
-import torch.nn as nn
-import numpy as np
 from torch.utils import data
 import shutil
-import torch.nn.functional as F
 
-from Metrics import segmentation_scores
 from dataloaders.DataloaderOrthogonal512 import CT_Dataset_Orthogonal
 from tensorboardX import SummaryWriter
 
 # import wandb
 
-from Utils import validate_three_planes
-from Loss import SoftDiceLoss
 # ==============================================
 from Models2DOrthogonal import Unet2DMultiChannel
 import errno
 
 from Utils import train_base
 
-from analysis.Inference3D import test_all_models
 
 # This script trains a weird model:
 # We train on three planes simulatenously
