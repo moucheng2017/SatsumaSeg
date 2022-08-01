@@ -7,39 +7,28 @@ import timeit
 from torch.utils import data
 import shutil
 
-from dataloaders.DataloaderOrthogonal512 import CT_Dataset_Orthogonal
+from pathlib import Path
+
+from dataloaders.DataloaderOrthogonal import CT_Dataset_Orthogonal
 from tensorboardX import SummaryWriter
 
+from training_arguments_sup import parser
 # import wandb
 
 # ==============================================
-from Models2DOrthogonal import Unet2DMultiChannel
+from Models2D import Unet
 import errno
 
 from Utils import train_base
 
 
-# This script trains a weird model:
-# We train on three planes simulatenously
+# This script trains a weird model on three planes simulatenously
 
 
-def trainModels(dataset_name,
-                data_directory,
-                repeat,
-                log_tag,
-                num_steps=10000,
-                learning_rate=1e-3,
-                width=32,
-                train_batchsize=4,
-                norm=False,
-                contrast=False,
-                lung=True,
-                temp=2.0,
-                l2=1e-3,
-                resume_epoch=0,
-                resume_training=False,
-                checkpoint_path='/path/checkpoint/model'
-                ):
+def trainModels():
+
+    global args
+    args = parser.parse_args()
 
     for j in range(1, repeat + 1):
         # wandb.init(project="test-project", entity="satsuma")
@@ -50,7 +39,7 @@ def trainModels(dataset_name,
         # }
 
         repeat_str = str(j)
-        Exp = Unet2DMultiChannel(in_ch=1, width=width, output_channels=1)
+        Exp = Unet(in_ch=1, width=width, depth=depth, classes=1, norm='in', side_output=False)
         Exp_name = 'OrthogonalSup2DSingle'
 
         Exp_name = Exp_name + \
@@ -58,6 +47,7 @@ def trainModels(dataset_name,
                    '_l' + str(learning_rate) + \
                    '_b' + str(train_batchsize) + \
                    '_w' + str(width) + \
+                   '_d' + str(depth) + \
                    '_s' + str(num_steps) + \
                    '_r' + str(l2) + \
                    '_c_' + str(contrast) + \
@@ -79,7 +69,7 @@ def trainModels(dataset_name,
                          last_model=checkpoint_path)
 
 
-def getData(data_directory, dataset_name, train_batchsize, norm=False, contrast_aug=False, lung_window=True):
+def getData(data_directory, dataset_name, train_batchsize, norm=False, contrast_aug=False, lung_window=True, apply_lung_mask=True):
 
     data_directory = data_directory + '/' + dataset_name
 
@@ -114,20 +104,6 @@ def getData(data_directory, dataset_name, train_batchsize, norm=False, contrast_
 # =====================================================================================================================================
 
 
-# def trainSingleModel(model,
-#                      model_name,
-#                      num_steps,
-#                      learning_rate,
-#                      dataset_name,
-#                      trainloader_with_labels,
-#                      validateloader,
-#                      temp,
-#                      log_tag,
-#                      l2,
-#                      resume=False,
-#                      last_model='/path/to/checkpoint'):
-
-
 def trainSingleModel(model,
                      model_name,
                      num_steps,
@@ -143,14 +119,11 @@ def trainSingleModel(model,
     device = torch.device('cuda')
     save_model_name = model_name
     saved_information_path = '../Results/' + dataset_name + '/' + log_tag
-    if not os.path.exists(saved_information_path):
-        os.makedirs(saved_information_path, exist_ok=True)
+    Path(saved_information_path).mkdir(parents=True, exist_ok=True)
     saved_log_path = saved_information_path + '/Logs'
-    if not os.path.exists(saved_log_path):
-        os.makedirs(saved_log_path, exist_ok=True)
+    Path(saved_log_path).mkdir(parents=True, exist_ok=True)
     saved_model_path = saved_information_path + '/' + save_model_name + '/trained_models'
-    if not os.path.exists(saved_model_path):
-        os.makedirs(saved_model_path, exist_ok=True)
+    Path(saved_model_path).mkdir(parents=True, exist_ok=True)
 
     print('The current model is:')
     print(save_model_name)
@@ -222,10 +195,10 @@ def trainSingleModel(model,
             'Train iou d: {:.4f}, '
             'Train iou h: {:.4f}, '
             'Train iou w: {:.4f}, '.format(step + 1, num_steps,
-                                      optimizer.param_groups[0]["lr"],
-                                      train_iou_d,
-                                      train_iou_h,
-                                      train_iou_w))
+                                           optimizer.param_groups[0]["lr"],
+                                           train_iou_d,
+                                           train_iou_h,
+                                           train_iou_w))
 
         # # # ================================================================== #
         # # #                        TensorboardX Logging                        #
@@ -275,17 +248,7 @@ def trainSingleModel(model,
     print('Training Time: ', training_time)
 
     save_path = saved_information_path + '/results'
-    try:
-        os.mkdir(save_path)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise
-        pass
-
-    # iou_mean, iou_std = test_all_models(saved_model_path, testdata_path, save_path, size, class_no, False, False)
-    #
-    # print('Test IoU: ' + str(iou_mean) + '\n')
-    # print('Test IoU std: ' + str(iou_std) + '\n')
+    Path(save_path).mkdir(parents=True, exist_ok=True)
 
     print('\nTraining finished and model saved\n')
 

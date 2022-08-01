@@ -2,30 +2,17 @@ import nibabel
 import sys
 import torch
 sys.path.append("..")
-import random
 import numpy as np
 import os
 from pathlib import Path
 
 import nibabel as nib
 
-import argparse
-import glob
-import tifffile as tiff
-
-import errno
-import imageio
-
-from PIL import Image
-
 import numpy.ma as ma
 
-from dataloaders.Dataloader import RandomContrast
-from collections import deque
+from arxiv.Dataloader import RandomContrast
 
 from Models2DOrthogonal import Unet2DMultiChannel
-
-import matplotlib.pyplot as plt
 
 
 def nii2np(file_path):

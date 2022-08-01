@@ -47,6 +47,8 @@ class UnetBPL(nn.Module):
     """
     def __init__(self, in_ch, width, depth, out_ch, norm='in', ratio=8, detach=True):
         super(UnetBPL, self).__init__()
+        if out_ch == 2:
+            out_ch = 1
         self.detach_bpl = detach
         self.segmentor = Unet(in_ch, width, depth, out_ch, norm=norm, side_output=True)
         self.encoder = ThresholdEncoder(c=width, ratio=ratio)
@@ -81,7 +83,6 @@ class Unet(nn.Module):
     Depth: at least
     """
     def __init__(self, in_ch, width, depth, classes, norm='in', side_output=False):
-        #
         # ===============================================================================
         # in_ch: dimension of input
         # class_no: number of output class
@@ -92,6 +93,9 @@ class Unet(nn.Module):
 
         assert depth > 1
         self.depth = depth
+
+        if classes == 2:
+            classes = 1
 
         self.side_output_mode = side_output
 

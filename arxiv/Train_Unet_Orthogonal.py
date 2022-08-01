@@ -7,7 +7,7 @@ import numpy as np
 from torch.utils import data
 import shutil
 
-from dataloaders.DataloaderOrthogonal import CT_Dataset_Orthogonal
+from arxiv.DataloaderOrthogonal_old import CT_Dataset_Orthogonal
 from tensorboardX import SummaryWriter
 
 # import wandb

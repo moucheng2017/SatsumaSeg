@@ -7,7 +7,7 @@ import numpy as np
 from torch.utils import data
 import shutil
 
-from dataloaders.DataloaderOrthogonalNoPadding import CT_Dataset_Orthogonal_Fast
+from arxiv.DataloaderOrthogonalNoPadding import CT_Dataset_Orthogonal_Fast
 from tensorboardX import SummaryWriter
 
 from Utils import validate_three_planes

@@ -9,13 +9,12 @@ from torch.utils import data
 import shutil
 import math
 from Metrics import segmentation_scores
-from dataloaders.Dataloader import CT_Dataset
+from dataloaders.DataloaderOrthogonal import CT_Dataset_Orthogonal
 from tensorboardX import SummaryWriter
 
 from Utils import evaluate, sigmoid_rampup
 from Loss import SoftDiceLoss
 # =================================
-from arxiv.Models3D import Unet3D, ThresholdModel3D
 from Models2D import UnetBPL
 import errno
 
@@ -34,6 +33,7 @@ def trainModels(
                 num_steps,
                 learning_rate,
                 width,
+                depth,
                 log_tag,
                 unlabelled=5,
                 l2=0.01,
@@ -47,7 +47,14 @@ def trainModels(
 
         repeat_str = str(j)
 
-        Exp = Unet2D(in_ch=input_dim, width=width, class_no=class_no, z_downsample=downsample)
+        Exp = UnetBPL(in_ch=input_dim,
+                      width=width,
+                      depth=depth,
+                      out_ch=class_no,
+                      norm='in',
+                      ratio=8,
+                      detach=True)
+
         Exp_name = 'VISegPL2D'
 
         Exp_name = Exp_name + \
@@ -62,18 +69,14 @@ def trainModels(
                    '_d' + str(downsample) + \
                    '_r' + str(l2) + \
                    '_a' + str(alpha) + \
-                   '_wu' + str(warmup) + \
-                   '_z' + str(new_resolution[0]) + \
-                   '_x' + str(new_resolution[1])
+                   '_wu' + str(warmup)
 
         trainloader_withlabels, trainloader_withoutlabels, validateloader = getData(data_directory,
                                                                                     dataset_name,
                                                                                     train_batchsize,
-                                                                                    new_resolution,
                                                                                     unlabelled)
 
         trainSingleModel(model=Exp,
-                         model_t=Exp_T,
                          model_name=Exp_name,
                          num_steps=num_steps,
                          learning_rate=learning_rate,
@@ -92,7 +95,7 @@ def trainModels(
                          )
 
 
-def getData(data_directory, dataset_name, train_batchsize, new_resolution, ratio, val_batchsize=5):
+def getData(data_directory, dataset_name, train_batchsize, ratio, val_batchsize=5):
 
     data_directory = data_directory + '/' + dataset_name
 
