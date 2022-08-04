@@ -6,12 +6,21 @@ import torch.nn.functional as F
 
 class ThresholdEncoder(nn.Module):
     def __init__(self, c=8, ratio=8):
+        '''
+
+        Args:
+            c:
+            ratio:
+        '''
         super(ThresholdEncoder, self).__init__()
 
         self.network = nn.Sequential(
             nn.Conv2d(in_channels=c, out_channels=c*ratio, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
             nn.InstanceNorm2d(c*ratio, affine=True),
-            nn.ReLU(inplace=True)
+            nn.PReLU(),
+            nn.Conv2d(in_channels=c*ratio, out_channels=c * ratio, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
+            nn.InstanceNorm2d(c * ratio, affine=True),
+            nn.PReLU()
         )
 
         self.threshold_logvar = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
@@ -26,12 +35,21 @@ class ThresholdEncoder(nn.Module):
 
 class ThresholdDecoder(nn.Module):
     def __init__(self, c=8, ratio=8):
+        '''
+
+        Args:
+            c:
+            ratio:
+        '''
         super(ThresholdDecoder, self).__init__()
 
         self.network = nn.Sequential(
             nn.Conv2d(in_channels=c, out_channels=c*ratio, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
             nn.InstanceNorm2d(c*ratio, affine=True),
-            nn.ReLU(inplace=True)
+            nn.PReLU(),
+            nn.Conv2d(in_channels=c*ratio, out_channels=c * ratio, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
+            nn.InstanceNorm2d(c * ratio, affine=True),
+            nn.PReLU()
         )
 
         self.threshold_logvar = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
@@ -43,9 +61,18 @@ class ThresholdDecoder(nn.Module):
 
 
 class UnetBPL(nn.Module):
-    """
-    """
     def __init__(self, in_ch, width, depth, out_ch, norm='in', ratio=8, detach=True):
+        '''
+
+        Args:
+            in_ch:
+            width:
+            depth:
+            out_ch:
+            norm:
+            ratio:
+            detach:
+        '''
         super(UnetBPL, self).__init__()
         if out_ch == 2:
             out_ch = 1
@@ -78,17 +105,16 @@ class UnetBPL(nn.Module):
 
 
 class Unet(nn.Module):
-    """
-    U-net: any depth and any width
-    Depth: at least
-    """
     def __init__(self, in_ch, width, depth, classes, norm='in', side_output=False):
-        # ===============================================================================
-        # in_ch: dimension of input
-        # class_no: number of output class
-        # width: number of channels in the first encoder
-        # depth: down-sampling stages - 1
-        # ===============================================================================
+        '''
+        Args:
+            in_ch:
+            width:
+            depth:
+            classes:
+            norm:
+            side_output:
+        '''
         super(Unet, self).__init__()
 
         assert depth > 1
@@ -150,11 +176,17 @@ class Unet(nn.Module):
 
 
 def double_conv(in_channels, out_channels, step, norm):
-    # ===========================================
-    # in_channels: dimension of input
-    # out_channels: dimension of output
-    # step: stride
-    # ===========================================
+    '''
+
+    Args:
+        in_channels:
+        out_channels:
+        step:
+        norm:
+
+    Returns:
+
+    '''
     if norm == 'in':
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 3, stride=step, padding=1, groups=1, bias=False),

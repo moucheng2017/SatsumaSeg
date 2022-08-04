@@ -7,15 +7,15 @@ import numpy as np
 from torch.utils import data
 import shutil
 
-from arxiv.DataloaderOrthogonalNoPadding import CT_Dataset_Orthogonal_Fast
+from libs.old.DataloaderOrthogonalNoPadding import CT_Dataset_Orthogonal_Fast
 from tensorboardX import SummaryWriter
 
-from Utils import validate_three_planes
+from libs.Utils import validate_three_planes
 # ==============================================
-from Models2DOrthogonal import Unet2DMultiChannel
+from libs.old.Models2DOrthogonal import Unet2DMultiChannel
 import errno
 
-from Utils import train_base
+from libs.Utils import train_base
 
 
 # This script trains a weird model:

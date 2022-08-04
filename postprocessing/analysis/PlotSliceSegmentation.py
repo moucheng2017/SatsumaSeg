@@ -1,5 +1,5 @@
 import sys
-sys.path.append("..")
+sys.path.append("../..")
 # torch.manual_seed(0)
 import errno
 import numpy as np

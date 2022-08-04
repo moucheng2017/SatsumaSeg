@@ -5,7 +5,7 @@ import os
 
 import numpy.ma as ma
 
-from arxiv.Dataloader import RandomContrast
+from libs.old.Dataloader import RandomContrast
 
 
 # Work flow for each case:

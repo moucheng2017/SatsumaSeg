@@ -1,14 +1,14 @@
 import nibabel
 import sys
 import torch
-sys.path.append("..")
+sys.path.append("../..")
 import numpy as np
 import os
 from pathlib import Path
 
 import numpy.ma as ma
 
-from arxiv.Dataloader import RandomContrast
+from libs.old.Dataloader import RandomContrast
 
 
 def nii2np(file_path):
