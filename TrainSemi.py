@@ -1,129 +1,110 @@
+# basic libs:
 import os
-import torch
-# torch.manual_seed(0)
-# # torch.backends.cudnn.benchmark = False
-import timeit
-import torch.nn as nn
-import numpy as np
-from torch.utils import data
-import shutil
 import math
+import errno
+import timeit
+import shutil
+from pathlib import Path
+
+# deterministic training:
+import random
+import numpy as np
+import torch.backends.cudnn as cudnn
+
+# deep learning:
+import torch
+import torch.nn as nn
+from Models2D import UnetBPL
+from libs.DataloaderOrthogonal import getData
+
+# metrics
 from Metrics import segmentation_scores
+
+# log
 from tensorboardX import SummaryWriter
 
+# evaluation
 from libs.Utils import evaluate, sigmoid_rampup
-from Loss import SoftDiceLoss
-# =================================
-from Models2D import UnetBPL
-import errno
 
-# This is for binary segmentation only for now
-# Multiclass will be transformed into multiple binary segmentation
+
+# training options control panel:
+from TrainArguments import parser
 
 
 def main():
+    global args
+    args = parser.parse_args()
 
-    for j in range(1, repeat + 1):
+    cudnn.benchmark = False
+    cudnn.deterministic = True
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+
+    for j in range(1, args.repeat + 1):
 
         repeat_str = str(j)
 
-        Exp = UnetBPL(in_ch=input_dim,
-                      width=width,
-                      depth=depth,
-                      out_ch=class_no,
+        Exp = UnetBPL(in_ch=args.input_dim,
+                      width=args.width,
+                      depth=args.depth,
+                      out_ch=args.output_dim,
                       norm='in',
-                      ratio=8,
-                      detach=True)
+                      ratio=4,
+                      detach=args.detach)
 
         Exp_name = 'BayesianPLSeg2DOrthogonal'
 
         Exp_name = Exp_name + \
                    '_e' + str(repeat_str) + \
-                   '_l' + str(learning_rate) + \
-                   '_m' + str(mean) + \
-                   '_sd' + str(std) + \
-                   '_b' + str(train_batchsize) + \
-                   '_u' + str(unlabelled) + \
-                   '_w' + str(width) + \
-                   '_s' + str(num_steps) + \
-                   '_d' + str(downsample) + \
-                   '_r' + str(l2) + \
-                   '_a' + str(alpha) + \
-                   '_wu' + str(warmup)
+                   '_l' + str(args.lr) + \
+                   '_m' + str(args.mu) + \
+                   '_v' + str(args.sigma) + \
+                   '_b' + str(args.batch) + \
+                   '_u' + str(args.unlabelled) + \
+                   '_w' + str(args.width) + \
+                   '_d' + str(args.depth) + \
+                   '_i' + str(args.iterations) + \
+                   '_r' + str(args.l2) + \
+                   '_a' + str(args.alpha) + \
+                   '_w' + str(args.warmup) + \
+                   '_det' + str(args.detach)
 
-        trainloader_withlabels, trainloader_withoutlabels, validateloader = getData(data_directory,
-                                                                                    dataset_name,
-                                                                                    train_batchsize,
-                                                                                    unlabelled)
+        data = getData(data_directory=args.data_path,
+                       dataset_name=args.dataset,
+                       train_batchsize=args.batch,
+                       norm=args.norm,
+                       contrast_aug=args.contrast,
+                       lung_window=True,
+                       resolution=args.resolution,
+                       train_full=True,
+                       unlabelled=True)
 
         trainSingleModel(model=Exp,
                          model_name=Exp_name,
-                         num_steps=num_steps,
-                         learning_rate=learning_rate,
-                         dataset_name=dataset_name,
-                         trainloader_with_labels=trainloader_withlabels,
-                         trainloader_without_labels=trainloader_withoutlabels,
-                         validateloader=validateloader,
-                         class_no=class_no,
-                         log_tag=log_tag,
-                         dilation=1,
-                         l2=l2,
-                         alpha=alpha,
-                         warmup=warmup,
-                         mean_prior=mean,
-                         std_prior=std
+                         num_iterations=args.iterations,
+                         learning_rate=args.lr,
+                         dataset_name=args.dataset,
+                         trainloader_with_labels=data.get('train_loader_l'),
+                         trainloader_without_labels=data.get('train_loader_u'),
+                         log_tag=args.log_tag,
+                         l2=args.l2,
+                         alpha=args.alpha,
+                         warmup=args.warmup,
+                         mean_prior=args.mu,
+                         std_prior=args.std
                          )
 
 
-def getData(data_directory, dataset_name, train_batchsize, ratio, val_batchsize=5):
-
-    data_directory = data_directory + '/' + dataset_name
-
-    folder_labelled = data_directory + '/labelled'
-
-    train_image_folder_labelled = folder_labelled + '/imgs'
-    train_label_folder_labelled = folder_labelled + '/lbls'
-    train_lung_folder_labelled = folder_labelled + '/lung'
-
-    train_dataset_labelled = CT_Dataset(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, new_resolution, labelled=True)
-
-    train_image_folder_unlabelled = data_directory + '/unlabelled/imgs'
-    train_label_folder_unlabelled = data_directory + '/unlabelled/lbls'
-    train_lung_folder_unlabelled = data_directory + '/unlabelled/lung'
-    train_dataset_unlabelled = CT_Dataset(train_image_folder_unlabelled, train_label_folder_unlabelled, train_lung_folder_unlabelled, new_resolution, labelled=False)
-
-    trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
-    trainloader_unlabelled = data.DataLoader(train_dataset_unlabelled, batch_size=train_batchsize*ratio, shuffle=True, num_workers=0, drop_last=False)
-
-    validate_image_folder = data_directory + '/validate/imgs'
-    validate_label_folder = data_directory + '/validate/lbls'
-    validate_lung_folder = data_directory + '/validate/lung'
-
-    validate_dataset = CT_Dataset(validate_image_folder, validate_label_folder, validate_lung_folder, new_resolution, labelled=True)
-    validateloader = data.DataLoader(validate_dataset, batch_size=val_batchsize, shuffle=True, num_workers=0, drop_last=True)
-
-    # testdata_path = data_directory + '/test'
-    # test_image_folder = data_directory + '/test/imgs'
-    # test_label_folder = data_directory + '/test/lbls'
-    # test_lung_folder = data_directory + '/test/lung'
-    # test_dataset = CT_Dataset(test_image_folder, test_label_folder, test_lung_folder, new_resolution, labelled=True)
-    # testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=0, drop_last=True)
-
-    return trainloader_labelled, trainloader_unlabelled, validateloader
-
-
 def trainSingleModel(model,
-                     model_t,
                      model_name,
-                     num_steps,
+                     num_iterations,
                      learning_rate,
                      dataset_name,
                      trainloader_with_labels,
                      trainloader_without_labels,
-                     validateloader,
-                     dilation,
                      log_tag,
-                     class_no,
                      l2=0.01,
                      alpha=1.0,
                      warmup=0.1,
@@ -132,16 +113,12 @@ def trainSingleModel(model,
 
     device = torch.device('cuda')
     save_model_name = model_name
-    saved_information_path = '../Results/' + dataset_name + '/' + '/' + log_tag
-
-    if not os.path.exists(saved_information_path):
-        os.makedirs(saved_information_path, exist_ok=True)
+    saved_information_path = '../Results/' + dataset_name + '/' + log_tag
+    Path(saved_information_path).mkdir(parents=True, exist_ok=True)
     saved_log_path = saved_information_path + '/Logs'
-    if not os.path.exists(saved_log_path):
-        os.makedirs(saved_log_path, exist_ok=True)
+    Path(saved_log_path).mkdir(parents=True, exist_ok=True)
     saved_model_path = saved_information_path + '/' + save_model_name + '/trained_models'
-    if not os.path.exists(saved_model_path):
-        os.makedirs(saved_model_path, exist_ok=True)
+    Path(saved_model_path).mkdir(parents=True, exist_ok=True)
 
     print('The current model is:')
     print(save_model_name)
@@ -150,28 +127,29 @@ def trainSingleModel(model,
     writer = SummaryWriter(saved_log_path + '/Log_' + save_model_name)
 
     model.to(device)
-    model_t.to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
-    optimizer_t = torch.optim.AdamW(model_t.parameters(), lr=0.5*learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
 
     start = timeit.default_timer()
 
     iterator_train_labelled = iter(trainloader_with_labels)
     iterator_train_unlabelled = iter(trainloader_without_labels)
 
-    for step in range(num_steps):
+    train_mean_iu_d_tracker = 0.0
+    train_mean_iu_h_tracker = 0.0
+    train_mean_iu_w_tracker = 0.0
+
+    for step in range(num_iterations):
 
         model.train()
-        model_t.train()
 
         train_iou = []
         train_sup_loss = []
         train_unsup_loss = []
         train_kl_loss = []
 
-        if step < int(warmup * num_steps):
-            scale = sigmoid_rampup(step, int(warmup * num_steps), 1.0)
+        if step < int(warmup * num_iterations):
+            scale = sigmoid_rampup(step, int(warmup * num_iterations), 1.0)
             alpha_current = alpha * scale
         else:
             alpha_current = alpha

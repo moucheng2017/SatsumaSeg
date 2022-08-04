@@ -198,7 +198,8 @@ def getData(data_directory,
             contrast_aug=True,
             lung_window=True,
             resolution=512,
-            train_full=True):
+            train_full=True,
+            unlabelled=False):
     '''
     Args:
         data_directory:
@@ -210,8 +211,8 @@ def getData(data_directory,
     Returns:
     '''
 
+    # Labelled images data set and data loader:
     data_directory = data_directory + '/' + dataset_name
-
     train_image_folder_labelled = data_directory + '/labelled/imgs'
     train_label_folder_labelled = data_directory + '/labelled/lbls'
     train_lung_folder_labelled = data_directory + '/labelled/lung'
@@ -231,34 +232,87 @@ def getData(data_directory,
                                             num_workers=0,
                                             drop_last=True)
 
-    if train_full is True:
-        return {'train_data': train_dataset_labelled,
-                'train_loader': train_loader_labelled}
+    # Unlabelled images data set and data loader:
+    if unlabelled is True:
+        train_image_folder_unlabelled = data_directory + '/unlabelled/imgs'
+        train_label_folder_unlabelled = data_directory + '/unlabelled/lbls'
+        train_lung_folder_unlabelled = data_directory + '/unlabelled/lung'
+
+        train_dataset_unlabelled = CT_Dataset_Orthogonal(imgs_folder=train_image_folder_unlabelled,
+                                                         labels_folder=train_label_folder_unlabelled,
+                                                         lung_folder=train_lung_folder_unlabelled,
+                                                         labelled=False,
+                                                         full_resolution=resolution,
+                                                         normalisation=norm,
+                                                         contrast_aug=contrast_aug,
+                                                         lung_window=lung_window)
+
+        train_loader_unlabelled = data.DataLoader(dataset=train_dataset_unlabelled,
+                                                  batch_size=train_batchsize,
+                                                  shuffle=True,
+                                                  num_workers=0,
+                                                  drop_last=True)
+
+        if train_full is True:
+            return {'train_data_l': train_dataset_labelled,
+                    'train_loader_l': train_loader_labelled,
+                    'train_data_u': train_dataset_unlabelled,
+                    'train_loader_u': train_loader_unlabelled}
+        else:
+            validate_image_folder = data_directory + '/validate/imgs'
+            validate_label_folder = data_directory + '/validate/lbls'
+            validate_lung_folder = data_directory + '/validate/lung'
+
+            validate_dataset = CT_Dataset_Orthogonal(imgs_folder=validate_image_folder,
+                                                     labels_folder=validate_label_folder,
+                                                     lung_folder=validate_lung_folder,
+                                                     labelled=True,
+                                                     full_resolution=resolution,
+                                                     normalisation=norm,
+                                                     contrast_aug=contrast_aug,
+                                                     lung_window=lung_window)
+
+            validate_loader = data.DataLoader(dataset=validate_dataset,
+                                              batch_size=2,
+                                              shuffle=True,
+                                              num_workers=0,
+                                              drop_last=True)
+
+            return {'train_data_l': train_dataset_labelled,
+                    'train_loader_l': train_loader_labelled,
+                    'train_data_u': train_dataset_unlabelled,
+                    'train_loader_u': train_loader_unlabelled,
+                    'val_data': validate_dataset,
+                    'val_loader': validate_loader}
 
     else:
-        validate_image_folder = data_directory + '/validate/imgs'
-        validate_label_folder = data_directory + '/validate/lbls'
-        validate_lung_folder = data_directory + '/validate/lung'
+        if train_full is True:
+            return {'train_data_l': train_dataset_labelled,
+                    'train_loader_l': train_loader_labelled}
+        else:
+            validate_image_folder = data_directory + '/validate/imgs'
+            validate_label_folder = data_directory + '/validate/lbls'
+            validate_lung_folder = data_directory + '/validate/lung'
 
-        validate_dataset = CT_Dataset_Orthogonal(imgs_folder=validate_image_folder,
-                                                 labels_folder=validate_label_folder,
-                                                 lung_folder=validate_lung_folder,
-                                                 labelled=True,
-                                                 full_resolution=resolution,
-                                                 normalisation=norm,
-                                                 contrast_aug=contrast_aug,
-                                                 lung_window=lung_window)
+            validate_dataset = CT_Dataset_Orthogonal(imgs_folder=validate_image_folder,
+                                                     labels_folder=validate_label_folder,
+                                                     lung_folder=validate_lung_folder,
+                                                     labelled=True,
+                                                     full_resolution=resolution,
+                                                     normalisation=norm,
+                                                     contrast_aug=contrast_aug,
+                                                     lung_window=lung_window)
 
-        validate_loader = data.DataLoader(dataset=validate_dataset,
-                                          batch_size=2,
-                                          shuffle=True,
-                                          num_workers=0,
-                                          drop_last=True)
+            validate_loader = data.DataLoader(dataset=validate_dataset,
+                                              batch_size=2,
+                                              shuffle=True,
+                                              num_workers=0,
+                                              drop_last=True)
 
-        return {'train_data': train_dataset_labelled,
-                'train_loader': train_loader_labelled,
-                'val_data': validate_dataset,
-                'val_loader': validate_loader}
+            return {'train_data_l': train_dataset_labelled,
+                    'train_loader_l': train_loader_labelled,
+                    'val_data': validate_dataset,
+                    'val_loader': validate_loader}
 
 
 if __name__ == '__main__':
