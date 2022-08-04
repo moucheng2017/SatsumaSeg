@@ -3,136 +3,191 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# ==================
-# Blocks
-# ==================
 
+class ThresholdEncoder(nn.Module):
+    def __init__(self, c=8, ratio=8):
+        super(ThresholdEncoder, self).__init__()
 
-def double_conv(in_channels, out_channels, step):
-    # double convolutional layers
-    return nn.Sequential(
-        nn.Conv2d(in_channels, out_channels, (3, 3), stride=step, padding=(1, 1), groups=1, bias=False),
-        nn.InstanceNorm2d(out_channels, affine=True),
-        nn.PReLU(),
-        nn.Conv2d(out_channels, out_channels, (3, 3), stride=(1, 1), padding=(1, 1), groups=1, bias=False),
-        nn.InstanceNorm2d(out_channels, affine=True),
-        nn.PReLU()
-    )
-
-
-def single_conv(in_channels, out_channels, step):
-    # single convolutional layers
-    return nn.Sequential(
-        nn.Conv2d(in_channels, out_channels, (7, 7), stride=step, padding=(3, 3), groups=1, bias=False),
-        nn.InstanceNorm2d(out_channels, affine=True),
-        nn.PReLU()
-    )
-
-
-class DoubleRandomDilatedConv(nn.Module):
-    # Random dilation convolutional layers
-    def __init__(self, in_channels, out_channels, step):
-        super(DoubleRandomDilatedConv, self).__init__()
-        self.attention_branch = nn.Sequential(
-            nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3), stride=step, dilation=(1, 1), padding=(1, 1), bias=False),
-            nn.InstanceNorm2d(out_channels, affine=True),
-            nn.PReLU(),
-            nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
-            nn.InstanceNorm2d(out_channels, affine=True),
-            nn.PReLU()
-        )
-
-    def forward(self, x, random_seed):
-        self.attention_branch[0].dilation = (int(random_seed), int(random_seed))
-        self.attention_branch[0].padding = (int(random_seed), int(random_seed))
-        self.attention_branch[3].dilation = (int(random_seed), int(random_seed))
-        self.attention_branch[3].padding = (int(random_seed), int(random_seed))
-        output = self.attention_branch(x)
-        return output
-
-
-class ThresholdModel2D(nn.Module):
-    def __init__(self, c=8):
-        super(ThresholdModel2D, self).__init__()
-
-        self.threshold_net = nn.Sequential(
-            nn.Conv2d(in_channels=c, out_channels=c*8, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
-            nn.InstanceNorm2d(c*8, affine=True),
+        self.network = nn.Sequential(
+            nn.Conv2d(in_channels=c, out_channels=c*ratio, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
+            nn.InstanceNorm2d(c*ratio, affine=True),
             nn.ReLU(inplace=True)
         )
 
-        self.threshold_logvar = nn.Conv2d(in_channels=8*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
-
-        self.threshold_mean = nn.Conv2d(in_channels=8 * c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
+        self.threshold_logvar = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
+        self.threshold_mean = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
 
     def forward(self, x):
-        y = self.threshold_net(x.detach())
+        y = self.network(x)
         y = torch.mean(y, dim=-1, keepdim=True)
         y = torch.mean(y, dim=-2, keepdim=True)
-        t_mean = self.threshold_mean(y)
-        t_logvar = self.threshold_logvar(y)
-        return t_mean, t_logvar
+        return self.threshold_mean(y), self.threshold_logvar(y)
 
 
-class Unet2D(nn.Module):
-    def __init__(self, in_ch, width, class_no, z_downsample=0):
-        super(Unet2D, self).__init__()
-        if class_no == 2:
-            self.final_in = 1
+class ThresholdDecoder(nn.Module):
+    def __init__(self, c=8, ratio=8):
+        super(ThresholdDecoder, self).__init__()
+
+        self.network = nn.Sequential(
+            nn.Conv2d(in_channels=c, out_channels=c*ratio, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
+            nn.InstanceNorm2d(c*ratio, affine=True),
+            nn.ReLU(inplace=True)
+        )
+
+        self.threshold_logvar = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
+        self.threshold_mean = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
+
+    def forward(self, x):
+        y = self.network(x)
+        return self.threshold_mean(y), self.threshold_logvar(y)
+
+
+class UnetBPL(nn.Module):
+    """
+    """
+    def __init__(self, in_ch, width, depth, out_ch, norm='in', ratio=8, detach=True):
+        super(UnetBPL, self).__init__()
+        if out_ch == 2:
+            out_ch = 1
+        self.detach_bpl = detach
+        self.segmentor = Unet(in_ch, width, depth, out_ch, norm=norm, side_output=True)
+        self.encoder = ThresholdEncoder(c=width, ratio=ratio)
+        self.decoder = ThresholdDecoder(c=width*ratio, ratio=1)
+
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return eps * std + mu
+
+    def forward(self, x):
+        output, threshold_input = self.segmentor(x)
+        if self.detach_bpl is True:
+            mu, logvar = self.encoder(threshold_input.detach())
         else:
-            self.final_in = class_no
+            mu, logvar = self.encoder(threshold_input)
 
-        self.w1 = width
-        self.w2 = width * 2
-        self.w3 = width * 4
-        self.w4 = width * 8
+        z = self.reparameterize(mu, logvar)
 
-        encoder_downsamples = [(2, 2), (2, 2), (2, 2), (2, 2)]
-        upsamples_steps = [(2, 2), (2, 2), (2, 2), (2, 2)]
+        t_mu, t_logvar = self.decoder(z)
 
-        self.econv0 = single_conv(in_channels=in_ch, out_channels=self.w1, step=1)
-        self.econv1 = DoubleRandomDilatedConv(in_channels=self.w1, out_channels=self.w2, step=encoder_downsamples[0])
-        self.econv2 = DoubleRandomDilatedConv(in_channels=self.w2, out_channels=self.w3, step=encoder_downsamples[1])
-        self.econv3 = DoubleRandomDilatedConv(in_channels=self.w3, out_channels=self.w4, step=encoder_downsamples[2])
-        self.bridge = DoubleRandomDilatedConv(in_channels=self.w4, out_channels=self.w4, step=encoder_downsamples[3])
+        return {'segmentation':output,
+                'mu': mu,
+                'logvar': logvar,
+                'threshold mu': t_mu,
+                'threshold var': t_logvar}
 
-        self.dconv3 = DoubleRandomDilatedConv(in_channels=self.w4+self.w4, out_channels=self.w3, step=1)
-        self.dconv2 = DoubleRandomDilatedConv(in_channels=self.w3+self.w3, out_channels=self.w2, step=1)
-        self.dconv1 = DoubleRandomDilatedConv(in_channels=self.w2+self.w2, out_channels=self.w1, step=1)
-        self.dconv0 = DoubleRandomDilatedConv(in_channels=self.w1+self.w1, out_channels=self.w1, step=1)
 
-        self.upsample0 = nn.Upsample(scale_factor=upsamples_steps[0], mode='bilinear', align_corners=True)
-        self.upsample1 = nn.Upsample(scale_factor=upsamples_steps[1], mode='bilinear', align_corners=True)
-        self.upsample2 = nn.Upsample(scale_factor=upsamples_steps[2], mode='bilinear', align_corners=True)
-        self.upsample3 = nn.Upsample(scale_factor=upsamples_steps[3], mode='bilinear', align_corners=True)
+class Unet(nn.Module):
+    """
+    U-net: any depth and any width
+    Depth: at least
+    """
+    def __init__(self, in_ch, width, depth, classes, norm='in', side_output=False):
+        # ===============================================================================
+        # in_ch: dimension of input
+        # class_no: number of output class
+        # width: number of channels in the first encoder
+        # depth: down-sampling stages - 1
+        # ===============================================================================
+        super(Unet, self).__init__()
 
-        self.dconv_last = nn.Conv2d(self.w1, self.final_in, (1, 1), bias=True)
+        assert depth > 1
+        self.depth = depth
 
-    def forward(self, x, dilation_encoder=[1, 1, 1, 1], dilation_decoder=[1, 1, 1, 1]):
+        if classes == 2:
+            classes = 1
 
-        x0 = self.econv0(x)
-        x1 = self.econv1(x0, dilation_encoder[0])
-        x2 = self.econv2(x1, dilation_encoder[1])
-        x3 = self.econv3(x2, dilation_encoder[2])
-        x4 = self.bridge(x3, dilation_encoder[3])
-        y = self.upsample0(x4)
+        self.side_output_mode = side_output
 
-        # if y.size()[3] != x3.size()[3]:
-        #     diffY = torch.tensor([x3.size()[4] - y.size()[4]])
-        #     diffX = torch.tensor([x3.size()[3] - y.size()[3]])
-        #     y = F.pad(y, [0, diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+        self.decoders = nn.ModuleList()
+        self.encoders = nn.ModuleList()
 
-        y3 = torch.cat([y, x3], dim=1)
-        y3 = self.dconv3(y3, dilation_decoder[0])
-        y2 = self.upsample1(y3)
-        y2 = torch.cat([y2, x2], dim=1)
-        y2 = self.dconv2(y2, dilation_decoder[1])
-        y1 = self.upsample2(y2)
-        y1 = torch.cat([y1, x1], dim=1)
-        y1 = self.dconv1(y1, dilation_decoder[2])
-        y0 = self.upsample3(y1)
-        y0 = torch.cat([y0, x0], dim=1)
-        y0 = self.dconv0(y0, dilation_decoder[3])
-        y = self.dconv_last(y0)
+        for i in range(self.depth):
 
-        return y, y0
+            if i == 0:
+                self.encoders.append(double_conv(in_channels=in_ch, out_channels=width, step=1, norm=norm))
+                self.decoders.append(double_conv(in_channels=width*2, out_channels=width, step=1, norm=norm))
+            elif i < (self.depth - 1):
+                self.encoders.append(double_conv(in_channels=width*(2**(i - 1)), out_channels=width*(2**i), step=2, norm=norm))
+                self.decoders.append(double_conv(in_channels=width*(2**(i + 1)), out_channels=width*(2**(i - 1)), step=1, norm=norm))
+
+            else:
+                self.encoders.append(double_conv(in_channels=width*(2**(i-1)), out_channels=width*(2**(i-1)), step=2, norm=norm))
+                self.decoders.append(double_conv(in_channels=width*(2**i), out_channels=width*(2**(i - 1)), step=1, norm=norm))
+
+        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.conv_last = nn.Conv2d(width, classes, 1, bias=True)
+
+    def forward(self, x):
+
+        y = x
+        encoder_features = []
+
+        for i in range(len(self.encoders)):
+
+            y = self.encoders[i](y)
+            encoder_features.append(y)
+
+        for i in range(len(encoder_features)):
+
+            y = self.upsample(y)
+            y_e = encoder_features[-(i+1)]
+
+            if y_e.shape[2] != y.shape[2]:
+                diffY = torch.tensor([y_e.size()[2] - y.size()[2]])
+                diffX = torch.tensor([y_e.size()[3] - y.size()[3]])
+
+                y = F.pad(y, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+
+            y = torch.cat([y_e, y], dim=1)
+            y = self.decoders[-(i+1)](y)
+
+        output = self.conv_last(y)
+        if self.side_output_mode is False:
+            return output
+        else:
+            return output, y
+
+
+def double_conv(in_channels, out_channels, step, norm):
+    # ===========================================
+    # in_channels: dimension of input
+    # out_channels: dimension of output
+    # step: stride
+    # ===========================================
+    if norm == 'in':
+        return nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 3, stride=step, padding=1, groups=1, bias=False),
+            nn.InstanceNorm2d(out_channels, affine=True),
+            nn.PReLU(),
+            nn.Conv2d(out_channels, out_channels, 3, stride=1, padding=1, groups=1, bias=False),
+            nn.InstanceNorm2d(out_channels, affine=True),
+            nn.PReLU()
+        )
+    elif norm == 'bn':
+        return nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 3, stride=step, padding=1, groups=1, bias=False),
+            nn.BatchNorm2d(out_channels, affine=True),
+            nn.PReLU(),
+            nn.Conv2d(out_channels, out_channels, 3, stride=1, padding=1, groups=1, bias=False),
+            nn.BatchNorm2d(out_channels, affine=True),
+            nn.PReLU()
+        )
+    elif norm == 'ln':
+        return nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 3, stride=step, padding=1, groups=1, bias=False),
+            nn.GroupNorm(out_channels, out_channels, affine=True),
+            nn.PReLU(),
+            nn.Conv2d(out_channels, out_channels, 3, stride=1, padding=1, groups=1, bias=False),
+            nn.GroupNorm(out_channels, out_channels, affine=True),
+            nn.PReLU()
+        )
+    elif norm == 'gn':
+        return nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 3, stride=step, padding=1, groups=1, bias=False),
+            nn.GroupNorm(out_channels // 8, out_channels, affine=True),
+            nn.PReLU(),
+            nn.Conv2d(out_channels, out_channels, 3, stride=1, padding=1, groups=1, bias=False),
+            nn.GroupNorm(out_channels // 8, out_channels, affine=True),
+            nn.PReLU()
+        )

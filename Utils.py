@@ -40,7 +40,7 @@ def train_base(labelled_img,
                device,
                model,
                t=2.0,
-               cm_refine=False,
+               apply_lung_mask=True,
                single_channel_label=False):
 
     train_imgs = labelled_img.to(device=device, dtype=torch.float32)
@@ -57,27 +57,21 @@ def train_base(labelled_img,
         train_imgs = train_imgs.unsqueeze(1)
 
     if torch.sum(labels) > 10.0:
-        if cm_refine is False:
-            outputs, _ = model(train_imgs, [1, 1, 1, 1], [1, 1, 1, 1])
-            prob_outputs = torch.sigmoid(outputs / t)
-        else:
-            outputs, cm = model(train_imgs, [1, 1, 1, 1], [1, 1, 1, 1])
-            prob_outputs = torch.softmax(outputs / t, dim=1)
-            prob_outputs = prob_outputs[:, -1, :, :].unsqueeze(1)
-            # prob_outputs, class_output = torch.max(prob_outputs, dim=1)
+        outputs, cm = model(train_imgs, [1, 1, 1, 1], [1, 1, 1, 1])
+        prob_outputs = torch.softmax(outputs / t, dim=1)
+        prob_outputs = prob_outputs[:, -1, :, :].unsqueeze(1)
+        # prob_outputs, class_output = torch.max(prob_outputs, dim=1)
 
-        lung_mask = (lung > 0.5)
-        prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask)
-        labels_masked = torch.masked_select(labels, lung_mask)
-        # print(lung_mask.size())
-        # print(labels_masked.size())
+        if apply_lung_mask is True:
+            lung_mask = (lung > 0.5)
+            prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask)
+            labels_masked = torch.masked_select(labels, lung_mask)
+        else:
+            prob_outputs_masked = prob_outputs
+            labels_masked = labels
 
         if torch.sum(prob_outputs_masked) > 10.0:
-            if cm_refine is False:
-                loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze() + 1e-10, labels_masked.squeeze() + 1e-10)
-            elif cm_refine is True:
-                loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze() + 1e-10, labels_masked.squeeze() + 1e-10)
-                loss += deterministic_noisy_label_loss(outputs, cm, lung_mask, t)
+            loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze() + 1e-10, labels_masked.squeeze() + 1e-10)
         else:
             loss = 0.0
 
