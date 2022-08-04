@@ -12,63 +12,24 @@ import numpy.ma as ma
 
 class RandomCroppingOrthogonal(object):
     def __init__(self,
-                 cropping_d,
-                 cropping_h,
-                 cropping_w,
-                 discarded_slices=5):
+                 discarded_slices=5,
+                 resolution=512):
         '''
         cropping_d: 3 d dimension of cropped sub volume cropping on h x w
         cropping_h: 3 d dimension of cropped sub volume cropping on w x d
         cropping_w: 3 d dimension of cropped sub volume cropping on h x d
         '''
         self.discarded_slices = discarded_slices
-        self.volume_d = cropping_d
-        self.volume_h = cropping_h
-        self.volume_w = cropping_w
+        self.resolution = resolution
 
     def crop(self, *volumes):
 
         # for supervised learning, we need to crop both volume and the label, arg1: volume, arg2: label
         # for unsupervised learning, we only need to crop the volume, arg1: volume
 
-        for volume in volumes:
-            d, h, w = np.shape(volume)
-
-        # sample_position_d_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
-        # sample_position_d_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
-        # sample_position_d_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
-        #
-        # sample_position_h_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
-        # sample_position_h_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
-        # sample_position_h_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
-        #
-        # sample_position_w_d = np.random.randint(self.discarded_slices, d + self.volume_d[1])
-        # sample_position_w_h = np.random.randint(self.discarded_slices, h + self.volume_d[1])
-        # sample_position_w_w = np.random.randint(self.discarded_slices, w + self.volume_d[1])
-
-        # sample_position_d_d = np.random.randint(self.discarded_slices, d - self.volume_d[1] // 2)
-        # sample_position_d_h = np.random.randint(self.discarded_slices, h - self.volume_d[1] // 2)
-        # sample_position_d_w = np.random.randint(self.discarded_slices, w - self.volume_d[1] // 2)
-        #
-        # sample_position_h_d = np.random.randint(self.discarded_slices, d - self.volume_d[1] // 2)
-        # sample_position_h_h = np.random.randint(self.discarded_slices, h - self.volume_d[1] // 2)
-        # sample_position_h_w = np.random.randint(self.discarded_slices, w - self.volume_d[1] // 2)
-        #
-        # sample_position_w_d = np.random.randint(self.discarded_slices, d - self.volume_d[1] // 2)
-        # sample_position_w_h = np.random.randint(self.discarded_slices, h - self.volume_d[1] // 2)
-        # sample_position_w_w = np.random.randint(self.discarded_slices, w - self.volume_d[1] // 2)
-
-        sample_position_d_d = np.random.randint(self.discarded_slices, d)
-        sample_position_d_h = np.random.randint(self.discarded_slices, h)
-        sample_position_d_w = np.random.randint(self.discarded_slices, w)
-
-        sample_position_h_d = np.random.randint(self.discarded_slices, d)
-        sample_position_h_h = np.random.randint(self.discarded_slices, h)
-        sample_position_h_w = np.random.randint(self.discarded_slices, w)
-
-        sample_position_w_d = np.random.randint(self.discarded_slices, d)
-        sample_position_w_h = np.random.randint(self.discarded_slices, h)
-        sample_position_w_w = np.random.randint(self.discarded_slices, w)
+        sample_position_d_d = np.random.randint(self.discarded_slices, self.resolution-1)
+        sample_position_h_h = np.random.randint(self.discarded_slices, self.resolution-1)
+        sample_position_w_w = np.random.randint(self.discarded_slices, self.resolution-1)
 
         outputs = {"plane_d": [],
                    "plane_h": [],
@@ -76,18 +37,15 @@ class RandomCroppingOrthogonal(object):
 
         for each_input in volumes:
 
-            each_input = np.pad(each_input, pad_width=((0, self.volume_d[1]),
-                                                       (0, self.volume_d[1]),
-                                                       (0, self.volume_d[1])), mode='symmetric')
+            newd, newh, neww = np.shape(each_input)
 
-            # each_input = np.pad(each_input, pad_width=((0, self.volume_d[1] // 2),
-            #                                            (0, self.volume_d[1] // 2),
-            #                                            (0, self.volume_d[1] // 2)), mode='symmetric')
+            assert newd == self.resolution
+            assert newh == self.resolution
+            assert neww == self.resolution
 
-            # transpose all patches to channel x height x width
-            outputs["plane_d"].append(each_input[sample_position_d_d:sample_position_d_d + self.volume_d[0], sample_position_d_h:sample_position_d_h + self.volume_d[1], sample_position_d_w:sample_position_d_w + self.volume_d[2]])
-            outputs["plane_h"].append(np.transpose(each_input[sample_position_h_d:sample_position_h_d + self.volume_h[0], sample_position_h_h:sample_position_h_h + self.volume_h[1], sample_position_h_w:sample_position_h_w + self.volume_h[2]], axes=(1, 0, 2)))
-            outputs["plane_w"].append(np.transpose(each_input[sample_position_w_d:sample_position_w_d + self.volume_w[0], sample_position_w_h:sample_position_w_h + self.volume_w[1], sample_position_w_w:sample_position_w_w + self.volume_w[2]], axes=(2, 0, 1)))
+            outputs["plane_d"].append(each_input[sample_position_d_d, :, :])
+            outputs["plane_h"].append(each_input[:, sample_position_h_h, :])
+            outputs["plane_w"].append(each_input[:, :, sample_position_w_w])
 
         return outputs
 
@@ -145,16 +103,31 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
     '''
     Each volume should be at: Dimension X Height X Width
     '''
-    def __init__(self, imgs_folder, labels_folder, lung_folder, cropping_d, cropping_h, cropping_w, labelled):
+    def __init__(self,
+                 imgs_folder,
+                 labels_folder,
+                 lung_folder,
+                 labelled,
+                 full_resolution=512,
+                 lung_mask=True,
+                 normalisation=False,
+                 contrast_aug=False,
+                 lung_window=True):
+        # data
         self.imgs_folder = imgs_folder
         self.labels_folder = labels_folder
         self.lung_folder = lung_folder
-
+        # flags
         self.labelled_flag = labelled
-        self.augmentation_contrast = RandomContrast([10, 255])
-        self.augmentation_cropping = RandomCroppingOrthogonal(cropping_d=cropping_d,
-                                                              cropping_h=cropping_h,
-                                                              cropping_w=cropping_w)
+        self.contrast_aug_flag = contrast_aug
+        self.normalisation_flag = normalisation
+        self.lung_window_flag = lung_window
+        self.apply_lung_mask_flag = lung_mask
+
+        if self.contrast_aug_flag is True:
+            self.augmentation_contrast = RandomContrast([10, 255])
+
+        self.augmentation_cropping = RandomCroppingOrthogonal(discarded_slices=1, resolution=full_resolution)
 
     def __getitem__(self, index):
         # Lung masks:
@@ -163,7 +136,6 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
         lung = lung.get_fdata()
         lung = np.array(lung, dtype='float32')
         lung = np.transpose(lung, (2, 0, 1))
-        # lung = np.expand_dims(lung, axis=0)
 
         # Images:
         all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
@@ -177,21 +149,22 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
         # transform dimension:
         # original dimension: (H x W x D)
         image = np.transpose(image, (2, 0, 1))
-        # (D x H x W)
-        # image = np.expand_dims(image, axis=0)
-        # (C x D x H x W)
 
         # Now applying lung window:
-        image[image < -1000.0] = -1000.0
-        image[image > 500.0] = 500.0
+        if self.lung_window_flag is True:
+            image[image < -1000.0] = -1000.0
+            image[image > 500.0] = 500.0
 
         # Apply normalisation with values inside of lung
-        image = normalisation(lung, image)
+        if self.normalisation_flag is True:
+            image = normalisation(lung, image)
 
         # Random contrast and Renormalisation:
-        image_another_contrast = self.augmentation_contrast.randomintensity(image)
-        image = 0.7*image + 0.3*image_another_contrast
-        image = normalisation(lung, image)
+        if self.contrast_aug_flag is True:
+            image_another_contrast = self.augmentation_contrast.randomintensity(image)
+            image = 0.7*image + 0.3*image_another_contrast
+            if self.normalisation_flag is True:
+                image = normalisation(lung, image)
 
         # Extract image name
         _, imagename = os.path.split(imagename)
@@ -204,8 +177,7 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
             label = label.get_fdata()
             label = np.array(label, dtype='float32')
             label = np.transpose(label, (2, 0, 1))
-            # label = np.expand_dims(label, axis=0)
-            # [image, label, lung] = self.augmentation_cropping.crop(image, label, lung)
+
             inputs_dict = self.augmentation_cropping.crop(image, label, lung)
             return inputs_dict, imagename
         else:
