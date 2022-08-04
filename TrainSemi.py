@@ -21,26 +21,7 @@ import errno
 # Multiclass will be transformed into multiple binary segmentation
 
 
-def trainModels(
-                dataset_name,
-                data_directory,
-                downsample,
-                input_dim,
-                class_no,
-                repeat,
-                train_batchsize,
-                num_steps,
-                learning_rate,
-                width,
-                depth,
-                log_tag,
-                unlabelled=5,
-                l2=0.01,
-                alpha=1.0,
-                warmup=0.1,
-                mean=0.5,
-                std=0.1
-                ):
+def main():
 
     for j in range(1, repeat + 1):
 
