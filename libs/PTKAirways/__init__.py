@@ -3,7 +3,7 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 import numpy as np
-from preprocessing.PTKAirways import TopOfTrachea as tot, AirwayRegionGrowingWithExplosionControl as argwxp
+from libs.PTKAirways import TopOfTrachea as tot, AirwayRegionGrowingWithExplosionControl as argwxp
 from scipy. ndimage import gaussian_filter
 
 
