@@ -16,9 +16,7 @@ from libs.old.Dataloader import RandomContrast
 
 from libs.old.Models2DOrthogonal import Unet2DMultiChannel
 
-import matplotlib.pyplot as plt
-
-from PTKAirways import RunPTKAirways
+from libs.PTKAirways import RunPTKAirways
 from skimage.measure import label
 import raster_geometry as rsg
 from scipy.ndimage import binary_closing
