@@ -6,7 +6,7 @@ torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-from Train_Unet_Orthogonal import trainModels
+from TrainSup import trainModels
 
 if __name__ == '__main__':
 

@@ -7,17 +7,17 @@ import numpy as np
 from torch.utils import data
 import shutil
 
-from arxiv.DataloaderOrthogonalNoPadding import CT_Dataset_Orthogonal_Fast
+from libs.old.DataloaderOrthogonal_old import CT_Dataset_Orthogonal
 from tensorboardX import SummaryWriter
 
 # import wandb
 
-from Utils import validate_three_planes
+from libs.Utils import validate_three_planes
 # ==============================================
-from Models2DOrthogonal import Unet2DMultiChannel
+from libs.old.Models2DOrthogonal import Unet2DMultiChannel
 import errno
 
-from Utils import train_base
+from libs.Utils import train_base
 
 
 # This script trains a weird model:
@@ -34,9 +34,8 @@ def trainModels(dataset_name,
                 train_batchsize,
                 val_batchsize=3,
                 new_d=5,
-                new_h=480,
-                new_w=480,
-                new_z=320,
+                new_h=384,
+                new_w=384,
                 temp=0.5,
                 l2=0.01
                 ):
@@ -50,7 +49,7 @@ def trainModels(dataset_name,
         # }
         repeat_str = str(j)
         Exp = Unet2DMultiChannel(in_ch=new_d, width=width, output_channels=new_d)
-        Exp_name = 'OrthogonalSup2DFast'
+        Exp_name = 'OrthogonalSup2D'
 
         Exp_name = Exp_name + \
                    '_e' + str(repeat_str) + \
@@ -59,18 +58,17 @@ def trainModels(dataset_name,
                    '_w' + str(width) + \
                    '_s' + str(num_steps) + \
                    '_r' + str(l2) + \
-                   '_d' + str(new_d) + \
+                   '_z' + str(new_d) + \
                    '_h' + str(new_h) + \
                    '_w' + str(new_w) + \
-                   '_z' + str(new_z) + \
                    '_t' + str(temp)
 
         trainloader_withlabels, validateloader, test_data_path, train_dataset_with_labels, validate_dataset = getData(data_directory,
                                                                                                                       dataset_name,
                                                                                                                       train_batchsize,
                                                                                                                       [new_d, new_h, new_w],
-                                                                                                                      [new_z, new_d, new_w],
-                                                                                                                      [new_z, new_w, new_d],
+                                                                                                                      [new_h, new_d, new_w],
+                                                                                                                      [new_h, new_w, new_d],
                                                                                                                       val_batchsize)
 
         trainSingleModel(model=Exp,
@@ -95,7 +93,7 @@ def getData(data_directory, dataset_name, train_batchsize, d, h, w, val_batchsiz
     train_label_folder_labelled = folder_labelled + '/lbls'
     train_lung_folder_labelled = folder_labelled + '/lung'
 
-    train_dataset_labelled = CT_Dataset_Orthogonal_Fast(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, d, h, w, labelled=True)
+    train_dataset_labelled = CT_Dataset_Orthogonal(train_image_folder_labelled, train_label_folder_labelled, train_lung_folder_labelled, d, h, w, labelled=True)
 
     trainloader_labelled = data.DataLoader(train_dataset_labelled, batch_size=train_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
@@ -103,7 +101,7 @@ def getData(data_directory, dataset_name, train_batchsize, d, h, w, val_batchsiz
     validate_label_folder = data_directory + '/validate/lbls'
     validate_lung_folder = data_directory + '/validate/lung'
 
-    validate_dataset = CT_Dataset_Orthogonal_Fast(validate_image_folder, validate_label_folder, validate_lung_folder, d, h, w, labelled=True)
+    validate_dataset = CT_Dataset_Orthogonal(validate_image_folder, validate_label_folder, validate_lung_folder, d, h, w, labelled=True)
     validateloader = data.DataLoader(validate_dataset, batch_size=val_batchsize, shuffle=True, num_workers=0, drop_last=True)
 
     testdata_path = data_directory + '/test'
@@ -145,22 +143,26 @@ def trainSingleModel(model,
 
     model.to(device)
 
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
+
     # resume training:
     if resume:
         model = torch.load(last_model)
-
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-8, weight_decay=l2)
 
     start = timeit.default_timer()
 
     iterator_train_labelled = iter(trainloader_with_labels)
 
+    train_mean_iu_d_tracker = 0
+    train_mean_iu_h_tracker = 0
+    train_mean_iu_w_tracker = 0
+
     for step in range(num_steps):
 
         model.train()
-        train_iou_d = []
-        train_iou_h = []
-        train_iou_w = []
+        # train_iou_d = []
+        # train_iou_h = []
+        # train_iou_w = []
 
         try:
             labelled_dict, labelled_name = next(iterator_train_labelled)
@@ -174,12 +176,21 @@ def trainSingleModel(model,
         loss = loss_w + loss_d + loss_h
         del labelled_dict
         del labelled_name
-        train_iou_d.append(train_mean_iu_d_)
-        train_iou_h.append(train_mean_iu_h_)
-        train_iou_w.append(train_mean_iu_w_)
-        train_iou_d = np.nanmean(train_iou_d)
-        train_iou_h = np.nanmean(train_iou_h)
-        train_iou_w = np.nanmean(train_iou_w)
+
+        train_iou_d = 0.1*train_mean_iu_d_ + 0.9*train_mean_iu_d_tracker if train_mean_iu_d_ == 0.0 else train_mean_iu_d_
+        train_iou_h = 0.1 * train_mean_iu_h_ + 0.9 * train_mean_iu_h_tracker if train_mean_iu_h_ == 0.0 else train_mean_iu_h_
+        train_iou_w = 0.1 * train_mean_iu_w_ + 0.9 * train_mean_iu_w_tracker if train_mean_iu_w_ == 0.0 else train_mean_iu_w_
+
+        train_mean_iu_d_tracker = train_iou_d
+        train_mean_iu_h_tracker = train_iou_h
+        train_mean_iu_w_tracker = train_iou_w
+
+        # train_iou_d.append(train_mean_iu_d_)
+        # train_iou_h.append(train_mean_iu_h_)
+        # train_iou_w.append(train_mean_iu_w_)
+        # train_iou_d = np.nanmean(train_iou_d)
+        # train_iou_h = np.nanmean(train_iou_h)
+        # train_iou_w = np.nanmean(train_iou_w)
 
         validate_ious = validate_three_planes(validateloader, device, model)
         validate_iou_d = np.nanmean(validate_ious["val d plane"])

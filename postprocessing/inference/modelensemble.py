@@ -1,22 +1,7 @@
-import nibabel
 import torch
-import random
-import numpy as np
 import os
-import argparse
-import glob
-import tifffile as tiff
 
-import errno
-import imageio
-
-from PIL import Image
-
-import numpy.ma as ma
-
-import matplotlib.pyplot as plt
-
-from Models2DOrthogonal import Unet2DMultiChannel
+from libs.old.Models2DOrthogonal import Unet2DMultiChannel
 
 
 def average_model_weights(model_path,

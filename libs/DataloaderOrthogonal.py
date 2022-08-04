@@ -1,13 +1,11 @@
 import glob
 import os
 import random
-
-import torch
 import numpy as np
-
 import nibabel as nib
-
 import numpy.ma as ma
+from torch.utils import data
+from torch.utils.data import Dataset
 
 
 class RandomCroppingOrthogonal(object):
@@ -91,15 +89,19 @@ class RandomGaussian(object):
         return input
 
 
-def normalisation(lung, image):
-    image_masked = ma.masked_where(lung > 0.5, image)
-    lung_mean = np.nanmean(image_masked)
-    lung_std = np.nanstd(image_masked)
+def normalisation(lung, image, apply_lung_mask=True):
+    if apply_lung_mask is True:
+        image_masked = ma.masked_where(lung > 0.5, image)
+        lung_mean = np.nanmean(image_masked)
+        lung_std = np.nanstd(image_masked)
+    else:
+        lung_mean = np.nanmean(image)
+        lung_std = np.nanstd(image)
     image = (image - lung_mean + 1e-10) / (lung_std + 1e-10)
     return image
 
 
-class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
+class CT_Dataset_Orthogonal(Dataset):
     '''
     Each volume should be at: Dimension X Height X Width
     '''
@@ -109,10 +111,10 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
                  lung_folder,
                  labelled,
                  full_resolution=512,
-                 lung_mask=True,
-                 normalisation=False,
-                 contrast_aug=False,
-                 lung_window=True):
+                 lung_mask=False,
+                 lung_window=True,
+                 normalisation=True,
+                 contrast_aug=True):
         # data
         self.imgs_folder = imgs_folder
         self.labels_folder = labels_folder
@@ -157,14 +159,14 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
 
         # Apply normalisation with values inside of lung
         if self.normalisation_flag is True:
-            image = normalisation(lung, image)
+            image = normalisation(lung, image, self.apply_lung_mask_flag)
 
         # Random contrast and Renormalisation:
         if self.contrast_aug_flag is True:
             image_another_contrast = self.augmentation_contrast.randomintensity(image)
             image = 0.7*image + 0.3*image_another_contrast
             if self.normalisation_flag is True:
-                image = normalisation(lung, image)
+                image = normalisation(lung, image, self.apply_lung_mask_flag)
 
         # Extract image name
         _, imagename = os.path.split(imagename)
@@ -187,6 +189,76 @@ class CT_Dataset_Orthogonal(torch.utils.data.Dataset):
     def __len__(self):
         # You should change 0 to the total size of your dataset.
         return len(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
+
+
+def getData(data_directory,
+            dataset_name,
+            train_batchsize,
+            norm=True,
+            contrast_aug=True,
+            lung_window=True,
+            resolution=512,
+            train_full=True):
+    '''
+    Args:
+        data_directory:
+        dataset_name:
+        train_batchsize:
+        norm:
+        contrast_aug:
+        lung_window:
+    Returns:
+    '''
+
+    data_directory = data_directory + '/' + dataset_name
+
+    train_image_folder_labelled = data_directory + '/labelled/imgs'
+    train_label_folder_labelled = data_directory + '/labelled/lbls'
+    train_lung_folder_labelled = data_directory + '/labelled/lung'
+
+    train_dataset_labelled = CT_Dataset_Orthogonal(imgs_folder=train_image_folder_labelled,
+                                                   labels_folder=train_label_folder_labelled,
+                                                   lung_folder=train_lung_folder_labelled,
+                                                   labelled=True,
+                                                   full_resolution=resolution,
+                                                   normalisation=norm,
+                                                   contrast_aug=contrast_aug,
+                                                   lung_window=lung_window)
+
+    train_loader_labelled = data.DataLoader(dataset=train_dataset_labelled,
+                                            batch_size=train_batchsize,
+                                            shuffle=True,
+                                            num_workers=0,
+                                            drop_last=True)
+
+    if train_full is True:
+        return {'train_data': train_dataset_labelled,
+                'train_loader': train_loader_labelled}
+
+    else:
+        validate_image_folder = data_directory + '/validate/imgs'
+        validate_label_folder = data_directory + '/validate/lbls'
+        validate_lung_folder = data_directory + '/validate/lung'
+
+        validate_dataset = CT_Dataset_Orthogonal(imgs_folder=validate_image_folder,
+                                                 labels_folder=validate_label_folder,
+                                                 lung_folder=validate_lung_folder,
+                                                 labelled=True,
+                                                 full_resolution=resolution,
+                                                 normalisation=norm,
+                                                 contrast_aug=contrast_aug,
+                                                 lung_window=lung_window)
+
+        validate_loader = data.DataLoader(dataset=validate_dataset,
+                                          batch_size=2,
+                                          shuffle=True,
+                                          num_workers=0,
+                                          drop_last=True)
+
+        return {'train_data': train_dataset_labelled,
+                'train_loader': train_loader_labelled,
+                'val_data': validate_dataset,
+                'val_loader': validate_loader}
 
 
 if __name__ == '__main__':

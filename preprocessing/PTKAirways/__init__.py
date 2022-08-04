@@ -2,10 +2,8 @@ import os, sys
  # cheat to add current cwd to python path, avoids relative import issues
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 
-import nibabel as nib
 import numpy as np
-from PTKAirways import TopOfTrachea as tot
-from PTKAirways import AirwayRegionGrowingWithExplosionControl as argwxp
+from preprocessing.PTKAirways import TopOfTrachea as tot, AirwayRegionGrowingWithExplosionControl as argwxp
 from scipy. ndimage import gaussian_filter
 
 

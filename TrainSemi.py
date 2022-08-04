@@ -9,10 +9,9 @@ from torch.utils import data
 import shutil
 import math
 from Metrics import segmentation_scores
-from dataloaders.DataloaderOrthogonal import CT_Dataset_Orthogonal
 from tensorboardX import SummaryWriter
 
-from Utils import evaluate, sigmoid_rampup
+from libs.Utils import evaluate, sigmoid_rampup
 from Loss import SoftDiceLoss
 # =================================
 from Models2D import UnetBPL
@@ -55,7 +54,7 @@ def trainModels(
                       ratio=8,
                       detach=True)
 
-        Exp_name = 'VISegPL2D'
+        Exp_name = 'BayesianPLSeg2DOrthogonal'
 
         Exp_name = Exp_name + \
                    '_e' + str(repeat_str) + \

@@ -1,20 +1,18 @@
 import nibabel
 import sys
 import torch
-sys.path.append("..")
+sys.path.append("../..")
 import numpy as np
 import os
 from pathlib import Path
 
 import nibabel as nib
 
-from tqdm import tqdm
-
 import numpy.ma as ma
 
-from arxiv.Dataloader import RandomContrast
+from libs.old.Dataloader import RandomContrast
 
-from Models2DOrthogonal import Unet2DMultiChannel
+from libs.old.Models2DOrthogonal import Unet2DMultiChannel
 
 
 def nii2np(file_path):
@@ -193,38 +191,28 @@ def ensemble(seg_path,
 
 
 def main(test_data_path,
+         case,
          lung_path,
          model_path,
          temp,
-         dataset,
+         channel=32,
          threshold=0.8,
          step_lower=20000,
          step_upper=20200):
 
     # generate save path:
-    # /data/model/config/nii.gz
-
     path = Path(os.path.abspath(model_path))
     save_path_parent = path.parent.absolute()
     save_path = os.path.join(save_path_parent, 'segmentation_thresh' + str(threshold) + '_temp' + str(temp))
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
-    save_path = os.path.join(save_path, dataset)
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
-    dataname = Path(test_data_path).name
-    save_path = os.path.join(save_path, dataname)
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    save_path = os.path.join(save_path, case)
+    Path(save_path).mkdir(parents=True, exist_ok=True)
 
     # sort out all models:
     all_models = os.listdir(model_path)
     all_models.sort()
 
     # ran inference for each model:
-    for model_name in tqdm(all_models):
+    for model_name in all_models:
 
         step = model_name.split('_')[-1]
         step = float(step.split('.')[0])
@@ -237,9 +225,15 @@ def main(test_data_path,
             lung, d2 = nii2np(lung_path)
             assert d1 == d2
 
-            model = Unet2DMultiChannel(in_ch=1, width=24, output_channels=1)
+            # load model:
+            # print(model_name)
+            # model = torch.load(model_name)
+            # model.load_state_dict()
+            # print(model)
+
+            model = Unet2DMultiChannel(in_ch=1, width=channel, output_channels=1)
             model.to('cuda')
-            checkpoint = torch.load(model_name)
+            checkpoint = torch.load(model_name,map_location='cuda:0')
             model.load_state_dict(checkpoint['model_state_dict'])
             model.eval()
 
@@ -255,7 +249,7 @@ def main(test_data_path,
             seg = np.transpose(seg, (1, 2, 0))
 
             # save prepration:
-            save_name = str(step) + '_prob.nii.gz'
+            save_name = case + '_s' + str(step) + '_prob.nii.gz'
 
             # save seg:
             save_seg(save_path,
@@ -265,7 +259,7 @@ def main(test_data_path,
 
     # ensemble all segmentation files:
     final_seg = ensemble(save_path, threshold)
-    save_name = 'final_seg.nii.gz'
+    save_name = case + '_final_prob.nii.gz'
 
     # save seg:
     save_seg(save_path,
@@ -273,36 +267,36 @@ def main(test_data_path,
              test_data_path,
              final_seg)
 
-    print(dataname + ' is done.')
+    print('Done')
 
 
 if __name__ == "__main__":
 
     # Hyperparameters:
-    dataset_tag = 'Leuven'
-    cases = ['ID005_022022/7_inspiratie_rug_long_10__br58_vol',
-             'ID005_022022/9_expiratie_rug_long_10__br59_vol',
-             'ID039_062021/8_inspiratie_body_10__inspiratie',
-             'ID039_062021/12_expiratie_lcad_lung_10__expiratie_lcad',
-             'ID039_062021/14_expiratie_body_10__expiratie',
-             'ID091_082021/4_expiratie_rug_long_10__b70f_vol',
-             'ID091_082021/8_inspiratie_rug_long_10__b60f_vol'] # testing case
+    # cases = ['PA000013',
+    #          'PA000032'] # testing case
 
+    channel = 32 # channels of conv in 1st layer
+    cases = os.listdir('/home/moucheng/projects_data/MICCAI_Challenges/PARSE2022/evaluation_2022/512')
+    cases.sort()
     threshold = 0.4 # confidence threshold
-    temperature = 2 # temperature scaling for sigmoid/softmax
+    temperature = 1 # temperature scaling for sigmoid/softmax
 
     for case in cases:
-        data_path = '/home/moucheng/projects_data/Pulmonary_data/Leuven familial fibrosis/nifti/' + case + '.nii.gz'
-        lung_path = '/home/moucheng/projects_data/Pulmonary_data/Leuven familial fibrosis/lungmask/' + case + '_lunglabel.nii.gz'
-        model_path = '/home/moucheng/projects_codes/Results/airway/2022_07_04/OrthogonalSup2DSingle_e1_l0.0001_b4_w24_s50000_r0.001_c_False_n_False_t1.0/trained_models/'
+        case = case[:-7]
+
+        data_path = '/home/moucheng/projects_data/MICCAI_Challenges/PARSE2022/evaluation_2022/evaluation/' + case + '.nii.gz'
+        lung_path = '/home/moucheng/projects_data/MICCAI_Challenges/PARSE2022/evaluation_lung/evaluation/' + case + '_lunglabel.nii.gz'
+        model_path = '/home/moucheng/PhD/2022_12_Clinical/miccai_challenge/parse/last100/' # segmentation saved in model path
 
         main(data_path,
+             case,
              lung_path,
              model_path,
              temperature,
-             dataset_tag,
+             channel,
              threshold,
-             step_lower=20000,
+             step_lower=18700,
              step_upper=100000)
 
 
