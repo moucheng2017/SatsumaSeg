@@ -64,7 +64,8 @@ def main():
                    '_l2_' + str(args.l2) + \
                    '_c_' + str(args.contrast) + \
                    '_n_' + str(args.norm) + \
-                   '_t' + str(args.temp)
+                   '_t' + str(args.temp) + \
+                   '_m' + str(args.lung_mask)
 
         data = getData(data_directory=args.data_path,
                        dataset_name=args.dataset,
@@ -73,14 +74,16 @@ def main():
                        contrast_aug=args.contrast,
                        lung_window=True,
                        resolution=args.resolution,
-                       train_full=True)
+                       train_full=True,
+                       unlabelled=False)
 
         trainSingleModel(model=Exp,
                          model_name=Exp_name,
                          num_iterations=args.iterations,
                          learning_rate=args.lr,
                          dataset_name=args.dataset,
-                         trainloader_with_labels=data.get('train_loader'),
+                         apply_lung_mask=args.lung_mask,
+                         trainloader_with_labels=data.get('train_loader_l'),
                          log_tag=args.log_tag,
                          l2=args.l2,
                          temp=args.temp,
@@ -88,6 +91,7 @@ def main():
                          last_model=args.checkpoint_path,
                          save_iteration_starting=args.saving_starting,
                          save_iteration_interval=args.saving_interval,
+                         output_dim=args.output_dim,
                          )
 
 
@@ -95,7 +99,9 @@ def trainSingleModel(model,
                      model_name,
                      num_iterations,
                      learning_rate,
+                     output_dim,
                      dataset_name,
+                     apply_lung_mask,
                      trainloader_with_labels,
                      temp,
                      log_tag,
@@ -113,6 +119,11 @@ def trainSingleModel(model,
     Path(saved_log_path).mkdir(parents=True, exist_ok=True)
     saved_model_path = saved_information_path + '/' + save_model_name + '/trained_models'
     Path(saved_model_path).mkdir(parents=True, exist_ok=True)
+
+    if output_dim == 1:
+        single_channel_output = True
+    else:
+        single_channel_output = False
 
     print('The current model is:')
     print(save_model_name)
@@ -149,9 +160,9 @@ def trainSingleModel(model,
             iterator_train_labelled = iter(trainloader_with_labels)
             labelled_dict, labelled_name = next(iterator_train_labelled)
 
-        loss_d, train_mean_iu_d_ = train_base(labelled_dict["plane_d"][0], labelled_dict["plane_d"][1], labelled_dict["plane_d"][2], device, model, temp, False, True)
-        loss_h, train_mean_iu_h_ = train_base(labelled_dict["plane_h"][0], labelled_dict["plane_h"][1], labelled_dict["plane_h"][2], device, model, temp, False, True)
-        loss_w, train_mean_iu_w_ = train_base(labelled_dict["plane_w"][0], labelled_dict["plane_w"][1], labelled_dict["plane_w"][2], device, model, temp, False, True)
+        loss_d, train_mean_iu_d_ = train_base(labelled_dict["plane_d"][0], labelled_dict["plane_d"][1], labelled_dict["plane_d"][2], device, model, temp, apply_lung_mask, single_channel_output)
+        loss_h, train_mean_iu_h_ = train_base(labelled_dict["plane_h"][0], labelled_dict["plane_h"][1], labelled_dict["plane_h"][2], device, model, temp, apply_lung_mask, single_channel_output)
+        loss_w, train_mean_iu_w_ = train_base(labelled_dict["plane_w"][0], labelled_dict["plane_w"][1], labelled_dict["plane_w"][2], device, model, temp, apply_lung_mask, single_channel_output)
         loss = loss_w + loss_d + loss_h
 
         del labelled_dict

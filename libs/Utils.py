@@ -23,8 +23,6 @@ from Metrics import segmentation_scores, hd95, preprocessing_accuracy, f1_score
 from PIL import Image
 from torch.utils import data
 
-from Loss import deterministic_noisy_label_loss
-
 from Loss import SoftDiceLoss
 
 
