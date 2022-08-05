@@ -36,7 +36,6 @@ class ThresholdEncoder(nn.Module):
 class ThresholdDecoder(nn.Module):
     def __init__(self, c=8, ratio=8):
         '''
-
         Args:
             c:
             ratio:
@@ -87,7 +86,8 @@ class UnetBPL(nn.Module):
         return eps * std + mu
 
     def forward(self, x):
-        output, threshold_input = self.segmentor(x)
+        outputs_dict = self.segmentor(x)
+        output, threshold_input = outputs_dict.get('segmentation'), outputs_dict.get('side_output')
         if self.detach_bpl is True:
             mu, logvar = self.encoder(threshold_input.detach())
         else:
@@ -97,7 +97,7 @@ class UnetBPL(nn.Module):
 
         t_mu, t_logvar = self.decoder(z)
 
-        return {'segmentation':output,
+        return {'segmentation': output,
                 'mu': mu,
                 'logvar': logvar,
                 'threshold mu': t_mu,
@@ -169,23 +169,22 @@ class Unet(nn.Module):
             y = self.decoders[-(i+1)](y)
 
         output = self.conv_last(y)
+
         if self.side_output_mode is False:
-            return output
+            return {'segmentation': output}
         else:
-            return output, y
+            return {'segmentation': output,
+                    'side_output': y}
 
 
 def double_conv(in_channels, out_channels, step, norm):
     '''
-
     Args:
         in_channels:
         out_channels:
         step:
         norm:
-
     Returns:
-
     '''
     if norm == 'in':
         return nn.Sequential(

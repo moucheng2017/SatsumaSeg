@@ -3,13 +3,85 @@ import torch.nn as nn
 from Loss import SoftDiceLoss, kld_loss
 from Metrics import segmentation_scores
 
-# todo: I need to re write train_base for supervised part
-# todo: Add a train_base for both supervised part and unsupervised part
 
-# def calculate_sup_loss():
+def check_dim(input_tensor):
+    if len(input_tensor.size()) < 4:
+        return input_tensor.unsqueeze(1)
+    else:
+        return input_tensor
 
 
-# def calculate_pl_loss():
+def check_inputs(img,
+                 lbl,
+                 lung):
+    img = check_dim(img)
+    lbl = check_dim(lbl)
+    lung = check_dim(lung)
+    return img, lbl, lung
+
+
+def np2tensor_all(img,
+                  lbl,
+                  lung,
+                  device='cuda'):
+    img = img.to(device=device, dtype=torch.float32)
+    lbl = lbl.to(device=device, dtype=torch.float32)
+    lung = lung.to(device=device, dtype=torch.float32)
+    img, lbl, lung = check_inputs(img, lbl, lung)
+    return img, lbl, lung
+
+
+def model_forward(model, img):
+    return model(img)
+
+def get_img_ssl(img_l, img_u):
+    img = torch.cat((img_l, img_u), dim=0)
+    b_l = img_l.size()[0]
+    b_u = img_u.size()[0]
+    del img_l
+    del img_u
+    return img, b_l, b_u
+
+def calculate_sup_loss(outputs_dict,
+                       lbl,
+                       lung,
+                       temp,
+                       apply_lung_mask):
+
+    if torch.sum(lbl) > 10.0:
+        prob_output = outputs_dict.get('segmentation')
+
+        if prob_output.size()[-1] == 1:  # if the output is single channel that means we are using binary segmentation
+            prob_output = torch.sigmoid(prob_output / temp)
+        else:
+            prob_output = torch.softmax(prob_output / temp, dim=1)
+
+        if apply_lung_mask is True:
+            lung_mask = (lung > 0.5)  # float to bool
+            prob_output = torch.masked_select(prob_output, lung_mask)
+            lbl = torch.masked_select(lbl, lung_mask)
+
+        loss = SoftDiceLoss()(prob_output, lbl) + nn.BCELoss(reduction='mean')(prob_output.squeeze() + 1e-10, lbl.squeeze() + 1e-10)
+        class_outputs = (prob_output > 0.95).float()
+        train_mean_iu_ = segmentation_scores(lbl, class_outputs, 2)
+        train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
+
+    else:
+        loss = 0.0
+        train_mean_iu_ = 0.0
+
+    return loss, train_mean_iu_
+
+
+
+# def calculate_ssl_loss(outputs_dict,
+#                        lbl,
+#                        lung,
+#                        temp,
+#                        apply_lung_mask):
+
+
+
 
 
 def train_base(labelled_img,
