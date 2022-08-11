@@ -24,6 +24,8 @@ from TrainArguments import parser
 # training data loader:
 from libs.DataloaderOrthogonal import getData
 
+from libs import TrainBase
+
 
 def main():
     global args

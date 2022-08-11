@@ -28,8 +28,6 @@ class ThresholdEncoder(nn.Module):
 
     def forward(self, x):
         y = self.network(x)
-        y = torch.mean(y, dim=-1, keepdim=True)
-        y = torch.mean(y, dim=-2, keepdim=True)
         return self.threshold_mean(y), self.threshold_logvar(y)
 
 
@@ -56,6 +54,8 @@ class ThresholdDecoder(nn.Module):
 
     def forward(self, x):
         y = self.network(x)
+        y = torch.mean(y, dim=-1, keepdim=True)
+        y = torch.mean(y, dim=-2, keepdim=True)
         return self.threshold_mean(y), self.threshold_logvar(y)
 
 

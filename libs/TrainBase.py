@@ -11,43 +11,87 @@ def check_dim(input_tensor):
         return input_tensor
 
 
-def check_inputs(img,
+def check_inputs(img_l,
                  lbl,
-                 lung):
-    img = check_dim(img)
+                 lung,
+                 img_u=None):
+    img_l = check_dim(img_l)
     lbl = check_dim(lbl)
     lung = check_dim(lung)
-    return img, lbl, lung
+    if img_u is not None:
+        img_u = check_dim(img_u)
+        return {'img_l': img_l,
+                'img_u': img_u,
+                'lung': lung,
+                'lbl': lbl}
+    else:
+        return {'img_l': img_l,
+                'img_u': None,
+                'lbl': lbl,
+                'lung': lung}
 
 
-def np2tensor_all(img,
+def np2tensor_all(img_l,
                   lbl,
                   lung,
+                  img_u=None,
                   device='cuda'):
-    img = img.to(device=device, dtype=torch.float32)
+    '''
+    Put all numpy files into tensor
+    Args:
+        img:
+        lbl:
+        lung:
+        device:
+    Returns:
+    '''
+    img_l = img_l.to(device=device, dtype=torch.float32)
     lbl = lbl.to(device=device, dtype=torch.float32)
     lung = lung.to(device=device, dtype=torch.float32)
-    img, lbl, lung = check_inputs(img, lbl, lung)
-    return img, lbl, lung
+    if img_u is None:
+        inputs = check_inputs(img_l, lbl, lung)
+    else:
+        inputs = check_inputs(img_l, lbl, lung, img_u)
+    return inputs
+
+
+def get_img(inputs):
+    img_l = inputs.get('img_l')
+    img_u = inputs.get('img_u')
+    if img_u is not None:
+        img = torch.cat((img_l, img_u), dim=0)
+        b_l = img_l.size()[0]
+        b_u = img_u.size()[0]
+        del img_l
+        del img_u
+        return {'train img': img,
+                'batch labelled': b_l,
+                'batch unlabelled': b_u}
+    else:
+        return {'train img': img_l}
 
 
 def model_forward(model, img):
     return model(img)
 
-def get_img_ssl(img_l, img_u):
-    img = torch.cat((img_l, img_u), dim=0)
-    b_l = img_l.size()[0]
-    b_u = img_u.size()[0]
-    del img_l
-    del img_u
-    return img, b_l, b_u
 
 def calculate_sup_loss(outputs_dict,
                        lbl,
                        lung,
                        temp,
                        apply_lung_mask):
+    '''
+    Supervised loss part.
+    Args:
+        outputs_dict:
+        lbl:
+        lung:
+        temp:
+        apply_lung_mask:
 
+    Returns:
+
+    '''
     if torch.sum(lbl) > 10.0:
         prob_output = outputs_dict.get('segmentation')
 
@@ -70,118 +114,99 @@ def calculate_sup_loss(outputs_dict,
         loss = 0.0
         train_mean_iu_ = 0.0
 
-    return loss, train_mean_iu_
+    return {'seg loss': loss,
+            'train iou': train_mean_iu_}
 
 
+def calculate_ssl_loss(outputs_dict,
+                       b_l,
+                       b_u,
+                       prior_u,
+                       prior_var):
+    '''
+    Semi supervised loss part.
+    Args:
+        outputs_dict:
+        b_l:
+        b_u:
+        prior_u:
+        prior_var:
 
-# def calculate_ssl_loss(outputs_dict,
-#                        lbl,
-#                        lung,
-#                        temp,
-#                        apply_lung_mask):
+    Returns:
 
+    '''
+    posterior_mu = outputs_dict.get('mu')
+    posterior_logvar = outputs_dict.get('logvar')
 
+    threshold_mu = outputs_dict.get('threshold_mu')
+    threshold_logvar = outputs_dict.get('threshold_logvar')
 
+    loss = kld_loss(posterior_mu, posterior_logvar, prior_u, prior_var)
+
+    std = torch.exp(0.5 * threshold_logvar)
+    eps = torch.rand_like(std)
+
+    threshold_learnt = threshold_mu + eps * std
+
+    threshold_learnt_l, threshold_learnt_u = torch.split(threshold_learnt, [b_l, b_u], dim=0)
+
+    return {'kl loss': loss,
+            'threshold labelled': threshold_learnt_l,
+            'threshold unlabelled': threshold_learnt_u}
 
 
 def train_base(labelled_img,
                labelled_label,
                labelled_lung,
-               device,
                model,
-               model_base=True,
+               unlabelled_img=None,
                t=2.0,
-               apply_lung_mask=True,
-               single_channel_label=False):
+               prior_mu=0.4,
+               prior_logsigma=0.1,
+               apply_lung_mask=True):
     '''
+
     Args:
         labelled_img:
         labelled_label:
         labelled_lung:
-        device:
         model:
-        model_base:
+        unlabelled_img:
         t:
+        prior_mu:
+        prior_logsigma:
         apply_lung_mask:
-        single_channel_label:
 
     Returns:
+
     '''
+    # convert data from numpy to tensor:
+    inputs = np2tensor_all(img_l=labelled_img, img_u=unlabelled_img, lbl=labelled_label, lung=labelled_lung)
 
-    train_imgs = labelled_img.to(device=device, dtype=torch.float32)
-    labels = labelled_label.to(device=device, dtype=torch.float32)
-    lung = labelled_lung.to(device=device, dtype=torch.float32)
+    # concatenate labelled and unlabelled for ssl otherwise just use labelled img
+    train_img = get_img(inputs)
 
-    if single_channel_label is True:
-        labels = labels.unsqueeze(1)
-        lung = lung.unsqueeze(1)
-        train_imgs = train_imgs.unsqueeze(1)
+    # forward pass:
+    outputs_dict = model_forward(model, train_img.get('train img'))
 
-    outputs = model(train_imgs)
+    # supervised loss:
+    sup_loss = calculate_sup_loss(outputs_dict=outputs_dict,
+                                  lbl=inputs.get('lbl'),
+                                  lung=inputs.get('lung'),
+                                  temp=t,
+                                  apply_lung_mask=apply_lung_mask)
 
-    if torch.sum(labels) > 10.0:
-        # we ignore slices with way too little foregorund pixels as they are meaningless anyways
-        if model_base is True: # this is plain u-net
-            outputs = model(train_imgs)
-
-        if outputs.size()[-1] == 1: # if the output is single channel that means we are using binary segmentation
-            prob_outputs = torch.sigmoid(outputs / t)
-        else:
-            prob_outputs = torch.softmax(outputs / t, dim=1)
-            prob_outputs = prob_outputs[:, -1, :, :].unsqueeze(1)
-
-        if apply_lung_mask is True:
-            lung_mask = (lung > 0.5) # float to bool
-            prob_outputs_masked = torch.masked_select(prob_outputs, lung_mask)
-            labels_masked = torch.masked_select(labels, lung_mask)
-            loss = SoftDiceLoss()(prob_outputs_masked, labels_masked) + nn.BCELoss(reduction='mean')(prob_outputs_masked.squeeze() + 1e-10, labels_masked.squeeze() + 1e-10)
-            class_outputs = (prob_outputs_masked > 0.95).float()
-            train_mean_iu_ = segmentation_scores(labels_masked, class_outputs, 2)
-            train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
-        else:
-            loss = SoftDiceLoss()(prob_outputs, labels) + nn.BCELoss(reduction='mean')(prob_outputs.squeeze() + 1e-10, labels.squeeze() + 1e-10)
-            class_outputs = (prob_outputs > 0.95).float()
-            train_mean_iu_ = segmentation_scores(labels, class_outputs, 2)
-            train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
+    if unlabelled_img is None:
+        return {'supervised loss': sup_loss}
 
     else:
-        train_mean_iu_ = 0.0
-        loss = 0.0
+        # pseudo label loss:
+        pseudo_loss = calculate_ssl_loss(outputs_dict=outputs_dict,
+                                         b_l=train_img.get('batch labelled'),
+                                         b_u=train_img.get('batch unlabelled'),
+                                         prior_u=prior_mu,
+                                         prior_var=prior_logsigma)
+        return {'supervised losses': sup_loss,
+                'pseudo losses': pseudo_loss}
 
-    if model_base is True:
-        return loss, train_mean_iu_
-    else:
-        return loss, train_mean_iu_, outputs
 
-
-def train_ssl_base(labelled_img,
-                   labelled_label,
-                   labelled_lung,
-                   unlabelled_img,
-                   alpha,
-                   warmup,
-                   max_iterations,
-                   device,
-                   model,
-                   model_base=True,
-                   t=2.0,
-                   apply_lung_mask=True,
-                   single_channel_label=False):
-    '''
-    Args:
-        labelled_img:
-        labelled_label:
-        labelled_lung:
-        device:
-        model:
-        model_base:
-        t:
-        apply_lung_mask:
-        single_channel_label:
-
-    Returns:
-    '''
-
-    sup_loss, train_mean_iu_ = train_base(labelled_img, labelled_label, labelled_lung, device, model, model_base, t, apply_lung_mask, single_channel_label)
-    # kl
-    return sup_loss, train_mean_iu_
