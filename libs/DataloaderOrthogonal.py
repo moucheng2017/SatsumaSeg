@@ -1,5 +1,6 @@
 import glob
 import os
+import torch
 import random
 import numpy as np
 import nibabel as nib
@@ -87,6 +88,75 @@ class RandomGaussian(object):
         noise[mask_overflow_lower] = 0.0
         input += noise
         return input
+
+
+class RandomCutOut(object):
+    # In house implementation of cutout for segmentation.
+    # We create a zero mask to cover up the same part of the image and the mask. Both BCE and Dice will have zero gradients
+    # if both seg and mask value are zero at the same position.
+    # This is only applied on segmentation loss!!
+    def __int__(self, tensor, mask_height=50, mask_width=50):
+        self.segmentation_tensor = tensor
+        self.w_mask = mask_width
+        self.h_mask = mask_height
+
+    def cutout_seg(self, x, y):
+        '''
+        Args:
+            x: segmentation
+            y: gt
+        Returns:
+        '''
+        b, c, h, w = self.segmentation_tensor.size()
+        assert self.w_mask <= w
+        assert self.h_mask <= h
+
+        h_starting = np.random.randint(0, h - self.h_mask)
+        w_starting = np.random.randint(0, w - self.h_mask)
+        h_ending = h_starting + self.h_mask
+        w_ending = w_starting + self.w_mask
+
+        mask = torch.ones_like(self.segmentation_tensor).cuda()
+        mask[:, :, h_starting:h_ending, w_starting:w_ending] = 0
+
+        return x*mask, y*mask
+
+
+class RandomCutMix(object):
+    # In house implementation of cutmix for segmentation. This is inspired by the original cutmix but very different from the original one!!
+    # We mix a part of image 1 with another part of image 2 and do the same for the paired labels.
+    # This is applied before feeding into the network!!!
+    def __int__(self, tensor, mask_height=50, mask_width=50):
+
+        self.segmentation_tensor = tensor
+        self.w_mask = mask_width
+        self.h_mask = mask_height
+
+    def cutmix_seg(self, x, y):
+        '''
+        Args:
+            x: segmentation
+            y: gt
+        Returns:
+        '''
+        b, c, h, w = self.segmentation_tensor.size()
+
+        assert self.w_mask <= w
+        assert self.h_mask <= h
+
+        h_starting = np.random.randint(0, h - self.h_mask)
+        w_starting = np.random.randint(0, w - self.h_mask)
+        h_ending = h_starting + self.h_mask
+        w_ending = w_starting + self.w_mask
+
+        index = np.random.permutation(b)
+        x_2 = x[index, :]
+        y_2 = y[index, :]
+
+        x[:, :, h_starting:h_ending, w_starting:w_ending] = x_2[:, :, h_starting:h_ending, w_starting:w_ending]
+        y[:, :, h_starting:h_ending, w_starting:w_ending] = y_2[:, :, h_starting:h_ending, w_starting:w_ending]
+
+        return x, y
 
 
 def normalisation(lung, image, apply_lung_mask=True):
