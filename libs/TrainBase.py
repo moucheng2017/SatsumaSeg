@@ -3,6 +3,8 @@ import torch.nn as nn
 from Loss import SoftDiceLoss, kld_loss
 from Metrics import segmentation_scores
 
+from DataloaderOrthogonal import RandomCutOut
+
 
 def check_dim(input_tensor):
     if len(input_tensor.size()) < 4:
@@ -79,6 +81,7 @@ def calculate_sup_loss(outputs_dict,
                        lbl,
                        lung,
                        temp,
+                       cutout_aug,
                        apply_lung_mask):
     '''
     Supervised loss part.
@@ -105,6 +108,10 @@ def calculate_sup_loss(outputs_dict,
             prob_output = torch.masked_select(prob_output, lung_mask)
             lbl = torch.masked_select(lbl, lung_mask)
 
+        if cutout_aug is True:
+            cutout = RandomCutOut()
+            prob_output, lbl = cutout.cutout_seg(prob_output, lbl)
+
         loss = SoftDiceLoss()(prob_output, lbl) + nn.BCELoss(reduction='mean')(prob_output.squeeze() + 1e-10, lbl.squeeze() + 1e-10)
         class_outputs = (prob_output > 0.95).float()
         train_mean_iu_ = segmentation_scores(lbl, class_outputs, 2)
@@ -118,13 +125,13 @@ def calculate_sup_loss(outputs_dict,
             'train iou': train_mean_iu_}
 
 
-def calculate_ssl_loss(outputs_dict,
-                       b_l,
-                       b_u,
-                       prior_u,
-                       prior_var):
+def calculate_kl_loss(outputs_dict,
+                      b_l,
+                      b_u,
+                      prior_u,
+                      prior_var):
     '''
-    Semi supervised loss part.
+    Calculate the KL loss between the prior and the posterior for the threshold:
     Args:
         outputs_dict:
         b_l:
@@ -133,8 +140,8 @@ def calculate_ssl_loss(outputs_dict,
         prior_var:
 
     Returns:
-
     '''
+
     posterior_mu = outputs_dict.get('mu')
     posterior_logvar = outputs_dict.get('logvar')
 
@@ -155,6 +162,22 @@ def calculate_ssl_loss(outputs_dict,
             'threshold unlabelled': threshold_learnt_u}
 
 
+def calculate_pseudo_loss(outputs_dict,
+                          threshold,
+                          lung,
+                          temp,
+                          cutout_aug
+                          ):
+    '''
+    Args:
+        outputs_dict:
+        threshold:
+
+    Returns:
+    '''
+    # todo
+
+
 def train_base(labelled_img,
                labelled_label,
                labelled_lung,
@@ -165,7 +188,6 @@ def train_base(labelled_img,
                prior_logsigma=0.1,
                apply_lung_mask=True):
     '''
-
     Args:
         labelled_img:
         labelled_label:
@@ -178,8 +200,8 @@ def train_base(labelled_img,
         apply_lung_mask:
 
     Returns:
-
     '''
+
     # convert data from numpy to tensor:
     inputs = np2tensor_all(img_l=labelled_img, img_u=unlabelled_img, lbl=labelled_label, lung=labelled_lung)
 
