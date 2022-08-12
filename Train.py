@@ -1,3 +1,4 @@
+# This will be the main script for both training with semi supervised learning and supervised learning
 # basic libs:
 import math
 import torch
@@ -24,6 +25,5 @@ from TrainArguments import parser
 from libs.DataloaderOrthogonal import getData
 
 from libs import TrainBase
-
 
 # class
