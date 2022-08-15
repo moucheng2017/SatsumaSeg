@@ -81,6 +81,8 @@ def calculate_sup_loss(outputs_dict,
                        lbl,
                        lung,
                        temp,
+                       b_l,
+                       b_u,
                        cutout_aug,
                        apply_lung_mask):
     '''
@@ -91,12 +93,11 @@ def calculate_sup_loss(outputs_dict,
         lung:
         temp:
         apply_lung_mask:
-
     Returns:
-
     '''
     if torch.sum(lbl) > 10.0:
         prob_output = outputs_dict.get('segmentation')
+        prob_output, _ = torch.split(prob_output, [b_l, b_u], dim=0) # labelled data
 
         if prob_output.size()[-1] == 1:  # if the output is single channel that means we are using binary segmentation
             prob_output = torch.sigmoid(prob_output / temp)
@@ -163,6 +164,8 @@ def calculate_kl_loss(outputs_dict,
 
 
 def calculate_pseudo_loss(outputs_dict,
+                          b_l,
+                          b_u,
                           threshold,
                           lung,
                           temp,
@@ -172,10 +175,25 @@ def calculate_pseudo_loss(outputs_dict,
     Args:
         outputs_dict:
         threshold:
-
     Returns:
     '''
-    # todo
+    predictions_all = outputs_dict.get('segmentation')
+    _, predictions_u = torch.split(predictions_all, [b_l, b_u], dim=0)
+
+    if predictions_u.size()[-1] == 1:  # if the output is single channel that means we are using binary segmentation
+        predictions_u = torch.sigmoid(predictions_u / temp)
+        pseudo_label_u = (predictions_u > threshold).float()
+    else:
+        predictions_u = torch.softmax(predictions_u / temp, dim=1)
+        # one-hot transformation:
+        # we need more especially about
+
+
+
+
+
+
+
 
 
 def train_base(labelled_img,
