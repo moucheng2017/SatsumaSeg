@@ -4,9 +4,18 @@ from Loss import SoftDiceLoss, kld_loss
 from Metrics import segmentation_scores
 
 from DataloaderOrthogonal import RandomCutOut
+from LabelEncoding import multi_class_label_processing
 
 
 def check_dim(input_tensor):
+    '''
+
+    Args:
+        input_tensor:
+
+    Returns:
+
+    '''
     if len(input_tensor.size()) < 4:
         return input_tensor.unsqueeze(1)
     else:
@@ -17,6 +26,17 @@ def check_inputs(img_l,
                  lbl,
                  lung,
                  img_u=None):
+    '''
+
+    Args:
+        img_l:
+        lbl:
+        lung:
+        img_u:
+
+    Returns:
+
+    '''
     img_l = check_dim(img_l)
     lbl = check_dim(lbl)
     lung = check_dim(lung)
@@ -39,13 +59,16 @@ def np2tensor_all(img_l,
                   img_u=None,
                   device='cuda'):
     '''
-    Put all numpy files into tensor
+
     Args:
-        img:
+        img_l:
         lbl:
         lung:
+        img_u:
         device:
+
     Returns:
+
     '''
     img_l = img_l.to(device=device, dtype=torch.float32)
     lbl = lbl.to(device=device, dtype=torch.float32)
@@ -84,46 +107,88 @@ def calculate_sup_loss(outputs_dict,
                        b_l,
                        b_u,
                        cutout_aug,
-                       apply_lung_mask):
+                       apply_lung_mask,
+                       foreground_threshold=50):
     '''
-    Supervised loss part.
+
     Args:
         outputs_dict:
         lbl:
         lung:
         temp:
+        b_l:
+        b_u:
+        cutout_aug:
         apply_lung_mask:
+        foreground_threshold:
+
     Returns:
+
     '''
-    if torch.sum(lbl) > 10.0:
-        prob_output = outputs_dict.get('segmentation')
-        prob_output, _ = torch.split(prob_output, [b_l, b_u], dim=0) # labelled data
+    if torch.sum(lbl) > foreground_threshold: # check whether there are enough foreground pixels
+        prob_output = outputs_dict.get('segmentation') # get segmentation map
+        if b_u > 0: # check if unlabelled data is included
+            prob_output, _ = torch.split(prob_output, [b_l, b_u], dim=0) # if both labelled and unlabelled, split the data and use the labelled
 
-        if prob_output.size()[-1] == 1:  # if the output is single channel that means we are using binary segmentation
-            prob_output = torch.sigmoid(prob_output / temp)
-        else:
-            prob_output = torch.softmax(prob_output / temp, dim=1)
+        prob_output = torch.sigmoid(prob_output / temp) # apply element-wise sigmoid
 
-        if apply_lung_mask is True:
+        if apply_lung_mask is True: # apply lung mask
             lung_mask = (lung > 0.5)  # float to bool
             prob_output = torch.masked_select(prob_output, lung_mask)
             lbl = torch.masked_select(lbl, lung_mask)
 
-        if cutout_aug is True:
+        if cutout_aug is True: # apply cutout augmentation
             cutout = RandomCutOut()
             prob_output, lbl = cutout.cutout_seg(prob_output, lbl)
 
-        loss = SoftDiceLoss()(prob_output, lbl) + nn.BCELoss(reduction='mean')(prob_output.squeeze() + 1e-10, lbl.squeeze() + 1e-10)
-        class_outputs = (prob_output > 0.95).float()
-        train_mean_iu_ = segmentation_scores(lbl, class_outputs, 2)
-        train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
+        # channel-wise loss (this is for multi-channel sigmoid function as well):
+        if len(prob_output.size()) == 3:
+            # this is binary segmentation
+            loss = SoftDiceLoss()(prob_output, lbl) + nn.BCELoss(reduction='mean')(prob_output.squeeze() + 1e-10, lbl.squeeze() + 1e-10)
+            class_outputs = (prob_output > 0.95).float()
+            train_mean_iu_ = segmentation_scores(lbl, class_outputs, 2)
+            train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
+            return {'seg loss': loss,
+                    'train iou': train_mean_iu_}
+        elif len(prob_output.size()) == 4:
+            if prob_output.size()[1] == 1:
+                # this is also binary segmentation
+                loss = SoftDiceLoss()(prob_output, lbl) + nn.BCELoss(reduction='mean')(prob_output.squeeze() + 1e-10, lbl.squeeze() + 1e-10)
+                class_outputs = (prob_output > 0.95).float()
+                train_mean_iu_ = segmentation_scores(lbl, class_outputs, 2)
+                train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
+                return {'seg loss': loss,
+                        'train iou': train_mean_iu_}
+
+            else:
+                # this is multi class segmentation
+                lbl = multi_class_label_processing(lbl, prob_output.size()[1]) # convert single channel multi integer class label to multi channel binary label
+                loss = 0
+                train_mean_iu_ = 0
+                effective_classes = 0
+                for i in range(prob_output.size()[1]): # multiple
+                    if torch.sum(lbl[:, i, :, :]) > 1.0:
+                        # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
+                        # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
+                        effective_classes += 1
+                        loss += SoftDiceLoss()(prob_output[:, i, :, :], lbl[:, i, :, :]) + nn.BCELoss(reduction='mean')(prob_output[:, i, :, :].squeeze() + 1e-10, lbl[:, i, :, :].squeeze() + 1e-10)
+                        class_outputs = (prob_output[:, i, :, :] > 0.95).float()
+                        train_mean_iu_list = segmentation_scores(lbl[:, i, :, :], class_outputs, 2)
+                        train_mean_iu_ += sum(train_mean_iu_list) / len(train_mean_iu_list)
+
+                loss = loss / effective_classes
+                train_mean_iu_ = train_mean_iu_ / effective_classes
+                return {'seg loss': loss,
+                        'train iou': train_mean_iu_}
+
+        else:
+            print('the output is probably 3D and we do not support it yet')
 
     else:
         loss = 0.0
         train_mean_iu_ = 0.0
-
-    return {'seg loss': loss,
-            'train iou': train_mean_iu_}
+        return {'seg loss': loss,
+                'train iou': train_mean_iu_}
 
 
 def calculate_kl_loss(outputs_dict,
@@ -142,7 +207,7 @@ def calculate_kl_loss(outputs_dict,
 
     Returns:
     '''
-
+    assert b_u > 0
     posterior_mu = outputs_dict.get('mu')
     posterior_logvar = outputs_dict.get('logvar')
 
@@ -169,31 +234,63 @@ def calculate_pseudo_loss(outputs_dict,
                           threshold,
                           lung,
                           temp,
-                          cutout_aug
+                          cutout_aug,
+                          apply_lung_mask=True
                           ):
     '''
     Args:
         outputs_dict:
+        b_l:
+        b_u:
         threshold:
+        lung:
+        temp:
+        cutout_aug:
+        apply_lung_mask:
     Returns:
     '''
+    assert b_u > 0
     predictions_all = outputs_dict.get('segmentation')
     _, predictions_u = torch.split(predictions_all, [b_l, b_u], dim=0)
+    prob_output_u = torch.sigmoid(predictions_u / temp)
+    pseudo_label_u = (prob_output_u > threshold).float()
 
-    if predictions_u.size()[-1] == 1:  # if the output is single channel that means we are using binary segmentation
-        predictions_u = torch.sigmoid(predictions_u / temp)
-        pseudo_label_u = (predictions_u > threshold).float()
+    if apply_lung_mask is True:
+        lung_mask = (lung > 0.5)  # float to bool
+        prob_output_u = torch.masked_select(predictions_u, lung_mask)
+        pseudo_label_u = torch.masked_select(pseudo_label_u, lung_mask)
+
+    if cutout_aug is True:
+        cutout = RandomCutOut()
+        prob_output_u, pseudo_label_u = cutout.cutout_seg(prob_output_u, pseudo_label_u)
+
+    if len(prob_output_u.size()) == 3:
+        # this is binary segmentation
+        loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
+        return {'pseudo loss': loss}
+
+    elif len(prob_output_u.size()) == 4:
+        if prob_output_u.size()[1] == 1:
+            # this is also binary segmentation
+            loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
+            return {'pseudo loss': loss}
+
+        else:
+            # this is multi class segmentation
+            pseudo_label_u = multi_class_label_processing(pseudo_label_u, prob_output_u.size()[1])  # convert single channel multi integer class label to multi channel binary label
+            loss = 0
+            effective_classes = 0
+            for i in range(prob_output_u.size()[1]):  # multiple
+                if torch.sum(pseudo_label_u[:, i, :, :]) > 1.0:
+                    # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
+                    # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
+                    effective_classes += 1
+                    loss += SoftDiceLoss()(prob_output_u[:, i, :, :], pseudo_label_u[:, i, :, :]) + nn.BCELoss(reduction='mean')(prob_output_u[:, i, :, :].squeeze() + 1e-10, pseudo_label_u[:, i, :, :].squeeze() + 1e-10)
+            loss = loss / effective_classes
+            return {'pseudo loss': loss}
+
     else:
-        predictions_u = torch.softmax(predictions_u / temp, dim=1)
-        # one-hot transformation:
-        # we need more especially about
-
-
-
-
-
-
-
+        print('the output is probably 3D and we do not support it yet')
 
 
 def train_base(labelled_img,
@@ -204,6 +301,7 @@ def train_base(labelled_img,
                t=2.0,
                prior_mu=0.4,
                prior_logsigma=0.1,
+               augmentation_cutout=True,
                apply_lung_mask=True):
     '''
     Args:
@@ -215,6 +313,7 @@ def train_base(labelled_img,
         t:
         prior_mu:
         prior_logsigma:
+        augmentation_cutout:
         apply_lung_mask:
 
     Returns:
@@ -234,19 +333,36 @@ def train_base(labelled_img,
                                   lbl=inputs.get('lbl'),
                                   lung=inputs.get('lung'),
                                   temp=t,
-                                  apply_lung_mask=apply_lung_mask)
+                                  apply_lung_mask=apply_lung_mask,
+                                  b_l=train_img.get('batch labelled'),
+                                  b_u=train_img.get('batch unlabelled'),
+                                  cutout_aug=augmentation_cutout,
+                                  foreground_threshold=50)
 
     if unlabelled_img is None:
-        return {'supervised loss': sup_loss}
+        return {'supervised losses': sup_loss}
 
     else:
+        # calculate the kl and get the learnt threshold:
+        kl_loss = calculate_kl_loss(outputs_dict=outputs_dict,
+                                    b_l=train_img.get('batch labelled'),
+                                    b_u=train_img.get('batch unlabelled'),
+                                    prior_u=prior_mu,
+                                    prior_var=prior_logsigma)
+
         # pseudo label loss:
-        pseudo_loss = calculate_ssl_loss(outputs_dict=outputs_dict,
-                                         b_l=train_img.get('batch labelled'),
-                                         b_u=train_img.get('batch unlabelled'),
-                                         prior_u=prior_mu,
-                                         prior_var=prior_logsigma)
+        pseudo_loss = calculate_pseudo_loss(outputs_dict=outputs_dict,
+                                            b_l=train_img.get('batch labelled'),
+                                            b_u=train_img.get('batch unlabelled'),
+                                            threshold=kl_loss.get('threshold unlabelled'),
+                                            lung=None,
+                                            temp=t,
+                                            cutout_aug=augmentation_cutout,
+                                            apply_lung_mask=True
+                                            )
+
         return {'supervised losses': sup_loss,
-                'pseudo losses': pseudo_loss}
+                'pseudo losses': pseudo_loss,
+                'kl losses': kl_loss}
 
 
