@@ -153,9 +153,7 @@ def trainSingleModel(model,
     train_mean_iu_w_tracker = 0.0
 
     for step in range(num_iterations):
-
         model.train()
-
         try:
             labelled_dict, labelled_name = next(iterator_train_labelled)
         except StopIteration:
