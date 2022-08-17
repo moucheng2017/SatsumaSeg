@@ -110,7 +110,6 @@ def calculate_sup_loss(outputs_dict,
                        apply_lung_mask,
                        foreground_threshold=50):
     '''
-
     Args:
         outputs_dict:
         lbl:
@@ -121,9 +120,7 @@ def calculate_sup_loss(outputs_dict,
         cutout_aug:
         apply_lung_mask:
         foreground_threshold:
-
     Returns:
-
     '''
     if torch.sum(lbl) > foreground_threshold: # check whether there are enough foreground pixels
         prob_output = outputs_dict.get('segmentation') # get segmentation map
@@ -150,6 +147,7 @@ def calculate_sup_loss(outputs_dict,
             train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
             return {'seg loss': loss,
                     'train iou': train_mean_iu_}
+
         elif len(prob_output.size()) == 4:
             if prob_output.size()[1] == 1:
                 # this is also binary segmentation

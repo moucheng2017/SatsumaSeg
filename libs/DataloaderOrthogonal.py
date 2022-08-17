@@ -95,7 +95,7 @@ class RandomCutOut(object):
     # We create a zero mask to cover up the same part of the image and the mask. Both BCE and Dice will have zero gradients
     # if both seg and mask value are zero at the same position.
     # This is only applied on segmentation loss!!
-    def __int__(self, tensor, mask_height=50, mask_width=50):
+    def __int__(self, tensor, mask_height=100, mask_width=100):
         self.segmentation_tensor = tensor
         self.w_mask = mask_width
         self.h_mask = mask_height
@@ -269,7 +269,7 @@ def getData(data_directory,
             lung_window=True,
             resolution=512,
             train_full=True,
-            unlabelled=False):
+            unlabelled=2):
     '''
     Args:
         data_directory:
@@ -278,9 +278,13 @@ def getData(data_directory,
         norm:
         contrast_aug:
         lung_window:
-    Returns:
-    '''
+        resolution:
+        train_full:
+        unlabelled:
 
+    Returns:
+
+    '''
     # Labelled images data set and data loader:
     data_directory = data_directory + '/' + dataset_name
     train_image_folder_labelled = data_directory + '/labelled/imgs'
@@ -303,7 +307,7 @@ def getData(data_directory,
                                             drop_last=True)
 
     # Unlabelled images data set and data loader:
-    if unlabelled is True:
+    if unlabelled > 0:
         train_image_folder_unlabelled = data_directory + '/unlabelled/imgs'
         train_label_folder_unlabelled = data_directory + '/unlabelled/lbls'
         train_lung_folder_unlabelled = data_directory + '/unlabelled/lung'
@@ -318,7 +322,7 @@ def getData(data_directory,
                                                          lung_window=lung_window)
 
         train_loader_unlabelled = data.DataLoader(dataset=train_dataset_unlabelled,
-                                                  batch_size=train_batchsize,
+                                                  batch_size=train_batchsize*unlabelled,
                                                   shuffle=True,
                                                   num_workers=0,
                                                   drop_last=True)
