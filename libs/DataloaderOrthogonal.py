@@ -9,6 +9,18 @@ from torch.utils import data
 from torch.utils.data import Dataset
 
 
+
+# class EdgeZoom(object):
+#     # Crop the edges and zoom out to focus on small airways and vessels
+#     def __int__(self, crop_size=100):
+#         self.new_size = crop_size
+#     def crop_along_edge(self, lung_mask, image):
+#         # input: lung mask --> prob map, candidate of locations
+#         # output: sampling point
+#
+#         return sample_position
+
+
 class RandomCroppingOrthogonal(object):
     def __init__(self,
                  discarded_slices=5,
@@ -159,14 +171,18 @@ class RandomCutMix(object):
         return x, y
 
 
-def normalisation(lung, image, apply_lung_mask=True):
-    if apply_lung_mask is True:
-        image_masked = ma.masked_where(lung > 0.5, image)
-        lung_mean = np.nanmean(image_masked)
-        lung_std = np.nanstd(image_masked)
-    else:
+def normalisation(label, image):
+    # Case-wise normalisation
+    # Normalisation using values inside of the foreground mask
+
+    if label is None:
         lung_mean = np.nanmean(image)
         lung_std = np.nanstd(image)
+    else:
+        image_masked = ma.masked_where(label > 0.5, image)
+        lung_mean = np.nanmean(image_masked)
+        lung_std = np.nanstd(image_masked)
+
     image = (image - lung_mean + 1e-10) / (lung_std + 1e-10)
     return image
 
@@ -178,23 +194,23 @@ class CT_Dataset_Orthogonal(Dataset):
     def __init__(self,
                  imgs_folder,
                  labels_folder,
-                 lung_folder,
+                 # lung_folder,
                  labelled,
                  full_resolution=512,
-                 lung_mask=False,
+                 # lung_mask=False,
                  lung_window=True,
                  normalisation=True,
                  contrast_aug=True):
         # data
         self.imgs_folder = imgs_folder
         self.labels_folder = labels_folder
-        self.lung_folder = lung_folder
+        # self.lung_folder = lung_folder
         # flags
         self.labelled_flag = labelled
         self.contrast_aug_flag = contrast_aug
         self.normalisation_flag = normalisation
         self.lung_window_flag = lung_window
-        self.apply_lung_mask_flag = lung_mask
+        # self.apply_lung_mask_flag = lung_mask
 
         if self.contrast_aug_flag is True:
             self.augmentation_contrast = RandomContrast([10, 255])
@@ -203,11 +219,11 @@ class CT_Dataset_Orthogonal(Dataset):
 
     def __getitem__(self, index):
         # Lung masks:
-        all_lungs = sorted(glob.glob(os.path.join(self.lung_folder, '*.nii.gz*')))
-        lung = nib.load(all_lungs[index])
-        lung = lung.get_fdata()
-        lung = np.array(lung, dtype='float32')
-        lung = np.transpose(lung, (2, 0, 1))
+        # all_lungs = sorted(glob.glob(os.path.join(self.lung_folder, '*.nii.gz*')))
+        # lung = nib.load(all_lungs[index])
+        # lung = lung.get_fdata()
+        # lung = np.array(lung, dtype='float32')
+        # lung = np.transpose(lung, (2, 0, 1))
 
         # Images:
         all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
@@ -218,6 +234,10 @@ class CT_Dataset_Orthogonal(Dataset):
         image = image.get_fdata()
         image = np.array(image, dtype='float32')
 
+        # Extract image name
+        _, imagename = os.path.split(imagename)
+        imagename, imagetxt = os.path.splitext(imagename)
+
         # transform dimension:
         # original dimension: (H x W x D)
         image = np.transpose(image, (2, 0, 1))
@@ -227,20 +247,10 @@ class CT_Dataset_Orthogonal(Dataset):
             image[image < -1000.0] = -1000.0
             image[image > 500.0] = 500.0
 
-        # Apply normalisation with values inside of lung
-        if self.normalisation_flag is True:
-            image = normalisation(lung, image, self.apply_lung_mask_flag)
-
         # Random contrast and Renormalisation:
         if self.contrast_aug_flag is True:
             image_another_contrast = self.augmentation_contrast.randomintensity(image)
             image = 0.7*image + 0.3*image_another_contrast
-            if self.normalisation_flag is True:
-                image = normalisation(lung, image, self.apply_lung_mask_flag)
-
-        # Extract image name
-        _, imagename = os.path.split(imagename)
-        imagename, imagetxt = os.path.splitext(imagename)
 
         if self.labelled_flag is True:
             # Labels:
@@ -250,10 +260,19 @@ class CT_Dataset_Orthogonal(Dataset):
             label = np.array(label, dtype='float32')
             label = np.transpose(label, (2, 0, 1))
 
-            inputs_dict = self.augmentation_cropping.crop(image, label, lung)
+            # Apply normalisation with values inside of lung
+            if self.normalisation_flag is True:
+                image = normalisation(label, image)
+            else:
+                image = normalisation(None, image)
+
+            inputs_dict = self.augmentation_cropping.crop(image, label)
             return inputs_dict, imagename
+
         else:
-            inputs_dict = self.augmentation_cropping.crop(image, lung)
+            image = normalisation(None, image)
+            inputs_dict = self.augmentation_cropping.crop(image)
+
             return inputs_dict, imagename
 
     def __len__(self):
