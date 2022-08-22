@@ -143,11 +143,11 @@ def get_data_dict(dataloader, iterator):
     return data_dict, data_name
 
 
-def get_losses(args, sup_data_dict, unsup_data_dict):
-    if args.unlabelled > 0:
-        # calculate loss for each plane of supervised:
-        # todo: remove lung mask, add loss function calculations
-        # loss_d, train_mean_iu_d_ = train_base(labelled_dict["plane_d"][0], labelled_dict["plane_d"][1], labelled_dict["plane_d"][2], device, model, temp, apply_lung_mask, single_channel_output)
+# def get_losses(args, sup_data_dict, unsup_data_dict):
+#     if args.unlabelled > 0:
+#         # calculate loss for each plane of supervised:
+#         # todo: remove lung mask, add loss function calculations
+#         # loss_d, train_mean_iu_d_ = train_base(labelled_dict["plane_d"][0], labelled_dict["plane_d"][1], labelled_dict["plane_d"][2], device, model, temp, apply_lung_mask, single_channel_output)
 
 
 
