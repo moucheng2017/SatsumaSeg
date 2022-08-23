@@ -2,29 +2,84 @@ import glob
 import os
 import torch
 import random
+
 import numpy as np
+import scipy.ndimage
 import nibabel as nib
 import numpy.ma as ma
+
 from torch.utils import data
 from torch.utils.data import Dataset
 
 
+class RandomForegroundZoom(object):
+    # Zoom in augmentation
+    # We zoom out the foreground parts when labels are available
+    # We also zoom out the slices in the start and the end
+    def __int__(self, zoom_ratio=5):
+        self.upsample_ratio = zoom_ratio
 
-# class EdgeZoom(object):
-#     # Crop the edges and zoom out to focus on small airways and vessels
-#     def __int__(self, crop_size=100):
-#         self.new_size = crop_size
-#     def crop_along_edge(self, lung_mask, image):
-#         # input: lung mask --> prob map, candidate of locations
-#         # output: sampling point
-#
-#         return sample_position
+    def get_sample_centre(self,
+                          label):
+
+        # get height and width of label:
+        h, w = np.shape(label)
+        new_size = h // self.upsample_ratio
+
+        # hal of the new size:
+        cropping_edge = int(0.5*new_size)
+
+        # make sure that label do not go above the range:
+        label_available = label[cropping_edge:h-cropping_edge, cropping_edge:w-cropping_edge]
+
+        # Locations map:
+        all_foreground_locs = np.argwhere((label_available > 0))
+
+        # select a random foreground out of it:
+        foreground_location = np.random.choice(np.arange(np.shape(all_foreground_locs)[0]), 1)
+
+        # foreground locations:
+        centre_x, centre_y = all_foreground_locs[foreground_location, :]
+        return centre_x, centre_y
+
+    def sample_patch(self,
+                     image,
+                     label):
+
+        h, w = np.shape(label)
+        new_size = h // self.upsample_ratio
+
+        centre_x, centre_y = self.get_sample_centre(label)
+
+        image = image[centre_x-int(0.5*new_size), centre_x+int(0.5*new_size)]
+        label = label[centre_y-int(0.5*new_size), centre_y+int(0.5*new_size)]
+        return image, label
+
+    def upsample_patch(self, image, label):
+        image = scipy.ndimage.zoom(input=image, zoom=(self.upsample_ratio, self.upsample_ratio), order=1)
+        label = scipy.ndimage.zoom(input=label, zoom=(self.upsample_ratio, self.upsample_ratio), order=0)
+        return image, label
+
+    def forward(self, image, label):
+
+        image_zoomed, label_zoomed = self.sample_patch(image, label)
+        image_zoomed, label_zoomed = self.upsample_patch(image_zoomed, label_zoomed)
+
+        h_i, w_i = np.shape(image)
+        h_o, w_o = np.shape(image_zoomed)
+
+        # To add a cropping mechanism to make sure the zoomed out image are the size with the inputs
+        assert h_i == h_o
+        assert w_i == w_o
+
+        return image_zoomed, label_zoomed
 
 
 class RandomCroppingOrthogonal(object):
     def __init__(self,
                  discarded_slices=5,
-                 resolution=512):
+                 resolution=512,
+                 sampling_weighting_slope=0):
         '''
         cropping_d: 3 d dimension of cropped sub volume cropping on h x w
         cropping_h: 3 d dimension of cropped sub volume cropping on w x d
@@ -33,14 +88,24 @@ class RandomCroppingOrthogonal(object):
         self.discarded_slices = discarded_slices
         self.resolution = resolution
 
+        # Over sampling the slices on the two ends because they contain small difficult vessels
+        # We give the middle slice the lowest weight and the slices at the two very ends the highest weights
+        weight_middle_slice = 1
+        weight_end_slices = sampling_weighting_slope*0.5*self.resolution + weight_middle_slice
+        self.sampling_weights_prob = [int(abs((i-0.5*self.resolution))*sampling_weighting_slope+self.resolution) / weight_end_slices for i in range(self.resolution)]
+
     def crop(self, *volumes):
 
         # for supervised learning, we need to crop both volume and the label, arg1: volume, arg2: label
         # for unsupervised learning, we only need to crop the volume, arg1: volume
 
-        sample_position_d_d = np.random.randint(self.discarded_slices, self.resolution-1)
-        sample_position_h_h = np.random.randint(self.discarded_slices, self.resolution-1)
-        sample_position_w_w = np.random.randint(self.discarded_slices, self.resolution-1)
+        sample_position_d_d = np.random.choice(np.arange(self.resolution), 1, p=self.sampling_weights_prob)
+        sample_position_h_h = np.random.choice(np.arange(self.resolution), 1, p=self.sampling_weights_prob)
+        sample_position_w_w = np.random.choice(np.arange(self.resolution), 1, p=self.sampling_weights_prob)
+
+        # sample_position_d_d = np.random.randint(self.discarded_slices, self.resolution-1)
+        # sample_position_h_h = np.random.randint(self.discarded_slices, self.resolution-1)
+        # sample_position_w_w = np.random.randint(self.discarded_slices, self.resolution-1)
 
         outputs = {"plane_d": [],
                    "plane_h": [],
@@ -215,7 +280,7 @@ class CT_Dataset_Orthogonal(Dataset):
         if self.contrast_aug_flag is True:
             self.augmentation_contrast = RandomContrast([10, 255])
 
-        self.augmentation_cropping = RandomCroppingOrthogonal(discarded_slices=1, resolution=full_resolution)
+        self.augmentation_cropping = RandomCroppingOrthogonal(discarded_slices=1, resolution=full_resolution, sampling_weighting_slope=10)
 
     def __getitem__(self, index):
         # Lung masks:
