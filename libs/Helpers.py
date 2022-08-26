@@ -58,8 +58,7 @@ def network_intialisation(args):
                        '_l2_' + str(args.l2) + \
                        '_c_' + str(args.contrast) + \
                        '_n_' + str(args.norm) + \
-                       '_t' + str(args.temp) + \
-                       '_m_' + str(args.lung_mask)
+                       '_t' + str(args.temp)
 
     else:
         # supervised learning plus pseudo labels:
@@ -81,7 +80,6 @@ def network_intialisation(args):
                        '_c_' + str(args.contrast) + \
                        '_n_' + str(args.norm) + \
                        '_t' + str(args.temp) + \
-                       '_m_' + str(args.lung_mask) + \
                        '_de_' + str(args.detach) + \
                        '_mu' + str(args.mu) + \
                        '_sig' + str(args.sigma) + \
@@ -123,7 +121,7 @@ def get_iterators(data_loaders, args):
     iterator_train_labelled = iter(data_loaders.get('train_loader_l'))
     if args.unlabelled > 0:
         iterator_train_unlabelled = iter(data_loaders.get('train_loader_u'))
-        if args.full_train is True:
+        if args.full_train is False:
             iterator_validate = iter(data_loaders.get('val_loader'))
             return {'train labelled': iterator_train_labelled,
                     'train unlabelled': iterator_train_unlabelled,
@@ -132,7 +130,12 @@ def get_iterators(data_loaders, args):
             return {'train labelled': iterator_train_labelled,
                     'train unlabelled': iterator_train_unlabelled}
     else:
-        return {'train labelled': iterator_train_labelled}
+        if args.full_train is False:
+            iterator_validate = iter(data_loaders.get('val_loader'))
+            return {'train labelled': iterator_train_labelled,
+                    'val': iterator_validate}
+        else:
+            return {'train labelled': iterator_train_labelled}
 
 
 def get_data_dict(dataloader, iterator):
@@ -142,7 +145,7 @@ def get_data_dict(dataloader, iterator):
         iterator = iter(dataloader)
         data_dict, data_name = next(iterator)
     del data_name
-    return data_dict, data_name
+    return data_dict
 
 
 # def get_losses(args, sup_data_dict, unsup_data_dict):

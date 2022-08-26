@@ -11,7 +11,7 @@ parser.add_argument('--log_tag', type=str, help='experiment tag for the record')
 # hyper parameters for training (both sup and semi sup):
 parser.add_argument('--input_dim', type=int, help='dimension for the input image, e.g. 1 for CT, 3 for RGB, and more for 3D inputs', default=1)
 parser.add_argument('--output_dim', type=int, help='dimension for the output, e.g. 1 for binary segmentation, 3 for 3 classes', default=1)
-parser.add_argument('--full_train', type=bool, help='if true, train without validation, else, train with validation', default=True)
+# parser.add_argument('--full_train', type=bool, help='if true, train without validation, else, train with validation', default=True) # we don't really have enough data to be split into train and val
 parser.add_argument('--iterations', type=int, help='number of iterations', default=10000)
 parser.add_argument('--lr', type=float, help='learning rate', default=0.001)
 parser.add_argument('--width', type=int, help='number of filters in the first conv block in encoder', default=32)
