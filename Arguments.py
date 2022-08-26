@@ -33,9 +33,13 @@ parser.add_argument('--alpha', type=float, help='SSL, weight on the unsupervised
 parser.add_argument('--warmup', type=float, help='SSL, ratio between the iterations of warming up and the whole training iterations', default=0.1)
 
 # flags for data preprocessing and augmentation in data loader:
-parser.add_argument('--norm', type=bool, help='true when using z score normalisation on images', default=True)
-parser.add_argument('--contrast', type=bool, help='random contrast augmentation using histogram equalization', default=True)
-# parser.add_argument('--lung_mask', type=bool, help='true when applying lung mask on the training data', default=False)
+parser.add_argument('--norm', type=bool, help='true when normalise each case individually', default=True)
+parser.add_argument('--gaussian', type=bool, help='true when add random gaussian noise', default=True)
+parser.add_argument('--cutout', type=bool, help='true when randomly cutout some patches', default=True)
+parser.add_argument('--sampling', type=int, help='weight for sampling the slices along each axis of 3d volume for training, '
+                                                 'highest weights at the edges and lowest at the middle', default=10)
+parser.add_argument('--zoom', type=bool, help='true when randomly zoom in the foreground areas for labelled data', default=True)
+parser.add_argument('--contrast', type=bool, help='true when random contrast augmentation using histogram equalization', default=True)
 
 # flags for if we use fine-tuning on an trained model:
 parser.add_argument('--resume', type=bool, help='resume training on an existing model', default=False)

@@ -22,7 +22,7 @@ import torch.backends.cudnn as cudnn
 
 # model:
 from Models2D import Unet, UnetBPL
-from TrainBase import train_base
+from libs.TrainBase import train_base
 
 # data:
 from libs.DataloaderOrthogonal import getData
@@ -96,6 +96,8 @@ def get_data_simple_wrapper(args):
                            dataset_name=args.dataset,
                            train_batchsize=args.batch,
                            norm=args.norm,
+                           zoom_aug=args.zoom,
+                           sampling_weight=args.sampling,
                            contrast_aug=args.contrast,
                            lung_window=args.lung_mask,
                            resolution=512,

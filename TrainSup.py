@@ -19,7 +19,7 @@ from Models2D import Unet
 from libs.Utils import train_base
 
 # training options control panel:
-from TrainArguments import parser
+from Arguments import parser
 
 # training data loader:
 from libs.DataloaderOrthogonal import getData

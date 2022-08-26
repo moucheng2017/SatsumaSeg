@@ -3,8 +3,8 @@ import torch.nn as nn
 from Loss import SoftDiceLoss, kld_loss
 from Metrics import segmentation_scores
 
-from DataloaderOrthogonal import RandomCutOut
-from LabelEncoding import multi_class_label_processing
+from libs.Augmentations import RandomCutOut
+from libs.LabelEncoding import multi_class_label_processing
 
 
 def check_dim(input_tensor):
@@ -299,6 +299,9 @@ def train_base(labelled_img,
                t=2.0,
                prior_mu=0.4,
                prior_logsigma=0.1,
+               # augmentation_gaussian=True,
+               # augmentation_zoom=True,
+               # augmentation_contrast=True,
                augmentation_cutout=True,
                apply_lung_mask=True):
     '''
