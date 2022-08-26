@@ -24,7 +24,7 @@ def check_dim(input_tensor):
 
 def check_inputs(img_l,
                  lbl,
-                 lung,
+                 # lung,
                  img_u=None):
     '''
 
@@ -39,23 +39,20 @@ def check_inputs(img_l,
     '''
     img_l = check_dim(img_l)
     lbl = check_dim(lbl)
-    lung = check_dim(lung)
+
     if img_u is not None:
         img_u = check_dim(img_u)
         return {'img_l': img_l,
                 'img_u': img_u,
-                'lung': lung,
                 'lbl': lbl}
     else:
         return {'img_l': img_l,
                 'img_u': None,
-                'lbl': lbl,
-                'lung': lung}
+                'lbl': lbl}
 
 
 def np2tensor_all(img_l,
                   lbl,
-                  lung,
                   img_u=None,
                   device='cuda'):
     '''
@@ -72,11 +69,11 @@ def np2tensor_all(img_l,
     '''
     img_l = img_l.to(device=device, dtype=torch.float32)
     lbl = lbl.to(device=device, dtype=torch.float32)
-    lung = lung.to(device=device, dtype=torch.float32)
+    # lung = lung.to(device=device, dtype=torch.float32)
     if img_u is None:
-        inputs = check_inputs(img_l, lbl, lung)
+        inputs = check_inputs(img_l, lbl)
     else:
-        inputs = check_inputs(img_l, lbl, lung, img_u)
+        inputs = check_inputs(img_l, lbl, img_u)
     return inputs
 
 
@@ -102,12 +99,10 @@ def model_forward(model, img):
 
 def calculate_sup_loss(outputs_dict,
                        lbl,
-                       lung,
                        temp,
                        b_l,
                        b_u,
                        cutout_aug,
-                       apply_lung_mask,
                        foreground_threshold=50):
     '''
     Args:
@@ -129,10 +124,10 @@ def calculate_sup_loss(outputs_dict,
 
         prob_output = torch.sigmoid(prob_output / temp) # apply element-wise sigmoid
 
-        if apply_lung_mask is True: # apply lung mask
-            lung_mask = (lung > 0.5)  # float to bool
-            prob_output = torch.masked_select(prob_output, lung_mask)
-            lbl = torch.masked_select(lbl, lung_mask)
+        # if apply_lung_mask is True: # apply lung mask
+        #     lung_mask = (lung > 0.5)  # float to bool
+        #     prob_output = torch.masked_select(prob_output, lung_mask)
+        #     lbl = torch.masked_select(lbl, lung_mask)
 
         if cutout_aug is True: # apply cutout augmentation
             cutout = RandomCutOut()
@@ -293,7 +288,6 @@ def calculate_pseudo_loss(outputs_dict,
 
 def train_base(labelled_img,
                labelled_label,
-               labelled_lung,
                model,
                unlabelled_img=None,
                t=2.0,
@@ -302,8 +296,7 @@ def train_base(labelled_img,
                # augmentation_gaussian=True,
                # augmentation_zoom=True,
                # augmentation_contrast=True,
-               augmentation_cutout=True,
-               apply_lung_mask=True):
+               augmentation_cutout=True):
     '''
     Args:
         labelled_img:
@@ -321,7 +314,7 @@ def train_base(labelled_img,
     '''
 
     # convert data from numpy to tensor:
-    inputs = np2tensor_all(img_l=labelled_img, img_u=unlabelled_img, lbl=labelled_label, lung=labelled_lung)
+    inputs = np2tensor_all(img_l=labelled_img, img_u=unlabelled_img, lbl=labelled_label)
 
     # concatenate labelled and unlabelled for ssl otherwise just use labelled img
     train_img = get_img(inputs)
@@ -332,9 +325,7 @@ def train_base(labelled_img,
     # supervised loss:
     sup_loss = calculate_sup_loss(outputs_dict=outputs_dict,
                                   lbl=inputs.get('lbl'),
-                                  lung=inputs.get('lung'),
                                   temp=t,
-                                  apply_lung_mask=apply_lung_mask,
                                   b_l=train_img.get('batch labelled'),
                                   b_u=train_img.get('batch unlabelled'),
                                   cutout_aug=augmentation_cutout,

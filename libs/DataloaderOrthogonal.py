@@ -175,7 +175,7 @@ def getData(data_directory,
     data_directory = data_directory + '/' + dataset_name
     train_image_folder_labelled = data_directory + '/labelled/imgs'
     train_label_folder_labelled = data_directory + '/labelled/lbls'
-    train_lung_folder_labelled = data_directory + '/labelled/lung'
+    # train_lung_folder_labelled = data_directory + '/labelled/lung'
 
     train_dataset_labelled = CT_Dataset_Orthogonal(imgs_folder=train_image_folder_labelled,
                                                    labels_folder=train_label_folder_labelled,
@@ -223,7 +223,7 @@ def getData(data_directory,
         else:
             validate_image_folder = data_directory + '/validate/imgs'
             validate_label_folder = data_directory + '/validate/lbls'
-            validate_lung_folder = data_directory + '/validate/lung'
+            # validate_lung_folder = data_directory + '/validate/lung'
 
             validate_dataset = CT_Dataset_Orthogonal(imgs_folder=validate_image_folder,
                                                      labels_folder=validate_label_folder,
@@ -255,7 +255,7 @@ def getData(data_directory,
         else:
             validate_image_folder = data_directory + '/validate/imgs'
             validate_label_folder = data_directory + '/validate/lbls'
-            validate_lung_folder = data_directory + '/validate/lung'
+            # validate_lung_folder = data_directory + '/validate/lung'
 
             validate_dataset = CT_Dataset_Orthogonal(imgs_folder=validate_image_folder,
                                                      labels_folder=validate_label_folder,
