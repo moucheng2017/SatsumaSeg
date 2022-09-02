@@ -24,8 +24,7 @@ def check_dim(input_tensor):
 
 def check_inputs(img_l,
                  lbl,
-                 # lung,
-                 img_u=None):
+                 *img_u):
     '''
 
     Args:
@@ -40,21 +39,20 @@ def check_inputs(img_l,
     img_l = check_dim(img_l)
     lbl = check_dim(lbl)
 
-    if img_u is not None:
+    if img_u:
         img_u = check_dim(img_u)
         return {'img_l': img_l,
                 'img_u': img_u,
                 'lbl': lbl}
     else:
         return {'img_l': img_l,
-                'img_u': None,
                 'lbl': lbl}
 
 
 def np2tensor_all(img_l,
                   lbl,
-                  img_u=None,
-                  device='cuda'):
+                  device='cuda',
+                  *img_u):
     '''
 
     Args:
@@ -70,7 +68,7 @@ def np2tensor_all(img_l,
     img_l = img_l.to(device=device, dtype=torch.float32)
     lbl = lbl.to(device=device, dtype=torch.float32)
     # lung = lung.to(device=device, dtype=torch.float32)
-    if img_u is None:
+    if img_u:
         inputs = check_inputs(img_l, lbl)
     else:
         inputs = check_inputs(img_l, lbl, img_u)
@@ -286,32 +284,24 @@ def calculate_pseudo_loss(outputs_dict,
         print('the output is probably 3D and we do not support it yet')
 
 
+# def train_base(labelled_img,
+#                labelled_label,
+#                model,
+#                unlabelled_img=None,
+#                t=2.0,
+#                prior_mu=0.4,
+#                prior_logsigma=0.1,
+#                # augmentation_gaussian=True,
+#                # augmentation_zoom=True,
+#                # augmentation_contrast=True,
+#                augmentation_cutout=True):
 def train_base(labelled_img,
                labelled_label,
                model,
-               unlabelled_img=None,
-               t=2.0,
-               prior_mu=0.4,
-               prior_logsigma=0.1,
-               # augmentation_gaussian=True,
-               # augmentation_zoom=True,
-               # augmentation_contrast=True,
-               augmentation_cutout=True):
-    '''
-    Args:
-        labelled_img:
-        labelled_label:
-        labelled_lung:
-        model:
-        unlabelled_img:
-        t:
-        prior_mu:
-        prior_logsigma:
-        augmentation_cutout:
-        apply_lung_mask:
-
-    Returns:
-    '''
+               t,
+               augmnetation_cutout,
+               *args):
+    # *args will include variables for unlabelled data and images
 
     # convert data from numpy to tensor:
     inputs = np2tensor_all(img_l=labelled_img, img_u=unlabelled_img, lbl=labelled_label)
