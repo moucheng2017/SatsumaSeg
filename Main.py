@@ -5,7 +5,7 @@ import timeit
 # training options control panel:
 from Arguments import parser
 
-from libs.TrainBase import train_base
+from libs.Train import train_base
 from libs import Helpers
 
 
