@@ -9,12 +9,9 @@ from libs.LabelEncoding import multi_class_label_processing
 
 def check_dim(input_tensor):
     '''
-
     Args:
         input_tensor:
-
     Returns:
-
     '''
     if len(input_tensor.size()) < 4:
         return input_tensor.unsqueeze(1)
@@ -26,21 +23,18 @@ def check_inputs(img_l,
                  lbl,
                  *img_u):
     '''
-
     Args:
         img_l:
         lbl:
         lung:
         img_u:
-
     Returns:
-
     '''
     img_l = check_dim(img_l)
     lbl = check_dim(lbl)
 
     if img_u:
-        img_u = check_dim(img_u)
+        img_u = check_dim(img_u[0])
         return {'img_l': img_l,
                 'img_u': img_u,
                 'lbl': lbl}
@@ -51,7 +45,6 @@ def check_inputs(img_l,
 
 def np2tensor_all(img_l,
                   lbl,
-                  device='cuda',
                   *img_u):
     '''
 
@@ -65,6 +58,7 @@ def np2tensor_all(img_l,
     Returns:
 
     '''
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     img_l = img_l.to(device=device, dtype=torch.float32)
     lbl = lbl.to(device=device, dtype=torch.float32)
     # lung = lung.to(device=device, dtype=torch.float32)
@@ -304,7 +298,7 @@ def train_base(labelled_img,
     # *args will include variables for unlabelled data and images
 
     # convert data from numpy to tensor:
-    inputs = np2tensor_all(img_l=labelled_img, img_u=unlabelled_img, lbl=labelled_label)
+    inputs = np2tensor_all(img_l=labelled_img, lbl=labelled_label)
 
     # concatenate labelled and unlabelled for ssl otherwise just use labelled img
     train_img = get_img(inputs)
