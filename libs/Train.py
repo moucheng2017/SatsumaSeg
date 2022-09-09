@@ -19,54 +19,76 @@ def check_dim(input_tensor):
         return input_tensor
 
 
-def check_inputs(img_l,
-                 lbl,
-                 *img_u):
-    '''
-    Args:
-        img_l:
-        lbl:
-        lung:
-        img_u:
-    Returns:
-    '''
-    img_l = check_dim(img_l)
-    lbl = check_dim(lbl)
+# def check_inputs(img_l,
+#                  lbl,
+#                  *img_u):
+#     '''
+#     Args:
+#         img_l:
+#         lbl:
+#         lung:
+#         img_u:
+#     Returns:
+#     '''
+#     img_l = check_dim(img_l)
+#     lbl = check_dim(lbl)
+#
+#     if img_u:
+#         img_u = check_dim(img_u[0])
+#         return {'img_l': img_l,
+#                 'img_u': img_u,
+#                 'lbl': lbl}
+#     else:
+#         return {'img_l': img_l,
+#                 'lbl': lbl}
 
-    if img_u:
-        img_u = check_dim(img_u[0])
-        return {'img_l': img_l,
-                'img_u': img_u,
-                'lbl': lbl}
-    else:
-        return {'img_l': img_l,
-                'lbl': lbl}
+
+def check_inputs(**kwargs):
+    outputs = {}
+    for key, val in kwargs.items():
+        # check the dimension for each input
+        outputs[key] = check_dim(val)
+    return outputs
 
 
-def np2tensor_all(img_l,
-                  lbl,
-                  *img_u):
-    '''
+# def np2tensor_all(**kwargs):
+#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#     for key, val in kwargs.items():
+#         val
+#     img_l = img_l.to(device=device, dtype=torch.float32)
+#     lbl = lbl.to(device=device, dtype=torch.float32)
+#     # lung = lung.to(device=device, dtype=torch.float32)
+#     if img_u:
+#         inputs = check_inputs(img_l, lbl)
+#     else:
+#         inputs = check_inputs(img_l, lbl, img_u)
+#     return inputs
 
-    Args:
-        img_l:
-        lbl:
-        lung:
-        img_u:
-        device:
 
-    Returns:
-
-    '''
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    img_l = img_l.to(device=device, dtype=torch.float32)
-    lbl = lbl.to(device=device, dtype=torch.float32)
-    # lung = lung.to(device=device, dtype=torch.float32)
-    if img_u:
-        inputs = check_inputs(img_l, lbl)
-    else:
-        inputs = check_inputs(img_l, lbl, img_u)
-    return inputs
+# def np2tensor_all(img_l,
+#                   lbl,
+#                   *img_u):
+#     '''
+#
+#     Args:
+#         img_l:
+#         lbl:
+#         lung:
+#         img_u:
+#         device:
+#
+#     Returns:
+#
+#     '''
+#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#     img_l = img_l.to(device=device, dtype=torch.float32)
+#     lbl = lbl.to(device=device, dtype=torch.float32)
+#     # lung = lung.to(device=device, dtype=torch.float32)
+#     if img_u:
+#         inputs = check_inputs(img_l, lbl)
+#     else:
+#         inputs = check_inputs(img_l, lbl, img_u)
+#     return inputs
 
 
 def get_img(inputs):
@@ -289,56 +311,50 @@ def calculate_pseudo_loss(outputs_dict,
 #                # augmentation_zoom=True,
 #                # augmentation_contrast=True,
 #                augmentation_cutout=True):
-def train_base(labelled_img,
-               labelled_label,
-               model,
-               t,
-               augmnetation_cutout,
-               *args):
-    # *args will include variables for unlabelled data and images
-
+def train_base(**kwargs):
     # convert data from numpy to tensor:
-    inputs = np2tensor_all(img_l=labelled_img, lbl=labelled_label)
+    for key, value in kwargs.items():
+        inputs = np2tensor_all(img_l=labelled_img, lbl=labelled_label)
 
-    # concatenate labelled and unlabelled for ssl otherwise just use labelled img
-    train_img = get_img(inputs)
+        # concatenate labelled and unlabelled for ssl otherwise just use labelled img
+        train_img = get_img(inputs)
 
-    # forward pass:
-    outputs_dict = model_forward(model, train_img.get('train img'))
+        # forward pass:
+        outputs_dict = model_forward(model, train_img.get('train img'))
 
-    # supervised loss:
-    sup_loss = calculate_sup_loss(outputs_dict=outputs_dict,
-                                  lbl=inputs.get('lbl'),
-                                  temp=t,
-                                  b_l=train_img.get('batch labelled'),
-                                  b_u=train_img.get('batch unlabelled'),
-                                  cutout_aug=augmentation_cutout,
-                                  foreground_threshold=50)
+        # supervised loss:
+        sup_loss = calculate_sup_loss(outputs_dict=outputs_dict,
+                                      lbl=inputs.get('lbl'),
+                                      temp=t,
+                                      b_l=train_img.get('batch labelled'),
+                                      b_u=train_img.get('batch unlabelled'),
+                                      cutout_aug=augmentation_cutout,
+                                      foreground_threshold=50)
 
-    if unlabelled_img is None:
-        return {'supervised losses': sup_loss}
+        if unlabelled_img is None:
+            return {'supervised losses': sup_loss}
 
-    else:
-        # calculate the kl and get the learnt threshold:
-        kl_loss = calculate_kl_loss(outputs_dict=outputs_dict,
-                                    b_l=train_img.get('batch labelled'),
-                                    b_u=train_img.get('batch unlabelled'),
-                                    prior_u=prior_mu,
-                                    prior_var=prior_logsigma)
+        else:
+            # calculate the kl and get the learnt threshold:
+            kl_loss = calculate_kl_loss(outputs_dict=outputs_dict,
+                                        b_l=train_img.get('batch labelled'),
+                                        b_u=train_img.get('batch unlabelled'),
+                                        prior_u=prior_mu,
+                                        prior_var=prior_logsigma)
 
-        # pseudo label loss:
-        pseudo_loss = calculate_pseudo_loss(outputs_dict=outputs_dict,
-                                            b_l=train_img.get('batch labelled'),
-                                            b_u=train_img.get('batch unlabelled'),
-                                            threshold=kl_loss.get('threshold unlabelled'),
-                                            lung=None,
-                                            temp=t,
-                                            cutout_aug=augmentation_cutout,
-                                            apply_lung_mask=True
-                                            )
+            # pseudo label loss:
+            pseudo_loss = calculate_pseudo_loss(outputs_dict=outputs_dict,
+                                                b_l=train_img.get('batch labelled'),
+                                                b_u=train_img.get('batch unlabelled'),
+                                                threshold=kl_loss.get('threshold unlabelled'),
+                                                lung=None,
+                                                temp=t,
+                                                cutout_aug=augmentation_cutout,
+                                                apply_lung_mask=True
+                                                )
 
-        return {'supervised losses': sup_loss,
-                'pseudo losses': pseudo_loss,
-                'kl losses': kl_loss}
+            return {'supervised losses': sup_loss,
+                    'pseudo losses': pseudo_loss,
+                    'kl losses': kl_loss}
 
 
