@@ -52,25 +52,83 @@ def get_img(**inputs):
         return {'train img': img_l}
 
 
+# def np2tensor_all(img_l,
+#                   lbl,
+#                   *img_u):
+#     '''
+#
+#     Args:
+#         img_l:
+#         lbl:
+#         lung:
+#         img_u:
+#         device:
+#
+#     Returns:
+#
+#     '''
+#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#     img_l = img_l.to(device=device, dtype=torch.float32)
+#     lbl = lbl.to(device=device, dtype=torch.float32)
+#     # lung = lung.to(device=device, dtype=torch.float32)
+#     if img_u:
+#         inputs = check_inputs(img_l, lbl)
+#     else:
+#         inputs = check_inputs(img_l, lbl, img_u)
+#     return inputs
+
+
+# def get_img(inputs):
+#     img_l = inputs.get('img_l')
+#     img_u = inputs.get('img_u')
+#     if img_u is not None:
+#         img = torch.cat((img_l, img_u), dim=0)
+#         b_l = img_l.size()[0]
+#         b_u = img_u.size()[0]
+#         del img_l
+#         del img_u
+#         return {'train img': img,
+#                 'batch labelled': b_l,
+#                 'batch unlabelled': b_u}
+#     else:
+#         return {'train img': img_l}
+
+
 def model_forward(model, img):
     return model(img)
 
 
-def calculate_sup_loss(**kwargs):
-    # get inputs from the dictionary:
-    lbl = kwargs.get('lbl')
-    outputs_dict = kwargs.get('outputs')
-    b_u = kwargs.get('batch unlabelled')
-    b_l = kwargs.get('batch labelled')
-    temp = kwargs.get('temp')
-    cutout_aug = kwargs.get('cutout')
-
-    if torch.sum(lbl) > 50: # check whether there are enough foreground pixels
+def calculate_sup_loss(outputs_dict,
+                       lbl,
+                       temp,
+                       b_l,
+                       b_u,
+                       cutout_aug,
+                       foreground_threshold=50):
+    '''
+    Args:
+        outputs_dict:
+        lbl:
+        lung:
+        temp:
+        b_l:
+        b_u:
+        cutout_aug:
+        apply_lung_mask:
+        foreground_threshold:
+    Returns:
+    '''
+    if torch.sum(lbl) > foreground_threshold: # check whether there are enough foreground pixels
         prob_output = outputs_dict.get('segmentation') # get segmentation map
         if b_u > 0: # check if unlabelled data is included
             prob_output, _ = torch.split(prob_output, [b_l, b_u], dim=0) # if both labelled and unlabelled, split the data and use the labelled
 
         prob_output = torch.sigmoid(prob_output / temp) # apply element-wise sigmoid
+
+        # if apply_lung_mask is True: # apply lung mask
+        #     lung_mask = (lung > 0.5)  # float to bool
+        #     prob_output = torch.masked_select(prob_output, lung_mask)
+        #     lbl = torch.masked_select(lbl, lung_mask)
 
         if cutout_aug is True: # apply cutout augmentation
             cutout = RandomCutOut()
@@ -127,14 +185,22 @@ def calculate_sup_loss(**kwargs):
                 'train iou': train_mean_iu_}
 
 
-def calculate_kl_loss(**kwargs):
-    # get inputs from the dictionary:
-    outputs_dict = kwargs.get('outputs')
-    b_u = kwargs.get('batch unlabelled')
-    b_l = kwargs.get('batch labelled')
-    prior_u = kwargs.get('mu')
-    prior_var = kwargs.get('std')
+def calculate_kl_loss(outputs_dict,
+                      b_l,
+                      b_u,
+                      prior_u,
+                      prior_var):
+    '''
+    Calculate the KL loss between the prior and the posterior for the threshold:
+    Args:
+        outputs_dict:
+        b_l:
+        b_u:
+        prior_u:
+        prior_var:
 
+    Returns:
+    '''
     assert b_u > 0
     posterior_mu = outputs_dict.get('mu')
     posterior_logvar = outputs_dict.get('logvar')
@@ -156,24 +222,40 @@ def calculate_kl_loss(**kwargs):
             'threshold unlabelled': threshold_learnt_u}
 
 
-def calculate_pseudo_loss(**kwargs):
-    # get inputs from the dictionary:
-    lbl = kwargs.get('lbl')
-    outputs_dict = kwargs.get('outputs')
-    b_u = kwargs.get('batch unlabelled')
-    b_l = kwargs.get('batch labelled')
-    temp = kwargs.get('temp')
-    cutout_aug = kwargs.get('cutout')
+def calculate_pseudo_loss(outputs_dict,
+                          b_l,
+                          b_u,
+                          threshold,
+                          lung,
+                          temp,
+                          cutout_aug,
+                          apply_lung_mask=True
+                          ):
 
-    # threshold is learnt here:
-    # (todo) this might be wrong here:
-    threshold = kwargs.get('threshold')
+# def calculate_pseudo_loss(**kwargs):
+    '''
+    Args:
+        outputs_dict:
+        b_l:
+        b_u:
+        threshold:
+        lung:
+        temp:
+        cutout_aug:
+        apply_lung_mask:
+    Returns:
+    '''
 
     assert b_u > 0
     predictions_all = outputs_dict.get('segmentation')
     _, predictions_u = torch.split(predictions_all, [b_l, b_u], dim=0)
     prob_output_u = torch.sigmoid(predictions_u / temp)
     pseudo_label_u = (prob_output_u > threshold).float()
+
+    if apply_lung_mask is True:
+        lung_mask = (lung > 0.5)  # float to bool
+        prob_output_u = torch.masked_select(predictions_u, lung_mask)
+        pseudo_label_u = torch.masked_select(pseudo_label_u, lung_mask)
 
     if cutout_aug is True:
         cutout = RandomCutOut()
