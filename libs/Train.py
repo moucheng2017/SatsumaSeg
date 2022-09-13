@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from Loss import SoftDiceLoss, kld_loss
 from Metrics import segmentation_scores
-
 from libs.Augmentations import RandomCutOut
 from libs.LabelEncoding import multi_class_label_processing
 
@@ -56,14 +55,12 @@ def model_forward(model, img):
     return model(img)
 
 
-def calculate_sup_loss(**kwargs):
-    # get inputs from the dictionary:
-    lbl = kwargs.get('lbl')
-    outputs_dict = kwargs.get('outputs')
-    b_u = kwargs.get('batch unlabelled')
-    b_l = kwargs.get('batch labelled')
-    temp = kwargs.get('temp')
-    cutout_aug = kwargs.get('cutout')
+def calculate_sup_loss(lbl,
+                       outputs_dict,
+                       b_u,
+                       b_l,
+                       temp,
+                       cutout_aug):
 
     if torch.sum(lbl) > 50: # check whether there are enough foreground pixels
         prob_output = outputs_dict.get('segmentation') # get segmentation map
@@ -127,13 +124,11 @@ def calculate_sup_loss(**kwargs):
                 'train iou': train_mean_iu_}
 
 
-def calculate_kl_loss(**kwargs):
-    # get inputs from the dictionary:
-    outputs_dict = kwargs.get('outputs')
-    b_u = kwargs.get('batch unlabelled')
-    b_l = kwargs.get('batch labelled')
-    prior_u = kwargs.get('mu')
-    prior_var = kwargs.get('std')
+def calculate_kl_loss(outputs_dict,
+                      b_u,
+                      b_l,
+                      prior_u,
+                      prior_var):
 
     assert b_u > 0
     posterior_mu = outputs_dict.get('mu')
@@ -156,21 +151,25 @@ def calculate_kl_loss(**kwargs):
             'threshold unlabelled': threshold_learnt_u}
 
 
-def calculate_pseudo_loss(**kwargs):
-    # get inputs from the dictionary:
-    lbl = kwargs.get('lbl')
-    outputs_dict = kwargs.get('outputs')
-    b_u = kwargs.get('batch unlabelled')
-    b_l = kwargs.get('batch labelled')
-    temp = kwargs.get('temp')
-    cutout_aug = kwargs.get('cutout')
-
-    # threshold is learnt here:
-    # (todo) this might be wrong here:
-    threshold = kwargs.get('threshold')
+def calculate_pseudo_loss(outputs_dict,
+                          b_u,
+                          b_l,
+                          temp,
+                          cutout_aug,
+                          conf_threshold='bayesian'):
 
     assert b_u > 0
     predictions_all = outputs_dict.get('segmentation')
+
+    # Monte Carlo sampling of confidence threshold:
+    if conf_threshold == 'bayesian':
+        logvar_learnt = outputs_dict.get('threshold var')
+        std_learnt = torch.exp(0.5*logvar_learnt)
+        mu_learnt = outputs_dict.get('threshold mu')
+        threshold = torch.rand_like(std_learnt)*std_learnt + mu_learnt
+    else:
+        threshold = 0.5
+
     _, predictions_u = torch.split(predictions_all, [b_l, b_u], dim=0)
     prob_output_u = torch.sigmoid(predictions_u / temp)
     pseudo_label_u = (prob_output_u > threshold).float()
@@ -208,62 +207,66 @@ def calculate_pseudo_loss(**kwargs):
         print('the output is probably 3D and we do not support it yet')
 
 
-# def train_base(labelled_img,
-#                labelled_label,
-#                model,
-#                unlabelled_img=None,
-#                t=2.0,
-#                prior_mu=0.4,
-#                prior_logsigma=0.1,
-#                # augmentation_gaussian=True,
-#                # augmentation_zoom=True,
-#                # augmentation_contrast=True,
-#                augmentation_cutout=True):
+def train_sup(labelled_img,
+              labelled_label,
+              model,
+              t=2.0,
+              augmentation_cutout=True):
 
-def train_base(**kwargs):
+    inputs = np2tensor_all(**{'img_l':labelled_img, 'lbl':labelled_label})
+    train_img = get_img(**inputs)
+    outputs_dict = model_forward(model, train_img.get('train img'))
+    sup_loss = calculate_sup_loss(outputs_dict=outputs_dict,
+                                  lbl=inputs.get('lbl'),
+                                  temp=t,
+                                  b_l=train_img.get('batch labelled'),
+                                  b_u=train_img.get('batch unlabelled'),
+                                  cutout_aug=augmentation_cutout)
+    return {'supervised loss': sup_loss}
+
+
+def train_semi(labelled_img,
+               labelled_label,
+               model,
+               unlabelled_img,
+               t=2.0,
+               prior_mu=0.4,
+               prior_logsigma=0.1,
+               augmentation_cutout=True):
+
     # convert data from numpy to tensor:
-    for key, value in kwargs.items():
-        inputs = np2tensor_all(img_l=kwargs.get('labelled_img'), lbl=kwargs.get('labelled_label')
+    inputs = np2tensor_all(**{'img_l':labelled_img, 'lbl':labelled_label, 'img_u':unlabelled_img})
 
-        # concatenate labelled and unlabelled for ssl otherwise just use labelled img
-        train_img = get_img(inputs)
+    # concatenate labelled and unlabelled for ssl otherwise just use labelled img
+    train_img = get_img(**inputs)
 
-        # forward pass:
-        outputs_dict = model_forward(model, train_img.get('train img'))
+    # forward pass:
+    outputs_dict = model_forward(model, train_img.get('train img'))
 
-        # supervised loss:
-        sup_loss = calculate_sup_loss(outputs_dict=outputs_dict,
-                                      lbl=inputs.get('lbl'),
-                                      temp=t,
-                                      b_l=train_img.get('batch labelled'),
-                                      b_u=train_img.get('batch unlabelled'),
-                                      cutout_aug=augmentation_cutout,
-                                      foreground_threshold=50)
+    # supervised loss:
+    sup_loss = calculate_sup_loss(outputs_dict=outputs_dict,
+                                  lbl=inputs.get('lbl'),
+                                  temp=t,
+                                  b_l=train_img.get('batch labelled'),
+                                  b_u=train_img.get('batch unlabelled'),
+                                  cutout_aug=augmentation_cutout)
 
-        if unlabelled_img is None:
-            return {'supervised losses': sup_loss}
+    # calculate the kl and get the learnt threshold:
+    kl_loss = calculate_kl_loss(outputs_dict=outputs_dict,
+                                b_l=train_img.get('batch labelled'),
+                                b_u=train_img.get('batch unlabelled'),
+                                prior_u=prior_mu,
+                                prior_var=prior_logsigma)
 
-        else:
-            # calculate the kl and get the learnt threshold:
-            kl_loss = calculate_kl_loss(outputs_dict=outputs_dict,
+    # pseudo label loss:
+    pseudo_loss = calculate_pseudo_loss(outputs_dict=outputs_dict,
                                         b_l=train_img.get('batch labelled'),
                                         b_u=train_img.get('batch unlabelled'),
-                                        prior_u=prior_mu,
-                                        prior_var=prior_logsigma)
+                                        temp=t,
+                                        cutout_aug=augmentation_cutout
+                                        )
 
-            # pseudo label loss:
-            pseudo_loss = calculate_pseudo_loss(outputs_dict=outputs_dict,
-                                                b_l=train_img.get('batch labelled'),
-                                                b_u=train_img.get('batch unlabelled'),
-                                                threshold=kl_loss.get('threshold unlabelled'),
-                                                lung=None,
-                                                temp=t,
-                                                cutout_aug=augmentation_cutout,
-                                                apply_lung_mask=True
-                                                )
-
-            return {'supervised losses': sup_loss,
-                    'pseudo losses': pseudo_loss,
-                    'kl losses': kl_loss}
-
+    return {'supervised losses': sup_loss,
+            'pseudo losses': pseudo_loss,
+            'kl losses': kl_loss}
 
