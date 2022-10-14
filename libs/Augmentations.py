@@ -58,14 +58,14 @@ class RandomZoom(object):
         upper_h, upper_w = int(h*(1-ratio_h)), int(w*(1-ratio_w))
         # sampling positions:
         sample_h, sample_w = random.randint(0, upper_h), random.randint(0, upper_w)
-        return sample_h, sample_w
+        # sampling sizes:
+        size_h, size_w = int(h * ratio_h), int(w * ratio_w)
+        return sample_h, sample_w, size_h, size_w
 
     def sample_patch(self, image, label):
-
-        x, y = self.sample_positions(label)
-
-        image = image[x, x+int(new_size)]
-        label = label[y, y+int(new_size)]
+        h0, w0, new_h, new_w = self.sample_positions(label)
+        image = image[h0, h0+int(new_h)]
+        label = label[w0, w0+int(new_w)]
         return image, label
 
     def upsample_patch(self, image, label):
