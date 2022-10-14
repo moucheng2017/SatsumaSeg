@@ -12,47 +12,60 @@ from torch.utils import data
 from torch.utils.data import Dataset
 
 
-class RandomForegroundZoom(object):
+class RandomZoom(object):
     # Zoom in augmentation
     # We zoom out the foreground parts when labels are available
     # We also zoom out the slices in the start and the end
-    def __int__(self, zoom_ratio=5):
-        self.upsample_ratio = zoom_ratio
+    def __init__(self,
+                 zoom_ratio_h=(0.5, 0.9),
+                 zoom_ratio_w=(0.5, 0.9)):
 
-    def get_sample_centre(self,
-                          label):
+        self.zoom_ratio_h = zoom_ratio_h
+        self.zoom_ratio_w = zoom_ratio_w
 
-        # get height and width of label:
-        h, w = np.shape(label)
-        new_size = h // self.upsample_ratio
+    # def get_sample_centre(self,
+    #                       label):
+    #     This one is buggy now not used and even if it was correct, it would be limited to only labelled data
+    #     # get height and width of label:
+    #     h, w = np.shape(label)
+    #     new_size = h // self.upsample_ratio
+    #
+    #     # half of the new size:
+    #     cropping_edge = int(new_size)
+    #
+    #     # make sure that label do not go above the range:
+    #     label_available = label[0:h-cropping_edge, 0:w-cropping_edge]
+    #
+    #     # locations map:
+    #     all_foreground_locs = np.argwhere((label_available > 0))
+    #
+    #     if not all_foreground_locs:
+    #         all_foreground_locs = len(all_foreground_locs)
+    #
+    #     # select a random foreground out of it:
+    #     foreground_location = np.random.choice(len(all_foreground_locs))
+    #
+    #     # foreground locations:
+    #     x, y = list(all_foreground_locs)[foreground_location]
+    #     return x, y
 
-        # hal of the new size:
-        cropping_edge = int(0.5*new_size)
+    def sample_positions(self, label):
+        ratio_h = round(random.uniform(self.zoom_ratio_h[0], self.zoom_ratio_h[1]), 2)
+        ratio_w = round(random.uniform(self.zoom_ratio_w[0], self.zoom_ratio_w[1]), 2)
+        # get image size upper bounds:
+        h, w = np.shape(label)[-2], np.shape(label)[-1]
+        # get cropping upper bounds:
+        upper_h, upper_w = int(h*(1-ratio_h)), int(w*(1-ratio_w))
+        # sampling positions:
+        sample_h, sample_w = random.randint(0, upper_h), random.randint(0, upper_w)
+        return sample_h, sample_w
 
-        # make sure that label do not go above the range:
-        label_available = label[cropping_edge:h-cropping_edge, cropping_edge:w-cropping_edge]
+    def sample_patch(self, image, label):
 
-        # Locations map:
-        all_foreground_locs = np.argwhere((label_available > 0))
+        x, y = self.sample_positions(label)
 
-        # select a random foreground out of it:
-        foreground_location = np.random.choice(np.arange(np.shape(all_foreground_locs)[0]), 1)
-
-        # foreground locations:
-        centre_x, centre_y = all_foreground_locs[foreground_location, :]
-        return centre_x, centre_y
-
-    def sample_patch(self,
-                     image,
-                     label):
-
-        h, w = np.shape(label)
-        new_size = h // self.upsample_ratio
-
-        centre_x, centre_y = self.get_sample_centre(label)
-
-        image = image[centre_x-int(0.5*new_size), centre_x+int(0.5*new_size)]
-        label = label[centre_y-int(0.5*new_size), centre_y+int(0.5*new_size)]
+        image = image[x, x+int(new_size)]
+        label = label[y, y+int(new_size)]
         return image, label
 
     def upsample_patch(self, image, label):
