@@ -98,6 +98,7 @@ class CT_Dataset_Orthogonal(Dataset):
         # transform dimension:
         # original dimension: (H x W x D)
         image = np.transpose(image, (2, 0, 1))
+        # current dimension: (D x H x W)
 
         # Now applying lung window:
         if self.lung_window_flag is True:
