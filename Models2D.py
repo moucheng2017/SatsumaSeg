@@ -105,7 +105,13 @@ class UnetBPL(nn.Module):
 
 
 class Unet(nn.Module):
-    def __init__(self, in_ch, width, depth, classes, norm='in', side_output=False):
+    def __init__(self,
+                 in_ch,
+                 width,
+                 depth,
+                 classes,
+                 norm='in',
+                 side_output=False):
         '''
         Args:
             in_ch:

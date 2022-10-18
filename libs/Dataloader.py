@@ -34,13 +34,14 @@ def normalisation(label, image):
 class CT_Dataset_Orthogonal(Dataset):
     '''
     Each volume should be at: Dimension X Height X Width
+    Sequentially random augment image with multiple steps
     '''
     def __init__(self,
                  imgs_folder,
                  labels_folder,
                  labelled,
                  full_resolution=512,
-                 sampling_weight=10,
+                 sampling_weight=5,
                  lung_window=True,
                  normalisation=True,
                  gaussian_aug=True,
@@ -64,12 +65,12 @@ class CT_Dataset_Orthogonal(Dataset):
         self.lung_window_flag = lung_window
 
         if self.contrast_aug_flag is True:
-            self.augmentation_contrast = RandomContrast([10, 255])
+            self.augmentation_contrast = RandomContrast(bin_range=(20, 255))
 
         if self.gaussian_aug_flag is True:
             self.gaussian_noise = RandomGaussian()
 
-        self.augmentation_cropping = RandomCroppingOrthogonal(discarded_slices=1,
+        self.augmentation_cropping = RandomSlicingOrthogonal(discarded_slices=1,
                                                               zoom=zoom_aug,
                                                               resolution=full_resolution,
                                                               sampling_weighting_slope=sampling_weight)
@@ -96,25 +97,12 @@ class CT_Dataset_Orthogonal(Dataset):
         imagename, imagetxt = os.path.splitext(imagename)
 
         # transform dimension:
-        # original dimension: (H x W x D)
-        image = np.transpose(image, (2, 0, 1))
-        # current dimension: (D x H x W)
+        image = np.transpose(image, (2, 0, 1)) # (H x W x D) --> (D x H x W)
 
         # Now applying lung window:
         if self.lung_window_flag is True:
             image[image < -1000.0] = -1000.0
             image[image > 500.0] = 500.0
-
-        # Random contrast:
-        if self.contrast_aug_flag is True:
-            if random.random() > 0.5:
-                image_another_contrast = self.augmentation_contrast.randomintensity(image)
-                image = image_another_contrast
-
-        # Random Gaussian:
-        if self.gaussian_aug_flag is True:
-            if random.random() > 0.5:
-                image = self.gaussian_noise.gaussiannoise(image)
 
         if self.labelled_flag is True:
             # Labels:
@@ -128,14 +116,37 @@ class CT_Dataset_Orthogonal(Dataset):
             if self.normalisation_flag is True:
                 image = normalisation(label, image)
 
+            # Random contrast:
+            if self.contrast_aug_flag is True:
+                if random.random() > 0.5:
+                    image_another_contrast = self.augmentation_contrast.randomintensity(image)
+                    image = image_another_contrast
+
+            # Random Gaussian:
+            if self.gaussian_aug_flag is True:
+                if random.random() > 0.5:
+                    image = self.gaussian_noise.gaussiannoise(image)
+
             # get slices by weighted sampling on each axis with zoom in augmentation:
             inputs_dict = self.augmentation_cropping.crop(image, label)
 
             return inputs_dict, imagename
 
         else:
+            # Apply normalisation at each case-wise:
             if self.normalisation_flag is True:
                 image = normalisation(None, image)
+
+            # Random contrast:
+            if self.contrast_aug_flag is True:
+                if random.random() > 0.5:
+                    image_another_contrast = self.augmentation_contrast.randomintensity(image)
+                    image = image_another_contrast
+
+            # Random Gaussian:
+            if self.gaussian_aug_flag is True:
+                if random.random() > 0.5:
+                    image = self.gaussian_noise.gaussiannoise(image)
 
             inputs_dict = self.augmentation_cropping.crop(image)
 
