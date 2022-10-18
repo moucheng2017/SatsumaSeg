@@ -2,7 +2,7 @@ import glob
 import os
 import torch
 import random
-
+import math
 import numpy as np
 import scipy.ndimage
 import nibabel as nib
@@ -17,8 +17,8 @@ class RandomZoom(object):
     # We zoom out the foreground parts when labels are available
     # We also zoom out the slices in the start and the end
     def __init__(self,
-                 zoom_ratio_h=(0.5, 0.9),
-                 zoom_ratio_w=(0.5, 0.9)):
+                 zoom_ratio_h=(0.5, 0.7),
+                 zoom_ratio_w=(0.5, 0.7)):
 
         self.zoom_ratio_h = zoom_ratio_h
         self.zoom_ratio_w = zoom_ratio_w
@@ -60,35 +60,43 @@ class RandomZoom(object):
         sample_h, sample_w = random.randint(0, upper_h), random.randint(0, upper_w)
         # sampling sizes:
         size_h, size_w = int(h * ratio_h), int(w * ratio_w)
-        return sample_h, sample_w, size_h, size_w
+        return sample_h, sample_w, size_h, size_w, ratio_h, ratio_w
 
     def sample_patch(self, image, label):
-        h0, w0, new_h, new_w = self.sample_positions(label)
-        image = image[h0, h0+int(new_h)]
-        label = label[w0, w0+int(new_w)]
-        return image, label
+        h0, w0, new_h, new_w, ratio_h, ratio_w = self.sample_positions(label)
 
-    def upsample_patch(self, image, label):
-        image = scipy.ndimage.zoom(input=image, zoom=(self.upsample_ratio, self.upsample_ratio), order=1)
-        label = scipy.ndimage.zoom(input=label, zoom=(self.upsample_ratio, self.upsample_ratio), order=0)
-        return image, label
+        if len(np.shape(image)) == 3:
+            cropped_image = image[:, h0:h0+int(new_h), w0:w0+int(new_w)]
+            cropped_label = label[:, h0:h0+int(new_h), w0:w0+int(new_w)]
+        elif len(np.shape(image)) == 2:
+            cropped_image = image[h0:h0+int(new_h), w0:w0+int(new_w)]
+            cropped_label = label[h0:h0+int(new_h), w0:w0+int(new_w)]
+
+        # upsample them:
+        zoomed_image = scipy.ndimage.zoom(input=cropped_image, zoom=(1, math.ceil(1 / ratio_h), math.ceil(1 / ratio_w)), order=1)
+        zoomed_label = scipy.ndimage.zoom(input=cropped_label, zoom=(1, math.ceil(1 / ratio_h), math.ceil(1 / ratio_w)), order=0)
+        return zoomed_image, zoomed_label
 
     def forward(self, image, label):
 
         image_zoomed, label_zoomed = self.sample_patch(image, label)
-        image_zoomed, label_zoomed = self.upsample_patch(image_zoomed, label_zoomed)
 
-        h_i, w_i = np.shape(image)
-        h_o, w_o = np.shape(image_zoomed)
+        # crop again to makes the zoomed image has the same size as the original image size:
+        h, w = np.shape(label)[-2], np.shape(label)[-1]
 
-        # To add a cropping mechanism to make sure the zoomed out image are the size with the inputs
-        assert h_i == h_o
-        assert w_i == w_o
+        if len(np.shape(image_zoomed)) == 3:
+            image_zoomed, label_zoomed = image_zoomed[:, 0:h, 0:w], label_zoomed[:, 0:h, 0:w]
+        elif len(np.shape(image_zoomed)) == 2:
+            image_zoomed, label_zoomed = image_zoomed[0:h, 0:w], label_zoomed[0:h, 0:w]
+
+        h2, w2 = np.shape(label_zoomed)[-2], np.shape(label_zoomed)[-1]
+        assert h2 == h
+        assert w2 == w
 
         return image_zoomed, label_zoomed
 
 
-class RandomCroppingOrthogonal(object):
+class RandomSlicingOrthogonal(object):
     def __init__(self,
                  discarded_slices=5,
                  resolution=512,
@@ -101,6 +109,7 @@ class RandomCroppingOrthogonal(object):
         '''
         self.discarded_slices = discarded_slices
         self.resolution = resolution
+        self.zoom = zoom
 
         # Over sampling the slices on the two ends because they contain small difficult vessels
         # We give the middle slice the lowest weight and the slices at the two very ends the highest weights
@@ -108,9 +117,8 @@ class RandomCroppingOrthogonal(object):
         weight_end_slices = sampling_weighting_slope*0.5*self.resolution + weight_middle_slice
         self.sampling_weights_prob = [int(abs((i-0.5*self.resolution))*sampling_weighting_slope+self.resolution) / weight_end_slices for i in range(self.resolution)]
 
-        if zoom is True:
-            self.zoom_aug = RandomForegroundZoom()
-            self.zoom_flag = True
+        if self.zoom is True:
+            self.zoom_aug = RandomZoom()
 
     def crop(self, *volumes):
 
@@ -120,10 +128,6 @@ class RandomCroppingOrthogonal(object):
         sample_position_d_d = np.random.choice(np.arange(self.resolution), 1, p=self.sampling_weights_prob)
         sample_position_h_h = np.random.choice(np.arange(self.resolution), 1, p=self.sampling_weights_prob)
         sample_position_w_w = np.random.choice(np.arange(self.resolution), 1, p=self.sampling_weights_prob)
-
-        # sample_position_d_d = np.random.randint(self.discarded_slices, self.resolution-1)
-        # sample_position_h_h = np.random.randint(self.discarded_slices, self.resolution-1)
-        # sample_position_w_w = np.random.randint(self.discarded_slices, self.resolution-1)
 
         outputs = {"plane_d": [],
                    "plane_h": [],
@@ -141,19 +145,17 @@ class RandomCroppingOrthogonal(object):
             outputs["plane_h"].append(each_input[:, sample_position_h_h, :])
             outputs["plane_w"].append(each_input[:, :, sample_position_w_w])
 
-        # zoom in only applies for labelled data for now:
-        if len(outputs["plane_d"]) > 1:
-            if self.zoom_flag is True:
-                if random.random() >= 0.5:
-                    outputs["plane_d"][0], outputs["plane_d"][1] = self.zoom_aug.forward(outputs["plane_d"][0], outputs["plane_d"][1])
-                    outputs["plane_h"][0], outputs["plane_h"][1] = self.zoom_aug.forward(outputs["plane_h"][0], outputs["plane_h"][1])
-                    outputs["plane_w"][0], outputs["plane_w"][1] = self.zoom_aug.forward(outputs["plane_w"][0], outputs["plane_w"][1])
+        if self.zoom is True:
+            if random.random() >= 0.5:
+                outputs["plane_d"][0], outputs["plane_d"][1] = self.zoom_aug.forward(outputs["plane_d"][0], outputs["plane_d"][1])
+                outputs["plane_h"][0], outputs["plane_h"][1] = self.zoom_aug.forward(outputs["plane_h"][0], outputs["plane_h"][1])
+                outputs["plane_w"][0], outputs["plane_w"][1] = self.zoom_aug.forward(outputs["plane_w"][0], outputs["plane_w"][1])
 
         return outputs
 
 
 class RandomContrast(object):
-    def __init__(self, bin_range=[100, 255]):
+    def __init__(self, bin_range=(100, 255)):
         # self.bin_low = bin_range[0]
         # self.bin_high = bin_range[1]
         self.bin_range = bin_range
@@ -193,70 +195,63 @@ class RandomGaussian(object):
         return input
 
 
-class RandomCutOut(object):
-    # In house implementation of cutout for segmentation.
-    # We create a zero mask to cover up the same part of the image and the mask. Both BCE and Dice will have zero gradients
-    # if both seg and mask value are zero at the same position.
-    # This is only applied on segmentation loss!!
-    def __int__(self, tensor, mask_height=100, mask_width=100):
-        self.segmentation_tensor = tensor
-        self.w_mask = mask_width
-        self.h_mask = mask_height
+def randomcutout(x, y):
+    '''
+    Args:
+        x: segmentation
+        y: gt
+    Returns:
+    '''
+    b, c, h, w = x.size()
+    # h_mask = 50
+    # w_mask = 50
+    h_mask, w_mask = random.randint(50, 100), random.randint(50, 100)
+    # assert self.w_mask <= w
+    # assert self.h_mask <= h
 
-    def cutout_seg(self, x, y):
-        '''
-        Args:
-            x: segmentation
-            y: gt
-        Returns:
-        '''
-        b, c, h, w = self.segmentation_tensor.size()
-        assert self.w_mask <= w
-        assert self.h_mask <= h
+    h_starting = np.random.randint(0, h - h_mask)
+    w_starting = np.random.randint(0, w - h_mask)
+    h_ending = h_starting + h_mask
+    w_ending = w_starting + w_mask
 
-        h_starting = np.random.randint(0, h - self.h_mask)
-        w_starting = np.random.randint(0, w - self.h_mask)
-        h_ending = h_starting + self.h_mask
-        w_ending = w_starting + self.w_mask
+    mask = torch.ones_like(x).cuda()
+    mask[:, :, h_starting:h_ending, w_starting:w_ending] = 0
 
-        mask = torch.ones_like(self.segmentation_tensor).cuda()
-        mask[:, :, h_starting:h_ending, w_starting:w_ending] = 0
-
-        return x*mask, y*mask
+    return x*mask, y*mask
 
 
-class RandomCutMix(object):
-    # In house implementation of cutmix for segmentation. This is inspired by the original cutmix but very different from the original one!!
-    # We mix a part of image 1 with another part of image 2 and do the same for the paired labels.
-    # This is applied before feeding into the network!!!
-    def __int__(self, tensor, mask_height=50, mask_width=50):
-
-        self.segmentation_tensor = tensor
-        self.w_mask = mask_width
-        self.h_mask = mask_height
-
-    def cutmix_seg(self, x, y):
-        '''
-        Args:
-            x: segmentation
-            y: gt
-        Returns:
-        '''
-        b, c, h, w = self.segmentation_tensor.size()
-
-        assert self.w_mask <= w
-        assert self.h_mask <= h
-
-        h_starting = np.random.randint(0, h - self.h_mask)
-        w_starting = np.random.randint(0, w - self.h_mask)
-        h_ending = h_starting + self.h_mask
-        w_ending = w_starting + self.w_mask
-
-        index = np.random.permutation(b)
-        x_2 = x[index, :]
-        y_2 = y[index, :]
-
-        x[:, :, h_starting:h_ending, w_starting:w_ending] = x_2[:, :, h_starting:h_ending, w_starting:w_ending]
-        y[:, :, h_starting:h_ending, w_starting:w_ending] = y_2[:, :, h_starting:h_ending, w_starting:w_ending]
-
-        return x, y
+# class RandomCutMix(object):
+#     # In house implementation of cutmix for segmentation. This is inspired by the original cutmix but very different from the original one!!
+#     # We mix a part of image 1 with another part of image 2 and do the same for the paired labels.
+#     # This is applied before feeding into the network!!!
+#     def __int__(self, tensor, mask_height=50, mask_width=50):
+#
+#         self.segmentation_tensor = tensor
+#         self.w_mask = mask_width
+#         self.h_mask = mask_height
+#
+#     def cutmix_seg(self, x, y):
+#         '''
+#         Args:
+#             x: segmentation
+#             y: gt
+#         Returns:
+#         '''
+#         b, c, h, w = self.segmentation_tensor.size()
+#
+#         assert self.w_mask <= w
+#         assert self.h_mask <= h
+#
+#         h_starting = np.random.randint(0, h - self.h_mask)
+#         w_starting = np.random.randint(0, w - self.h_mask)
+#         h_ending = h_starting + self.h_mask
+#         w_ending = w_starting + self.w_mask
+#
+#         index = np.random.permutation(b)
+#         x_2 = x[index, :]
+#         y_2 = y[index, :]
+#
+#         x[:, :, h_starting:h_ending, w_starting:w_ending] = x_2[:, :, h_starting:h_ending, w_starting:w_ending]
+#         y[:, :, h_starting:h_ending, w_starting:w_ending] = y_2[:, :, h_starting:h_ending, w_starting:w_ending]
+#
+#         return x, y
