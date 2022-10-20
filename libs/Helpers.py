@@ -89,16 +89,15 @@ def network_intialisation(args):
 
 
 def get_data_simple_wrapper(args):
-    data_loaders = getData(data_directory=args.data_path,
-                           dataset_name=args.dataset,
+    data_loaders = getData(data_directory=args.data,
                            train_batchsize=args.batch,
                            norm=args.norm,
                            zoom_aug=args.zoom,
                            sampling_weight=args.sampling,
                            contrast_aug=args.contrast,
-                           lung_window=args.lung_mask,
+                           lung_window=args.lung_window,
                            resolution=512,
-                           train_full=True,
+                           train_full=args.full_train,
                            unlabelled=args.unlabelled)
 
     return data_loaders
@@ -106,7 +105,7 @@ def get_data_simple_wrapper(args):
 
 def make_saving_directories(model_name, args):
     save_model_name = model_name
-    saved_information_path = '../Results/' + args.dataset + '/' + args.log_tag
+    saved_information_path = '../Results/' + args.log_tag
     Path(saved_information_path).mkdir(parents=True, exist_ok=True)
     saved_log_path = saved_information_path + '/Logs'
     Path(saved_log_path).mkdir(parents=True, exist_ok=True)
@@ -116,25 +115,39 @@ def make_saving_directories(model_name, args):
     return writer, saved_model_path
 
 
-def get_iterators(data_loaders, args):
-    iterator_train_labelled = iter(data_loaders.get('train_loader_l'))
-    if args.unlabelled > 0:
-        iterator_train_unlabelled = iter(data_loaders.get('train_loader_u'))
-        if args.full_train is False:
-            iterator_validate = iter(data_loaders.get('val_loader'))
-            return {'train labelled': iterator_train_labelled,
-                    'train unlabelled': iterator_train_unlabelled,
-                    'val': iterator_validate}
-        else:
-            return {'train labelled': iterator_train_labelled,
-                    'train unlabelled': iterator_train_unlabelled}
-    else:
-        if args.full_train is False:
-            iterator_validate = iter(data_loaders.get('val_loader'))
-            return {'train labelled': iterator_train_labelled,
-                    'val': iterator_validate}
-        else:
-            return {'train labelled': iterator_train_labelled}
+def get_iterators(args):
+
+    data_loaders = getData(data_directory=args.data,
+                           train_batchsize=args.batch,
+                           norm=args.norm,
+                           zoom_aug=args.zoom,
+                           sampling_weight=args.sampling,
+                           contrast_aug=args.contrast,
+                           lung_window=args.lung_window,
+                           resolution=512,
+                           train_full=args.full_train,
+                           unlabelled=args.unlabelled)
+
+    return data_loaders
+
+    # iterator_train_labelled = iter(data_loaders.get('train_loader_l'))
+    # if args.unlabelled > 0:
+    #     iterator_train_unlabelled = iter(data_loaders.get('train_loader_u'))
+    #     if args.full_train is False:
+    #         iterator_validate = iter(data_loaders.get('val_loader'))
+    #         return {'train labelled': iterator_train_labelled,
+    #                 'train unlabelled': iterator_train_unlabelled,
+    #                 'val': iterator_validate}
+    #     else:
+    #         return {'train labelled': iterator_train_labelled,
+    #                 'train unlabelled': iterator_train_unlabelled}
+    # else:
+    #     if args.full_train is False:
+    #         iterator_validate = iter(data_loaders.get('val_loader'))
+    #         return {'train labelled': iterator_train_labelled,
+    #                 'val': iterator_validate}
+    #     else:
+    #         return {'train labelled': iterator_train_labelled}
 
 
 def get_data_dict(dataloader, iterator):
@@ -145,6 +158,12 @@ def get_data_dict(dataloader, iterator):
         data_dict, data_name = next(iterator)
     del data_name
     return data_dict
+
+
+def ramp_up(weight, ratio, step, total_steps):
+    ramp_up_length = int(ratio*total_steps)
+    current_weight = weight * step / ramp_up_length
+    return min(current_weight, weight)
 
 
 

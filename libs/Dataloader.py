@@ -1,8 +1,10 @@
+import collections
 import glob
 import os
 import torch
 import random
 
+from collections import deque, defaultdict
 
 import numpy as np
 import scipy.ndimage
@@ -37,9 +39,9 @@ class CT_Dataset_Orthogonal(Dataset):
     Sequentially random augment image with multiple steps
     '''
     def __init__(self,
-                 imgs_folder,
-                 labels_folder,
-                 labelled,
+                 images_folder,
+                 # labelled,
+                 labels_folder=None,
                  full_resolution=512,
                  sampling_weight=5,
                  lung_window=True,
@@ -47,16 +49,17 @@ class CT_Dataset_Orthogonal(Dataset):
                  gaussian_aug=True,
                  zoom_aug=True,
                  contrast_aug=True):
-        # data
-        self.imgs_folder = imgs_folder
-        self.labels_folder = labels_folder
 
         # flags
-        self.labelled_flag = labelled
+        # self.labelled_flag = labelled
         self.contrast_aug_flag = contrast_aug
         self.gaussian_aug_flag = gaussian_aug
         self.normalisation_flag = normalisation
         self.zoom_aug_flag = zoom_aug
+
+        # data
+        self.imgs_folder = images_folder
+        self.lbls_folder = labels_folder
 
         # we now removed lung masking
         # self.lung_folder = lung_folder
@@ -104,51 +107,76 @@ class CT_Dataset_Orthogonal(Dataset):
             image[image < -1000.0] = -1000.0
             image[image > 500.0] = 500.0
 
-        if self.labelled_flag is True:
+        if self.lbls_folder:
             # Labels:
-            all_labels = sorted(glob.glob(os.path.join(self.labels_folder, '*.nii.gz*')))
+            all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.nii.gz*')))
             label = nib.load(all_labels[index])
             label = label.get_fdata()
             label = np.array(label, dtype='float32')
             label = np.transpose(label, (2, 0, 1))
 
+            image_queue = collections.deque()
+
             # Apply normalisation at each case-wise:
             if self.normalisation_flag is True:
                 image = normalisation(label, image)
 
+            image_queue.append(image)
+
             # Random contrast:
             if self.contrast_aug_flag is True:
-                if random.random() > 0.5:
-                    image_another_contrast = self.augmentation_contrast.randomintensity(image)
-                    image = image_another_contrast
+                image_another_contrast = self.augmentation_contrast.randomintensity(image)
+                image_queue.append(image_another_contrast)
 
             # Random Gaussian:
             if self.gaussian_aug_flag is True:
-                if random.random() > 0.5:
-                    image = self.gaussian_noise.gaussiannoise(image)
+                image_noise = self.gaussian_noise.gaussiannoise(image)
+                image_queue.append(image_noise)
+
+            # weights:
+            dirichlet_alpha = collections.deque()
+            for i in range(len(image_queue)):
+                dirichlet_alpha.append(1)
+            dirichlet_weights = np.random.dirichlet(tuple(dirichlet_alpha), 1)
+
+            # make a new image:
+            image_weighted = [weight*img for weight, img in zip(dirichlet_weights[0], image_queue)]
+            image_weighted = sum(image_weighted)
 
             # get slices by weighted sampling on each axis with zoom in augmentation:
-            inputs_dict = self.augmentation_cropping.crop(image, label)
+            inputs_dict = self.augmentation_cropping.crop(image_weighted, label)
 
             return inputs_dict, imagename
 
         else:
+            image_queue = collections.deque()
+
             # Apply normalisation at each case-wise:
             if self.normalisation_flag is True:
                 image = normalisation(None, image)
+            image_queue.append(image)
 
             # Random contrast:
             if self.contrast_aug_flag is True:
-                if random.random() > 0.5:
-                    image_another_contrast = self.augmentation_contrast.randomintensity(image)
-                    image = image_another_contrast
+                image_another_contrast = self.augmentation_contrast.randomintensity(image)
+                image_queue.append(image_another_contrast)
 
             # Random Gaussian:
             if self.gaussian_aug_flag is True:
-                if random.random() > 0.5:
-                    image = self.gaussian_noise.gaussiannoise(image)
+                image_noise = self.gaussian_noise.gaussiannoise(image)
+                image_queue.append(image_noise)
 
-            inputs_dict = self.augmentation_cropping.crop(image)
+            # weights:
+            dirichlet_alpha = collections.deque()
+            for i in range(len(image_queue)):
+                dirichlet_alpha.append(1)
+            dirichlet_weights = np.random.dirichlet(tuple(dirichlet_alpha), 1)
+
+            # make a new image:
+            image_weighted = [weight*img for weight, img in zip(dirichlet_weights[0], image_queue)]
+            image_weighted = sum(image_weighted)
+
+            inputs_dict = self.augmentation_cropping.crop(image_weighted)
 
             return inputs_dict, imagename
 
@@ -158,7 +186,6 @@ class CT_Dataset_Orthogonal(Dataset):
 
 
 def getData(data_directory,
-            dataset_name,
             train_batchsize,
             sampling_weight,
             norm=True,
@@ -184,14 +211,18 @@ def getData(data_directory,
 
     '''
     # Labelled images data set and data loader:
-    data_directory = data_directory + '/' + dataset_name
+    # data_directory = data_directory + '/' + dataset_name
+    # train_image_folder_labelled = os.path.join(data_directory, '/labelled/imgs')
+    # train_label_folder_labelled = os.path.join(data_directory, '/labelled/lbls')
+
     train_image_folder_labelled = data_directory + '/labelled/imgs'
     train_label_folder_labelled = data_directory + '/labelled/lbls'
-    # train_lung_folder_labelled = data_directory + '/labelled/lung'
 
-    train_dataset_labelled = CT_Dataset_Orthogonal(imgs_folder=train_image_folder_labelled,
+    # print(train_image_folder_labelled)
+    # print(train_label_folder_labelled)
+
+    train_dataset_labelled = CT_Dataset_Orthogonal(images_folder=train_image_folder_labelled,
                                                    labels_folder=train_label_folder_labelled,
-                                                   labelled=True,
                                                    sampling_weight=sampling_weight,
                                                    full_resolution=resolution,
                                                    normalisation=norm,
@@ -208,12 +239,10 @@ def getData(data_directory,
     # Unlabelled images data set and data loader:
     if unlabelled > 0:
         train_image_folder_unlabelled = data_directory + '/unlabelled/imgs'
-        train_label_folder_unlabelled = data_directory + '/unlabelled/lbls'
         # train_lung_folder_unlabelled = data_directory + '/unlabelled/lung'
 
-        train_dataset_unlabelled = CT_Dataset_Orthogonal(imgs_folder=train_image_folder_unlabelled,
-                                                         labels_folder=train_label_folder_unlabelled,
-                                                         labelled=False,
+        train_dataset_unlabelled = CT_Dataset_Orthogonal(images_folder=train_image_folder_unlabelled,
+                                                         # labels_folder=train_label_folder_unlabelled,
                                                          sampling_weight=sampling_weight,
                                                          zoom_aug=False,
                                                          full_resolution=resolution,
@@ -237,11 +266,10 @@ def getData(data_directory,
             validate_label_folder = data_directory + '/validate/lbls'
             # validate_lung_folder = data_directory + '/validate/lung'
 
-            validate_dataset = CT_Dataset_Orthogonal(imgs_folder=validate_image_folder,
+            validate_dataset = CT_Dataset_Orthogonal(images_folder=validate_image_folder,
                                                      labels_folder=validate_label_folder,
                                                      sampling_weight=sampling_weight,
                                                      zoom_aug=False,
-                                                     labelled=True,
                                                      full_resolution=resolution,
                                                      normalisation=norm,
                                                      contrast_aug=contrast_aug,
@@ -269,11 +297,10 @@ def getData(data_directory,
             validate_label_folder = data_directory + '/validate/lbls'
             # validate_lung_folder = data_directory + '/validate/lung'
 
-            validate_dataset = CT_Dataset_Orthogonal(imgs_folder=validate_image_folder,
+            validate_dataset = CT_Dataset_Orthogonal(images_folder=validate_image_folder,
                                                      labels_folder=validate_label_folder,
                                                      sampling_weight=sampling_weight,
                                                      zoom_aug=False,
-                                                     labelled=True,
                                                      full_resolution=resolution,
                                                      normalisation=norm,
                                                      contrast_aug=contrast_aug,
