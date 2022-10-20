@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from Loss import SoftDiceLoss, kld_loss
 from Metrics import segmentation_scores
-from libs.Augmentations import RandomCutOut
+from libs.Augmentations import randomcutout
 from libs.LabelEncoding import multi_class_label_processing
 
 
@@ -70,8 +70,7 @@ def calculate_sup_loss(lbl,
         prob_output = torch.sigmoid(prob_output / temp) # apply element-wise sigmoid
 
         if cutout_aug is True: # apply cutout augmentation
-            cutout = RandomCutOut()
-            prob_output, lbl = cutout.cutout_seg(prob_output, lbl)
+            prob_output, lbl = randomcutout(prob_output, lbl)
 
         # channel-wise loss (this is for multi-channel sigmoid function as well):
         if len(prob_output.size()) == 3:
@@ -134,17 +133,11 @@ def calculate_kl_loss(outputs_dict,
     posterior_mu = outputs_dict.get('mu')
     posterior_logvar = outputs_dict.get('logvar')
 
-    threshold_mu = outputs_dict.get('threshold_mu')
-    threshold_logvar = outputs_dict.get('threshold_logvar')
+    confidence_threshold_learnt = outputs_dict.get('learnt_threshold')
 
     loss = kld_loss(posterior_mu, posterior_logvar, prior_u, prior_var)
 
-    std = torch.exp(0.5 * threshold_logvar)
-    eps = torch.rand_like(std)
-
-    threshold_learnt = threshold_mu + eps * std
-
-    threshold_learnt_l, threshold_learnt_u = torch.split(threshold_learnt, [b_l, b_u], dim=0)
+    threshold_learnt_l, threshold_learnt_u = torch.split(confidence_threshold_learnt, [b_l, b_u], dim=0)
 
     return {'kl loss': loss,
             'threshold labelled': threshold_learnt_l,
@@ -163,20 +156,17 @@ def calculate_pseudo_loss(outputs_dict,
 
     # Monte Carlo sampling of confidence threshold:
     if conf_threshold == 'bayesian':
-        logvar_learnt = outputs_dict.get('threshold var')
-        std_learnt = torch.exp(0.5*logvar_learnt)
-        mu_learnt = outputs_dict.get('threshold mu')
-        threshold = torch.rand_like(std_learnt)*std_learnt + mu_learnt
+        threshold = outputs_dict.get('learnt_threshold')
     else:
         threshold = 0.5
 
     _, predictions_u = torch.split(predictions_all, [b_l, b_u], dim=0)
+    _, threshold_u = torch.split(threshold, [b_l, b_u], dim=0)
     prob_output_u = torch.sigmoid(predictions_u / temp)
-    pseudo_label_u = (prob_output_u > threshold).float()
+    pseudo_label_u = (prob_output_u > threshold_u).float()
 
     if cutout_aug is True:
-        cutout = RandomCutOut()
-        prob_output_u, pseudo_label_u = cutout.cutout_seg(prob_output_u, pseudo_label_u)
+        prob_output_u, pseudo_label_u = randomcutout(prob_output_u, pseudo_label_u)
 
     if len(prob_output_u.size()) == 3:
         # this is binary segmentation
@@ -230,12 +220,14 @@ def train_semi(labelled_img,
                model,
                unlabelled_img,
                t=2.0,
-               prior_mu=0.4,
+               prior_mu=0.6,
                prior_logsigma=0.1,
                augmentation_cutout=True):
 
     # convert data from numpy to tensor:
-    inputs = np2tensor_all(**{'img_l':labelled_img, 'lbl':labelled_label, 'img_u':unlabelled_img})
+    inputs = np2tensor_all(**{'img_l': labelled_img,
+                              'lbl': labelled_label,
+                              'img_u': unlabelled_img})
 
     # concatenate labelled and unlabelled for ssl otherwise just use labelled img
     train_img = get_img(**inputs)
@@ -266,7 +258,7 @@ def train_semi(labelled_img,
                                         cutout_aug=augmentation_cutout
                                         )
 
-    return {'supervised losses': sup_loss,
-            'pseudo losses': pseudo_loss,
-            'kl losses': kl_loss}
+    return {'supervised loss': sup_loss,
+            'pseudo loss': pseudo_loss,
+            'kl loss': kl_loss}
 

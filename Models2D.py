@@ -7,10 +7,10 @@ import torch.nn.functional as F
 class ThresholdEncoder(nn.Module):
     def __init__(self, c=8, ratio=8):
         '''
-
         Args:
             c:
             ratio:
+        We assume the latent variable confidence threshold is gaussian distribution
         '''
         super(ThresholdEncoder, self).__init__()
 
@@ -26,43 +26,51 @@ class ThresholdEncoder(nn.Module):
         self.threshold_logvar = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
         self.threshold_mean = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
 
-    def forward(self, x):
-        y = self.network(x)
-        return self.threshold_mean(y), self.threshold_logvar(y)
-
-
-class ThresholdDecoder(nn.Module):
-    def __init__(self, c=8, ratio=8):
-        '''
-        Args:
-            c:
-            ratio:
-        '''
-        super(ThresholdDecoder, self).__init__()
-
-        self.network = nn.Sequential(
-            nn.Conv2d(in_channels=c, out_channels=c*ratio, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
-            nn.InstanceNorm2d(c*ratio, affine=True),
-            nn.PReLU(),
-            nn.Conv2d(in_channels=c*ratio, out_channels=c * ratio, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
-            nn.InstanceNorm2d(c * ratio, affine=True),
-            nn.PReLU()
-        )
-
-        self.threshold_logvar = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
-        self.threshold_mean = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
+        self.softplus = nn.Softplus()
 
     def forward(self, x):
         y = self.network(x)
-        y = torch.mean(y, dim=-1, keepdim=True)
-        y = torch.mean(y, dim=-2, keepdim=True)
-        return self.threshold_mean(y), self.threshold_logvar(y)
+        return self.softplus(self.threshold_mean(y)), self.threshold_logvar(y)
+
+
+# class ThresholdDecoder(nn.Module):
+#     def __init__(self, c=8, ratio=8):
+#         '''
+#         Args:
+#             c:
+#             ratio:
+#         '''
+#         super(ThresholdDecoder, self).__init__()
+#
+#         self.network = nn.Sequential(
+#             nn.Conv2d(in_channels=c, out_channels=c*ratio, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
+#             nn.InstanceNorm2d(c*ratio, affine=True),
+#             nn.PReLU(),
+#             nn.Conv2d(in_channels=c*ratio, out_channels=c * ratio, kernel_size=(3, 3), stride=(1, 1), dilation=(1, 1), padding=(1, 1), bias=False),
+#             nn.InstanceNorm2d(c * ratio, affine=True),
+#             nn.PReLU()
+#         )
+#
+#         self.threshold_logvar = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
+#         self.threshold_mean = nn.Conv2d(in_channels=ratio*c, out_channels=1, kernel_size=(1, 1), stride=(1, 1), dilation=(1, 1), padding=(0, 0), bias=True)
+#
+#     def forward(self, x):
+#         y = self.network(x)
+#         y = torch.mean(y, dim=-1, keepdim=True)
+#         y = torch.mean(y, dim=-2, keepdim=True)
+#         return self.threshold_mean(y), self.threshold_logvar(y)
 
 
 class UnetBPL(nn.Module):
-    def __init__(self, in_ch, width, depth, out_ch, norm='in', ratio=8, detach=True):
+    def __init__(self,
+                 in_ch,
+                 width,
+                 depth,
+                 out_ch,
+                 norm='in',
+                 ratio=8,
+                 detach=True):
         '''
-
         Args:
             in_ch:
             width:
@@ -78,7 +86,6 @@ class UnetBPL(nn.Module):
         self.detach_bpl = detach
         self.segmentor = Unet(in_ch, width, depth, out_ch, norm=norm, side_output=True)
         self.encoder = ThresholdEncoder(c=width, ratio=ratio)
-        self.decoder = ThresholdDecoder(c=width*ratio, ratio=1)
 
     def reparameterize(self, mu, logvar):
         std = torch.exp(0.5 * logvar)
@@ -93,15 +100,14 @@ class UnetBPL(nn.Module):
         else:
             mu, logvar = self.encoder(threshold_input)
 
-        z = self.reparameterize(mu, logvar)
+        learnt_threshold = self.reparameterize(mu, logvar)
 
-        t_mu, t_logvar = self.decoder(z)
-
-        return {'segmentation': output,
-                'mu': mu,
-                'logvar': logvar,
-                'threshold mu': t_mu,
-                'threshold var': t_logvar}
+        return {
+            'segmentation': output,
+            'mu': mu,
+            'logvar': logvar,
+            'learnt_threshold': learnt_threshold
+                }
 
 
 class Unet(nn.Module):

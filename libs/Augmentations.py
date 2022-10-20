@@ -63,31 +63,27 @@ class RandomZoom(object):
         return sample_h, sample_w, size_h, size_w, ratio_h, ratio_w
 
     def sample_patch(self, image, label):
-        h0, w0, new_h, new_w, ratio_h, ratio_w = self.sample_positions(label)
 
-        if len(np.shape(image)) == 3:
-            cropped_image = image[:, h0:h0+int(new_h), w0:w0+int(new_w)]
-            cropped_label = label[:, h0:h0+int(new_h), w0:w0+int(new_w)]
-        elif len(np.shape(image)) == 2:
-            cropped_image = image[h0:h0+int(new_h), w0:w0+int(new_w)]
-            cropped_label = label[h0:h0+int(new_h), w0:w0+int(new_w)]
+        h0, w0, new_h, new_w, ratio_h, ratio_w = self.sample_positions(label)
+        cropped_image = image[h0:h0 + int(new_h), w0:w0 + int(new_w)]
+        cropped_label = label[h0:h0 + int(new_h), w0:w0 + int(new_w)]
 
         # upsample them:
-        zoomed_image = scipy.ndimage.zoom(input=cropped_image, zoom=(1, math.ceil(1 / ratio_h), math.ceil(1 / ratio_w)), order=1)
-        zoomed_label = scipy.ndimage.zoom(input=cropped_label, zoom=(1, math.ceil(1 / ratio_h), math.ceil(1 / ratio_w)), order=0)
+        zoomed_image = scipy.ndimage.zoom(input=cropped_image, zoom=(math.ceil(1 / ratio_h), math.ceil(1 / ratio_w)), order=1)
+        zoomed_label = scipy.ndimage.zoom(input=cropped_label, zoom=(math.ceil(1 / ratio_h), math.ceil(1 / ratio_w)), order=0)
+
         return zoomed_image, zoomed_label
 
     def forward(self, image, label):
+
+        image, label = np.squeeze(image), np.squeeze(label)
 
         image_zoomed, label_zoomed = self.sample_patch(image, label)
 
         # crop again to makes the zoomed image has the same size as the original image size:
         h, w = np.shape(label)[-2], np.shape(label)[-1]
 
-        if len(np.shape(image_zoomed)) == 3:
-            image_zoomed, label_zoomed = image_zoomed[:, 0:h, 0:w], label_zoomed[:, 0:h, 0:w]
-        elif len(np.shape(image_zoomed)) == 2:
-            image_zoomed, label_zoomed = image_zoomed[0:h, 0:w], label_zoomed[0:h, 0:w]
+        image_zoomed, label_zoomed = image_zoomed[0:h, 0:w], label_zoomed[0:h, 0:w]
 
         h2, w2 = np.shape(label_zoomed)[-2], np.shape(label_zoomed)[-1]
         assert h2 == h
@@ -115,7 +111,8 @@ class RandomSlicingOrthogonal(object):
         # We give the middle slice the lowest weight and the slices at the two very ends the highest weights
         weight_middle_slice = 1
         weight_end_slices = sampling_weighting_slope*0.5*self.resolution + weight_middle_slice
-        self.sampling_weights_prob = [int(abs((i-0.5*self.resolution))*sampling_weighting_slope+self.resolution) / weight_end_slices for i in range(self.resolution)]
+        sampling_weights_prob = [int(abs((i-0.5*self.resolution))*sampling_weighting_slope+self.resolution) / weight_end_slices for i in range(self.resolution)]
+        self.sampling_weights_prob = [i / sum(sampling_weights_prob) for i in sampling_weights_prob] # normalise so everything adds up to 1
 
         if self.zoom is True:
             self.zoom_aug = RandomZoom()
@@ -141,9 +138,13 @@ class RandomSlicingOrthogonal(object):
             assert newh == self.resolution
             assert neww == self.resolution
 
-            outputs["plane_d"].append(each_input[sample_position_d_d, :, :])
-            outputs["plane_h"].append(each_input[:, sample_position_h_h, :])
-            outputs["plane_w"].append(each_input[:, :, sample_position_w_w])
+            # outputs["plane_d"].append(each_input[sample_position_d_d, :, :])
+            # outputs["plane_h"].append(each_input[:, sample_position_h_h, :])
+            # outputs["plane_w"].append(each_input[:, :, sample_position_w_w])
+
+            outputs["plane_d"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
+            outputs["plane_h"].append(np.squeeze(each_input[:, sample_position_h_h, :]))
+            outputs["plane_w"].append(np.squeeze(each_input[:, :, sample_position_w_w]))
 
         if self.zoom is True:
             if random.random() >= 0.5:
@@ -205,7 +206,7 @@ def randomcutout(x, y):
     b, c, h, w = x.size()
     # h_mask = 50
     # w_mask = 50
-    h_mask, w_mask = random.randint(50, 100), random.randint(50, 100)
+    h_mask, w_mask = random.randint(50, h-100), random.randint(50, w-100)
     # assert self.w_mask <= w
     # assert self.h_mask <= h
 

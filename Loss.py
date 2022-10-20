@@ -1,3 +1,4 @@
+import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -16,9 +17,9 @@ import numpy as np
 from scipy.ndimage import distance_transform_edt
 
 
-def kld_loss(mu, logvar, mu_prior, var_prior):
+def kld_loss(mu, logvar, mu_prior=0.5, var_prior=0.1):
     # Kl between two Gaussians:
-    loss = -0.5 - logvar + var_prior.log() + (logvar.exp() + (mu - mu_prior)**2) / (2*(var_prior)**2)
+    loss = -0.5 - logvar + math.log(var_prior) + (logvar.exp() + (mu - mu_prior)**2) / (2*(var_prior)**2)
     return loss
 
 
