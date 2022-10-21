@@ -1,19 +1,4 @@
 import collections
-import glob
-import os
-import torch
-import random
-
-from collections import deque, defaultdict
-
-import numpy as np
-import scipy.ndimage
-import nibabel as nib
-import numpy.ma as ma
-
-from torch.utils import data
-from torch.utils.data import Dataset
-
 from libs.Augmentations import *
 
 
@@ -40,9 +25,7 @@ class CT_Dataset_Orthogonal(Dataset):
     '''
     def __init__(self,
                  images_folder,
-                 # labelled,
                  labels_folder=None,
-                 full_resolution=512,
                  sampling_weight=5,
                  lung_window=True,
                  normalisation=True,
@@ -61,10 +44,6 @@ class CT_Dataset_Orthogonal(Dataset):
         self.imgs_folder = images_folder
         self.lbls_folder = labels_folder
 
-        # we now removed lung masking
-        # self.lung_folder = lung_folder
-        # self.apply_lung_mask_flag = lung_mask
-
         self.lung_window_flag = lung_window
 
         if self.contrast_aug_flag is True:
@@ -74,9 +53,8 @@ class CT_Dataset_Orthogonal(Dataset):
             self.gaussian_noise = RandomGaussian()
 
         self.augmentation_cropping = RandomSlicingOrthogonal(discarded_slices=1,
-                                                              zoom=zoom_aug,
-                                                              resolution=full_resolution,
-                                                              sampling_weighting_slope=sampling_weight)
+                                                             zoom=zoom_aug,
+                                                             sampling_weighting_slope=sampling_weight)
 
     def __getitem__(self, index):
         # Lung masks:
@@ -143,6 +121,10 @@ class CT_Dataset_Orthogonal(Dataset):
             image_weighted = [weight*img for weight, img in zip(dirichlet_weights[0], image_queue)]
             image_weighted = sum(image_weighted)
 
+            # Apply normalisation at each case-wise again:
+            if self.normalisation_flag is True:
+                image_weighted = normalisation(label, image_weighted)
+
             # get slices by weighted sampling on each axis with zoom in augmentation:
             inputs_dict = self.augmentation_cropping.crop(image_weighted, label)
 
@@ -176,6 +158,10 @@ class CT_Dataset_Orthogonal(Dataset):
             image_weighted = [weight*img for weight, img in zip(dirichlet_weights[0], image_queue)]
             image_weighted = sum(image_weighted)
 
+            # Apply normalisation at each case-wise again:
+            if self.normalisation_flag is True:
+                image_weighted = normalisation(None, image_weighted)
+
             inputs_dict = self.augmentation_cropping.crop(image_weighted)
 
             return inputs_dict, imagename
@@ -192,8 +178,6 @@ def getData(data_directory,
             zoom_aug=True,
             contrast_aug=True,
             lung_window=True,
-            resolution=512,
-            train_full=True,
             unlabelled=2):
     '''
     Args:
@@ -206,25 +190,15 @@ def getData(data_directory,
         resolution:
         train_full:
         unlabelled:
-
     Returns:
-
     '''
-    # Labelled images data set and data loader:
-    # data_directory = data_directory + '/' + dataset_name
-    # train_image_folder_labelled = os.path.join(data_directory, '/labelled/imgs')
-    # train_label_folder_labelled = os.path.join(data_directory, '/labelled/lbls')
 
     train_image_folder_labelled = data_directory + '/labelled/imgs'
     train_label_folder_labelled = data_directory + '/labelled/lbls'
 
-    # print(train_image_folder_labelled)
-    # print(train_label_folder_labelled)
-
     train_dataset_labelled = CT_Dataset_Orthogonal(images_folder=train_image_folder_labelled,
                                                    labels_folder=train_label_folder_labelled,
                                                    sampling_weight=sampling_weight,
-                                                   full_resolution=resolution,
                                                    normalisation=norm,
                                                    zoom_aug=zoom_aug,
                                                    contrast_aug=contrast_aug,
@@ -239,13 +213,10 @@ def getData(data_directory,
     # Unlabelled images data set and data loader:
     if unlabelled > 0:
         train_image_folder_unlabelled = data_directory + '/unlabelled/imgs'
-        # train_lung_folder_unlabelled = data_directory + '/unlabelled/lung'
 
         train_dataset_unlabelled = CT_Dataset_Orthogonal(images_folder=train_image_folder_unlabelled,
-                                                         # labels_folder=train_label_folder_unlabelled,
                                                          sampling_weight=sampling_weight,
                                                          zoom_aug=False,
-                                                         full_resolution=resolution,
                                                          normalisation=norm,
                                                          contrast_aug=contrast_aug,
                                                          lung_window=lung_window)
@@ -256,66 +227,14 @@ def getData(data_directory,
                                                   num_workers=0,
                                                   drop_last=True)
 
-        if train_full is True:
-            return {'train_data_l': train_dataset_labelled,
-                    'train_loader_l': train_loader_labelled,
-                    'train_data_u': train_dataset_unlabelled,
-                    'train_loader_u': train_loader_unlabelled}
-        else:
-            validate_image_folder = data_directory + '/validate/imgs'
-            validate_label_folder = data_directory + '/validate/lbls'
-            # validate_lung_folder = data_directory + '/validate/lung'
-
-            validate_dataset = CT_Dataset_Orthogonal(images_folder=validate_image_folder,
-                                                     labels_folder=validate_label_folder,
-                                                     sampling_weight=sampling_weight,
-                                                     zoom_aug=False,
-                                                     full_resolution=resolution,
-                                                     normalisation=norm,
-                                                     contrast_aug=contrast_aug,
-                                                     lung_window=lung_window)
-
-            validate_loader = data.DataLoader(dataset=validate_dataset,
-                                              batch_size=2,
-                                              shuffle=True,
-                                              num_workers=0,
-                                              drop_last=True)
-
-            return {'train_data_l': train_dataset_labelled,
-                    'train_loader_l': train_loader_labelled,
-                    'train_data_u': train_dataset_unlabelled,
-                    'train_loader_u': train_loader_unlabelled,
-                    'val_data': validate_dataset,
-                    'val_loader': validate_loader}
+        return {'train_data_l': train_dataset_labelled,
+                'train_loader_l': train_loader_labelled,
+                'train_data_u': train_dataset_unlabelled,
+                'train_loader_u': train_loader_unlabelled}
 
     else:
-        if train_full is True:
-            return {'train_data_l': train_dataset_labelled,
-                    'train_loader_l': train_loader_labelled}
-        else:
-            validate_image_folder = data_directory + '/validate/imgs'
-            validate_label_folder = data_directory + '/validate/lbls'
-            # validate_lung_folder = data_directory + '/validate/lung'
-
-            validate_dataset = CT_Dataset_Orthogonal(images_folder=validate_image_folder,
-                                                     labels_folder=validate_label_folder,
-                                                     sampling_weight=sampling_weight,
-                                                     zoom_aug=False,
-                                                     full_resolution=resolution,
-                                                     normalisation=norm,
-                                                     contrast_aug=contrast_aug,
-                                                     lung_window=lung_window)
-
-            validate_loader = data.DataLoader(dataset=validate_dataset,
-                                              batch_size=2,
-                                              shuffle=True,
-                                              num_workers=0,
-                                              drop_last=True)
-
-            return {'train_data_l': train_dataset_labelled,
-                    'train_loader_l': train_loader_labelled,
-                    'val_data': validate_dataset,
-                    'val_loader': validate_loader}
+        return {'train_data_l': train_dataset_labelled,
+                'train_loader_l': train_loader_labelled}
 
 
 if __name__ == '__main__':

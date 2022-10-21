@@ -62,7 +62,7 @@ def calculate_sup_loss(lbl,
                        temp,
                        cutout_aug):
 
-    if torch.sum(lbl) > 50: # check whether there are enough foreground pixels
+    if torch.sum(lbl) > 10: # check whether there are enough foreground pixels
         prob_output = outputs_dict.get('segmentation') # get segmentation map
         if b_u > 0: # check if unlabelled data is included
             prob_output, _ = torch.split(prob_output, [b_l, b_u], dim=0) # if both labelled and unlabelled, split the data and use the labelled
@@ -79,7 +79,7 @@ def calculate_sup_loss(lbl,
             class_outputs = (prob_output > 0.95).float()
             train_mean_iu_ = segmentation_scores(lbl, class_outputs, 2)
             train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
-            return {'seg loss': loss,
+            return {'loss': loss.mean(),
                     'train iou': train_mean_iu_}
 
         elif len(prob_output.size()) == 4:
@@ -89,7 +89,7 @@ def calculate_sup_loss(lbl,
                 class_outputs = (prob_output > 0.95).float()
                 train_mean_iu_ = segmentation_scores(lbl, class_outputs, 2)
                 train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
-                return {'seg loss': loss,
+                return {'loss': loss.mean(),
                         'train iou': train_mean_iu_}
 
             else:
@@ -103,14 +103,14 @@ def calculate_sup_loss(lbl,
                         # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
                         # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
                         effective_classes += 1
-                        loss += SoftDiceLoss()(prob_output[:, i, :, :], lbl[:, i, :, :]) + nn.BCELoss(reduction='mean')(prob_output[:, i, :, :].squeeze() + 1e-10, lbl[:, i, :, :].squeeze() + 1e-10)
+                        loss += SoftDiceLoss()(prob_output[:, i, :, :], lbl[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output[:, i, :, :].squeeze() + 1e-10, lbl[:, i, :, :].squeeze() + 1e-10).mean()
                         class_outputs = (prob_output[:, i, :, :] > 0.95).float()
                         train_mean_iu_list = segmentation_scores(lbl[:, i, :, :], class_outputs, 2)
                         train_mean_iu_ += sum(train_mean_iu_list) / len(train_mean_iu_list)
 
                 loss = loss / effective_classes
                 train_mean_iu_ = train_mean_iu_ / effective_classes
-                return {'seg loss': loss,
+                return {'loss': loss,
                         'train iou': train_mean_iu_}
 
         else:
@@ -119,7 +119,7 @@ def calculate_sup_loss(lbl,
     else:
         loss = 0.0
         train_mean_iu_ = 0.0
-        return {'seg loss': loss,
+        return {'loss': loss,
                 'train iou': train_mean_iu_}
 
 
@@ -139,7 +139,7 @@ def calculate_kl_loss(outputs_dict,
 
     threshold_learnt_l, threshold_learnt_u = torch.split(confidence_threshold_learnt, [b_l, b_u], dim=0)
 
-    return {'kl loss': loss,
+    return {'loss': loss.mean(),
             'threshold labelled': threshold_learnt_l,
             'threshold unlabelled': threshold_learnt_u}
 
@@ -171,13 +171,13 @@ def calculate_pseudo_loss(outputs_dict,
     if len(prob_output_u.size()) == 3:
         # this is binary segmentation
         loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
-        return {'pseudo loss': loss}
+        return {'loss': loss.mean()}
 
     elif len(prob_output_u.size()) == 4:
         if prob_output_u.size()[1] == 1:
             # this is also binary segmentation
             loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
-            return {'pseudo loss': loss}
+            return {'loss': loss.mean()}
 
         else:
             # this is multi class segmentation
@@ -189,9 +189,9 @@ def calculate_pseudo_loss(outputs_dict,
                     # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
                     # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
                     effective_classes += 1
-                    loss += SoftDiceLoss()(prob_output_u[:, i, :, :], pseudo_label_u[:, i, :, :]) + nn.BCELoss(reduction='mean')(prob_output_u[:, i, :, :].squeeze() + 1e-10, pseudo_label_u[:, i, :, :].squeeze() + 1e-10)
+                    loss += SoftDiceLoss()(prob_output_u[:, i, :, :], pseudo_label_u[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output_u[:, i, :, :].squeeze() + 1e-10, pseudo_label_u[:, i, :, :].squeeze() + 1e-10).mean()
             loss = loss / effective_classes
-            return {'pseudo loss': loss}
+            return {'loss': loss}
 
     else:
         print('the output is probably 3D and we do not support it yet')
