@@ -175,7 +175,8 @@ class Unet(nn.Module):
                 diffY = torch.tensor([y_e.size()[2] - y.size()[2]])
                 diffX = torch.tensor([y_e.size()[3] - y.size()[3]])
 
-                y = F.pad(y, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+                # y = F.pad(y, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+                y = F.pad(y, [torch.div(diffX, 2, rounding_mode='floor'), diffX - torch.div(diffX, 2, rounding_mode='floor'), torch.div(diffY, 2, rounding_mode='floor'), diffY - torch.div(diffY, 2, rounding_mode='floor')])
 
             y = torch.cat([y_e, y], dim=1)
             y = self.decoders[-(i+1)](y)

@@ -1,21 +1,6 @@
-import parser
-
 import torch
-# torch.manual_seed(0)
-import errno
-import numpy as np
-# import pandas as pd
-
-
-import os
-from os import listdir
-# import Image
-
-import timeit
-import torch.nn as nn
 from pathlib import Path
 
-# Deterministic training:
 import random
 import numpy as np
 import torch.backends.cudnn as cudnn
@@ -88,21 +73,6 @@ def network_intialisation(args):
     return model, model_name
 
 
-def get_data_simple_wrapper(args):
-    data_loaders = getData(data_directory=args.data,
-                           train_batchsize=args.batch,
-                           norm=args.norm,
-                           zoom_aug=args.zoom,
-                           sampling_weight=args.sampling,
-                           contrast_aug=args.contrast,
-                           lung_window=args.lung_window,
-                           resolution=512,
-                           train_full=args.full_train,
-                           unlabelled=args.unlabelled)
-
-    return data_loaders
-
-
 def make_saving_directories(model_name, args):
     save_model_name = model_name
     saved_information_path = '../Results/' + args.log_tag
@@ -116,7 +86,6 @@ def make_saving_directories(model_name, args):
 
 
 def get_iterators(args):
-
     data_loaders = getData(data_directory=args.data,
                            train_batchsize=args.batch,
                            norm=args.norm,
@@ -124,30 +93,9 @@ def get_iterators(args):
                            sampling_weight=args.sampling,
                            contrast_aug=args.contrast,
                            lung_window=args.lung_window,
-                           resolution=512,
-                           train_full=args.full_train,
                            unlabelled=args.unlabelled)
 
     return data_loaders
-
-    # iterator_train_labelled = iter(data_loaders.get('train_loader_l'))
-    # if args.unlabelled > 0:
-    #     iterator_train_unlabelled = iter(data_loaders.get('train_loader_u'))
-    #     if args.full_train is False:
-    #         iterator_validate = iter(data_loaders.get('val_loader'))
-    #         return {'train labelled': iterator_train_labelled,
-    #                 'train unlabelled': iterator_train_unlabelled,
-    #                 'val': iterator_validate}
-    #     else:
-    #         return {'train labelled': iterator_train_labelled,
-    #                 'train unlabelled': iterator_train_unlabelled}
-    # else:
-    #     if args.full_train is False:
-    #         iterator_validate = iter(data_loaders.get('val_loader'))
-    #         return {'train labelled': iterator_train_labelled,
-    #                 'val': iterator_validate}
-    #     else:
-    #         return {'train labelled': iterator_train_labelled}
 
 
 def get_data_dict(dataloader, iterator):
@@ -160,9 +108,24 @@ def get_data_dict(dataloader, iterator):
     return data_dict
 
 
-def ramp_up(weight, ratio, step, total_steps):
+def ramp_up(weight, ratio, step, total_steps, starting=0):
+    '''
+    Args:
+        weight: final target weight value
+        ratio: ratio between the length of ramping up and the total steps
+        step: current step
+        total_steps: total steps
+        starting: starting step for ramping up
+    Returns:
+        current weight value
+    '''
+    # For the 1st 50 steps, the weighting is zero
+    # For the ramp-up stage from starting through the length of ramping up, we linearly gradually ramp up the weight
     ramp_up_length = int(ratio*total_steps)
-    current_weight = weight * step / ramp_up_length
+    if step > starting:
+        current_weight = weight * (step-starting) / ramp_up_length
+    else:
+        current_weight = 0.0
     return min(current_weight, weight)
 
 

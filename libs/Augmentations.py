@@ -75,9 +75,7 @@ class RandomZoom(object):
         return zoomed_image, zoomed_label
 
     def forward(self, image, label):
-
         image, label = np.squeeze(image), np.squeeze(label)
-
         image_zoomed, label_zoomed = self.sample_patch(image, label)
 
         # crop again to makes the zoomed image has the same size as the original image size:
@@ -95,7 +93,6 @@ class RandomZoom(object):
 class RandomSlicingOrthogonal(object):
     def __init__(self,
                  discarded_slices=5,
-                 resolution=512,
                  zoom=True,
                  sampling_weighting_slope=0):
         '''
@@ -104,27 +101,21 @@ class RandomSlicingOrthogonal(object):
         cropping_w: 3 d dimension of cropped sub volume cropping on h x d
         '''
         self.discarded_slices = discarded_slices
-        self.resolution = resolution
         self.zoom = zoom
 
         # Over sampling the slices on the two ends because they contain small difficult vessels
         # We give the middle slice the lowest weight and the slices at the two very ends the highest weights
+
         weight_middle_slice = 1
-        weight_end_slices = sampling_weighting_slope*0.5*self.resolution + weight_middle_slice
-        sampling_weights_prob = [int(abs((i-0.5*self.resolution))*sampling_weighting_slope+self.resolution) / weight_end_slices for i in range(self.resolution)]
+        default_no_slices = 512
+        weight_end_slices = sampling_weighting_slope*0.5*default_no_slices + weight_middle_slice
+        sampling_weights_prob = [int(abs((i-0.5*default_no_slices))*sampling_weighting_slope+default_no_slices) / weight_end_slices for i in range(default_no_slices)]
         self.sampling_weights_prob = [i / sum(sampling_weights_prob) for i in sampling_weights_prob] # normalise so everything adds up to 1
 
         if self.zoom is True:
             self.zoom_aug = RandomZoom()
 
     def crop(self, *volumes):
-
-        # for supervised learning, we need to crop both volume and the label, arg1: volume, arg2: label
-        # for unsupervised learning, we only need to crop the volume, arg1: volume
-
-        sample_position_d_d = np.random.choice(np.arange(self.resolution), 1, p=self.sampling_weights_prob)
-        sample_position_h_h = np.random.choice(np.arange(self.resolution), 1, p=self.sampling_weights_prob)
-        sample_position_w_w = np.random.choice(np.arange(self.resolution), 1, p=self.sampling_weights_prob)
 
         outputs = {"plane_d": [],
                    "plane_h": [],
@@ -134,13 +125,9 @@ class RandomSlicingOrthogonal(object):
 
             newd, newh, neww = np.shape(each_input)
 
-            assert newd == self.resolution
-            assert newh == self.resolution
-            assert neww == self.resolution
-
-            # outputs["plane_d"].append(each_input[sample_position_d_d, :, :])
-            # outputs["plane_h"].append(each_input[:, sample_position_h_h, :])
-            # outputs["plane_w"].append(each_input[:, :, sample_position_w_w])
+            sample_position_d_d = np.random.choice(np.arange(newd), 1, p=self.sampling_weights_prob)
+            sample_position_h_h = np.random.choice(np.arange(newh), 1, p=self.sampling_weights_prob)
+            sample_position_w_w = np.random.choice(np.arange(neww), 1, p=self.sampling_weights_prob)
 
             outputs["plane_d"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
             outputs["plane_h"].append(np.squeeze(each_input[:, sample_position_h_h, :]))
@@ -204,11 +191,7 @@ def randomcutout(x, y):
     Returns:
     '''
     b, c, h, w = x.size()
-    # h_mask = 50
-    # w_mask = 50
-    h_mask, w_mask = random.randint(50, h-100), random.randint(50, w-100)
-    # assert self.w_mask <= w
-    # assert self.h_mask <= h
+    h_mask, w_mask = random.randint(int(h // 5), int(h // 2)), random.randint(int(w // 5), int(w // 2))
 
     h_starting = np.random.randint(0, h - h_mask)
     w_starting = np.random.randint(0, w - h_mask)

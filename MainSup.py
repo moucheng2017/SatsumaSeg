@@ -10,7 +10,7 @@ from libs.Train import train_sup
 from libs import Helpers
 
 
-def main():
+def trainSup():
     parser = argparse.ArgumentParser(description='Training options for supervised segmentation.')
 
     # paths to the training data
@@ -162,10 +162,6 @@ def main():
     # zip all models:
     shutil.make_archive(saved_model_path, 'zip', saved_model_path)
     shutil.rmtree(saved_model_path)
-
-
-if __name__ == '__main__':
-    main()
 
 
 
