@@ -153,20 +153,19 @@ class RandomSlicingOrthogonal(object):
 
         roll_a_dice = random.random()
 
-        for each_input in volumes:
-            if roll_a_dice < 0.34:
-                if random.random() >= 0.5:
-                    outputs["plane"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
-                    outputs["plane"][0], outputs["plane"][1] = self.zoom_aug.forward(outputs["plane"][0], outputs["plane"][1])
-                # outputs["plane"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
-            elif roll_a_dice < 0.68:
+        if roll_a_dice < 0.34:
+            for each_input in volumes:
+                outputs["plane"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
+        elif roll_a_dice < 0.68:
+            for each_input in volumes:
                 outputs["plane"].append(np.squeeze(each_input[:, sample_position_h_h, :]))
-            else:
+        else:
+            for each_input in volumes:
                 outputs["plane"].append(np.squeeze(each_input[:, :, sample_position_w_w]))
 
-            # if self.zoom is True:
-            #     if random.random() >= 0.5:
-            #         outputs["plane"][0], outputs["plane"][1] = self.zoom_aug.forward(outputs["plane"][0], outputs["plane"][1])
+        if self.zoom is True:
+            if random.random() >= 0.5:
+                outputs["plane"][0], outputs["plane"][1] = self.zoom_aug.forward(outputs["plane"][0], outputs["plane"][1])
 
         return outputs
 
