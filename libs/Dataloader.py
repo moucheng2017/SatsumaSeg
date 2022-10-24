@@ -238,7 +238,7 @@ def getData(data_directory,
 
         train_dataset_unlabelled = CT_Dataset_Orthogonal(images_folder=train_image_folder_unlabelled,
                                                          sampling_weight=sampling_weight,
-                                                         zoom_aug=zoom_aug,
+                                                         zoom_aug=False,
                                                          normalisation=norm,
                                                          contrast_aug=contrast_aug,
                                                          lung_window=lung_window,
