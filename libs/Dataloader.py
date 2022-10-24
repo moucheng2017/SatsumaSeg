@@ -1,4 +1,7 @@
 import collections
+import glob
+import os
+
 from libs.Augmentations import *
 
 
@@ -24,6 +27,7 @@ class CT_Dataset_Orthogonal(Dataset):
     Sequentially random augment image with multiple steps
     '''
     def __init__(self,
+                 full_orthogonal,
                  images_folder,
                  labels_folder=None,
                  sampling_weight=5,
@@ -54,7 +58,8 @@ class CT_Dataset_Orthogonal(Dataset):
 
         self.augmentation_cropping = RandomSlicingOrthogonal(discarded_slices=1,
                                                              zoom=zoom_aug,
-                                                             sampling_weighting_slope=sampling_weight)
+                                                             sampling_weighting_slope=sampling_weight,
+                                                             full_orthogonal=full_orthogonal)
 
     def __getitem__(self, index):
         # Lung masks:
@@ -64,21 +69,30 @@ class CT_Dataset_Orthogonal(Dataset):
         # lung = np.array(lung, dtype='float32')
         # lung = np.transpose(lung, (2, 0, 1))
 
-        # Images:
-        all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
-        imagename = all_images[index]
+        # Check image extension:
+        image_example = os.listdir(self.imgs_folder)[0]
+        if image_example.lower().endswith(('.nii.gz', '.nii')):
+            # Images:
+            all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
+            imagename = all_images[index]
+            # load image and preprocessing:
+            image = nib.load(imagename)
+            image = image.get_fdata()
 
-        # load image and preprocessing:
-        image = nib.load(imagename)
-        image = image.get_fdata()
+        else:
+            # Images:
+            all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.npy*')))
+            imagename = all_images[index]
+            # load image and preprocessing:
+            image = np.load(imagename)
+
         image = np.array(image, dtype='float32')
+        # transform dimension:
+        image = np.transpose(image, (2, 0, 1)) # (H x W x D) --> (D x H x W)
 
         # Extract image name
         _, imagename = os.path.split(imagename)
         imagename, imagetxt = os.path.splitext(imagename)
-
-        # transform dimension:
-        image = np.transpose(image, (2, 0, 1)) # (H x W x D) --> (D x H x W)
 
         # Now applying lung window:
         if self.lung_window_flag is True:
@@ -87,9 +101,15 @@ class CT_Dataset_Orthogonal(Dataset):
 
         if self.lbls_folder:
             # Labels:
-            all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.nii.gz*')))
-            label = nib.load(all_labels[index])
-            label = label.get_fdata()
+            label_example = os.listdir(self.lbls_folder)[0]
+            if label_example.lower().endswith(('.nii.gz', '.nii')):
+                all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.nii.gz*')))
+                label = nib.load(all_labels[index])
+                label = label.get_fdata()
+            else:
+                all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.npy*')))
+                label = np.load(all_labels[index])
+
             label = np.array(label, dtype='float32')
             label = np.transpose(label, (2, 0, 1))
 
@@ -174,6 +194,7 @@ class CT_Dataset_Orthogonal(Dataset):
 def getData(data_directory,
             train_batchsize,
             sampling_weight,
+            full_sampling_mode,
             norm=True,
             zoom_aug=True,
             contrast_aug=True,
@@ -202,7 +223,8 @@ def getData(data_directory,
                                                    normalisation=norm,
                                                    zoom_aug=zoom_aug,
                                                    contrast_aug=contrast_aug,
-                                                   lung_window=lung_window)
+                                                   lung_window=lung_window,
+                                                   full_orthogonal=full_sampling_mode)
 
     train_loader_labelled = data.DataLoader(dataset=train_dataset_labelled,
                                             batch_size=train_batchsize,
@@ -216,10 +238,11 @@ def getData(data_directory,
 
         train_dataset_unlabelled = CT_Dataset_Orthogonal(images_folder=train_image_folder_unlabelled,
                                                          sampling_weight=sampling_weight,
-                                                         zoom_aug=False,
+                                                         zoom_aug=zoom_aug,
                                                          normalisation=norm,
                                                          contrast_aug=contrast_aug,
-                                                         lung_window=lung_window)
+                                                         lung_window=lung_window,
+                                                         full_orthogonal=full_sampling_mode)
 
         train_loader_unlabelled = data.DataLoader(dataset=train_dataset_unlabelled,
                                                   batch_size=train_batchsize*unlabelled,
