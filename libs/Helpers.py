@@ -93,7 +93,8 @@ def get_iterators(args):
                            sampling_weight=args.sampling,
                            contrast_aug=args.contrast,
                            lung_window=args.lung_window,
-                           unlabelled=args.unlabelled)
+                           unlabelled=args.unlabelled,
+                           full_sampling_mode=args.full_orthogonal)
 
     return data_loaders
 

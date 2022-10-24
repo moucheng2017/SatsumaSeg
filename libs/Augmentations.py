@@ -92,6 +92,7 @@ class RandomZoom(object):
 
 class RandomSlicingOrthogonal(object):
     def __init__(self,
+                 full_orthogonal,
                  discarded_slices=5,
                  zoom=True,
                  sampling_weighting_slope=0):
@@ -102,6 +103,7 @@ class RandomSlicingOrthogonal(object):
         '''
         self.discarded_slices = discarded_slices
         self.zoom = zoom
+        self.full_orthogonal = full_orthogonal
 
         # Over sampling the slices on the two ends because they contain small difficult vessels
         # We give the middle slice the lowest weight and the slices at the two very ends the highest weights
@@ -117,27 +119,54 @@ class RandomSlicingOrthogonal(object):
 
     def crop(self, *volumes):
 
-        outputs = {"plane_d": [],
-                   "plane_h": [],
-                   "plane_w": []}
+        # if self.full_orthogonal is True:
+        #     outputs = {"plane_d": [],
+        #                "plane_h": [],
+        #                "plane_w": []}
+        #
+        #     newd, newh, neww = np.shape(volumes[0])
+        #
+        #     sample_position_d_d = np.random.choice(np.arange(newd), 1, p=self.sampling_weights_prob)
+        #     sample_position_h_h = np.random.choice(np.arange(newh), 1, p=self.sampling_weights_prob)
+        #     sample_position_w_w = np.random.choice(np.arange(neww), 1, p=self.sampling_weights_prob)
+        #
+        #     for each_input in volumes:
+        #
+        #         outputs["plane_d"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
+        #         outputs["plane_h"].append(np.squeeze(each_input[:, sample_position_h_h, :]))
+        #         outputs["plane_w"].append(np.squeeze(each_input[:, :, sample_position_w_w]))
+        #
+        #     if self.zoom is True:
+        #         if random.random() >= 0.5:
+        #             outputs["plane_d"][0], outputs["plane_d"][1] = self.zoom_aug.forward(outputs["plane_d"][0], outputs["plane_d"][1])
+        #             outputs["plane_h"][0], outputs["plane_h"][1] = self.zoom_aug.forward(outputs["plane_h"][0], outputs["plane_h"][1])
+        #             outputs["plane_w"][0], outputs["plane_w"][1] = self.zoom_aug.forward(outputs["plane_w"][0], outputs["plane_w"][1])
+
+        # else:
+        outputs = {"plane": []}
+
+        newd, newh, neww = np.shape(volumes[0])
+
+        sample_position_d_d = np.random.choice(np.arange(newd), 1, p=self.sampling_weights_prob)
+        sample_position_h_h = np.random.choice(np.arange(newh), 1, p=self.sampling_weights_prob)
+        sample_position_w_w = np.random.choice(np.arange(neww), 1, p=self.sampling_weights_prob)
+
+        roll_a_dice = random.random()
 
         for each_input in volumes:
+            if roll_a_dice < 0.34:
+                if random.random() >= 0.5:
+                    outputs["plane"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
+                    outputs["plane"][0], outputs["plane"][1] = self.zoom_aug.forward(outputs["plane"][0], outputs["plane"][1])
+                # outputs["plane"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
+            elif roll_a_dice < 0.68:
+                outputs["plane"].append(np.squeeze(each_input[:, sample_position_h_h, :]))
+            else:
+                outputs["plane"].append(np.squeeze(each_input[:, :, sample_position_w_w]))
 
-            newd, newh, neww = np.shape(each_input)
-
-            sample_position_d_d = np.random.choice(np.arange(newd), 1, p=self.sampling_weights_prob)
-            sample_position_h_h = np.random.choice(np.arange(newh), 1, p=self.sampling_weights_prob)
-            sample_position_w_w = np.random.choice(np.arange(neww), 1, p=self.sampling_weights_prob)
-
-            outputs["plane_d"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
-            outputs["plane_h"].append(np.squeeze(each_input[:, sample_position_h_h, :]))
-            outputs["plane_w"].append(np.squeeze(each_input[:, :, sample_position_w_w]))
-
-        if self.zoom is True:
-            if random.random() >= 0.5:
-                outputs["plane_d"][0], outputs["plane_d"][1] = self.zoom_aug.forward(outputs["plane_d"][0], outputs["plane_d"][1])
-                outputs["plane_h"][0], outputs["plane_h"][1] = self.zoom_aug.forward(outputs["plane_h"][0], outputs["plane_h"][1])
-                outputs["plane_w"][0], outputs["plane_w"][1] = self.zoom_aug.forward(outputs["plane_w"][0], outputs["plane_w"][1])
+            # if self.zoom is True:
+            #     if random.random() >= 0.5:
+            #         outputs["plane"][0], outputs["plane"][1] = self.zoom_aug.forward(outputs["plane"][0], outputs["plane"][1])
 
         return outputs
 

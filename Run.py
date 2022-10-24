@@ -43,6 +43,7 @@ def main():
     parser.add_argument('--zoom', type=bool, help='true when use random zoom in augmentation', default=True)
     parser.add_argument('--contrast', type=bool, help='true when use random contrast using histogram equalization with random bins', default=True)
     parser.add_argument('--lung_window', type=bool, help='True when we apply lung window on data', default=True)
+    parser.add_argument('--full_orthogonal', type=bool, help='true when each iteration has three orthogonal planes all together', default=False)
 
     # flags for if we use fine-tuning on an trained model:
     parser.add_argument('--resume', type=bool, help='resume training on an existing model', default=False)

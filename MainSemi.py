@@ -1,5 +1,6 @@
 # basic libs:
 import argparse
+import random
 from pathlib import Path
 import torch
 import timeit
@@ -61,93 +62,150 @@ def trainBPL(args):
         # unlabelled data:
         unlabelled_dict = Helpers.get_data_dict(train_unlabelled_data_loader, iterator_train_unlabelled)
 
-        loss_d = train_semi(labelled_img=labelled_dict["plane_d"][0],
-                            labelled_label=labelled_dict["plane_d"][1],
-                            unlabelled_img=unlabelled_dict["plane_d"][0],
-                            model=model,
-                            t=args.temp,
-                            prior_mu=args.mu,
-                            prior_logsigma=args.sigma,
-                            augmentation_cutout=args.cutout)
+        if args.full_orthogonal is True:
+            loss_d = train_semi(labelled_img=labelled_dict["plane_d"][0],
+                                labelled_label=labelled_dict["plane_d"][1],
+                                unlabelled_img=unlabelled_dict["plane_d"][0],
+                                model=model,
+                                t=args.temp,
+                                prior_mu=args.mu,
+                                prior_logsigma=args.sigma,
+                                augmentation_cutout=args.cutout)
 
-        loss_h = train_semi(labelled_img=labelled_dict["plane_h"][0],
-                            labelled_label=labelled_dict["plane_h"][1],
-                            unlabelled_img=unlabelled_dict["plane_h"][0],
-                            model=model,
-                            t=args.temp,
-                            prior_mu=args.mu,
-                            prior_logsigma=args.sigma,
-                            augmentation_cutout=args.cutout)
+            loss_h = train_semi(labelled_img=labelled_dict["plane_h"][0],
+                                labelled_label=labelled_dict["plane_h"][1],
+                                unlabelled_img=unlabelled_dict["plane_h"][0],
+                                model=model,
+                                t=args.temp,
+                                prior_mu=args.mu,
+                                prior_logsigma=args.sigma,
+                                augmentation_cutout=args.cutout)
 
-        loss_w = train_semi(labelled_img=labelled_dict["plane_w"][0],
-                            labelled_label=labelled_dict["plane_w"][1],
-                            unlabelled_img=unlabelled_dict["plane_w"][0],
-                            model=model,
-                            t=args.temp,
-                            prior_mu=args.mu,
-                            prior_logsigma=args.sigma,
-                            augmentation_cutout=args.cutout)
+            loss_w = train_semi(labelled_img=labelled_dict["plane_w"][0],
+                                labelled_label=labelled_dict["plane_w"][1],
+                                unlabelled_img=unlabelled_dict["plane_w"][0],
+                                model=model,
+                                t=args.temp,
+                                prior_mu=args.mu,
+                                prior_logsigma=args.sigma,
+                                augmentation_cutout=args.cutout)
 
-        sup_loss = loss_d.get('supervised loss').get('loss') + loss_h.get('supervised loss').get('loss') + loss_w.get('supervised loss').get('loss')
-        sup_loss = sup_loss / 3
-        # print(sup_loss)
+            sup_loss = loss_d.get('supervised loss').get('loss') + loss_h.get('supervised loss').get('loss') + loss_w.get('supervised loss').get('loss')
+            sup_loss = sup_loss / 3
+            # print(sup_loss)
 
-        pseudo_loss = loss_d.get('pseudo loss').get('loss') + loss_h.get('pseudo loss').get('loss') + loss_w.get('pseudo loss').get('loss')
-        pseudo_loss = pseudo_loss / 3
-        # print(pseudo_loss)
+            pseudo_loss = loss_d.get('pseudo loss').get('loss') + loss_h.get('pseudo loss').get('loss') + loss_w.get('pseudo loss').get('loss')
+            pseudo_loss = pseudo_loss / 3
+            # print(pseudo_loss)
 
-        kl_loss = loss_d.get('kl loss').get('loss') + loss_h.get('kl loss').get('loss') + loss_w.get('kl loss').get('loss')
-        kl_loss = kl_loss / 3
-        # print(kl_loss)
+            kl_loss = loss_d.get('kl loss').get('loss') + loss_h.get('kl loss').get('loss') + loss_w.get('kl loss').get('loss')
+            kl_loss = kl_loss / 3
+            # print(kl_loss)
 
-        loss = sup_loss + current_alpha*pseudo_loss + current_beta*kl_loss
-        # print(loss)
+            loss = sup_loss + current_alpha*pseudo_loss + current_beta*kl_loss
+            # print(loss)
 
-        learnt_threshold = loss_d.get('kl loss').get('threshold unlabelled') + loss_h.get('kl loss').get('threshold unlabelled') + loss_w.get('kl loss').get('threshold unlabelled')
-        learnt_threshold = learnt_threshold.mean() / 3
-        # learnt_threshold = learnt_threshold / 3
+            learnt_threshold = loss_d.get('kl loss').get('threshold unlabelled') + loss_h.get('kl loss').get('threshold unlabelled') + loss_w.get('kl loss').get('threshold unlabelled')
+            learnt_threshold = learnt_threshold.mean() / 3
+            # learnt_threshold = learnt_threshold / 3
 
-        del labelled_dict
+            del labelled_dict
 
-        if loss != 0.0:
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            if loss != 0.0:
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
-        for param_group in optimizer.param_groups:
-            # exponential decay
-            param_group["lr"] = args.lr * ((1 - float(step) / args.iterations) ** 0.99)
+            for param_group in optimizer.param_groups:
+                # exponential decay
+                param_group["lr"] = args.lr * ((1 - float(step) / args.iterations) ** 0.99)
 
-        print(
-            'Step [{}/{}], '
-            'lr: {:.4f},'
-            'loss d: {:.4f}, '
-            'loss h: {:.4f}, '
-            'loss w: {:.4f}, '
-            'pseudo loss: {:.4f}, '
-            'kl loss: {:.4f}, '
-            'Threshold: {:.4f}'.format(step + 1,
-                                       args.iterations,
-                                       optimizer.param_groups[0]["lr"],
-                                       loss_d.get('supervised loss').get('loss'),
-                                       loss_h.get('supervised loss').get('loss'),
-                                       loss_w.get('supervised loss').get('loss'),
-                                       current_alpha*pseudo_loss,
-                                       current_beta*kl_loss,
-                                       learnt_threshold)
-        )
+            print(
+                'Step [{}/{}], '
+                'lr: {:.4f},'
+                'loss d: {:.4f}, '
+                'loss h: {:.4f}, '
+                'loss w: {:.4f}, '
+                'pseudo loss: {:.4f}, '
+                'kl loss: {:.4f}, '
+                'Threshold: {:.4f}'.format(step + 1,
+                                           args.iterations,
+                                           optimizer.param_groups[0]["lr"],
+                                           loss_d.get('supervised loss').get('loss'),
+                                           loss_h.get('supervised loss').get('loss'),
+                                           loss_w.get('supervised loss').get('loss'),
+                                           current_alpha * pseudo_loss,
+                                           current_beta * kl_loss,
+                                           learnt_threshold)
+            )
 
-        # # # ================================================================== #
-        # # #                        TensorboardX Logging                        #
-        # # # # ================================================================ #
+            # # # ================================================================== #
+            # # #                        TensorboardX Logging                        #
+            # # # # ================================================================ #
 
-        writer.add_scalars('loss metrics', {'train seg loss d': loss_d.get('supervised loss').get('loss'),
-                                            'train seg loss h': loss_h.get('supervised loss').get('loss'),
-                                            'train seg loss w': loss_w.get('supervised loss').get('loss'),
-                                            'train seg total loss': sup_loss,
-                                            'train pseudo loss': args.alpha*pseudo_loss,
-                                            'learnt threshold': learnt_threshold,
-                                            'train kl loss': args.beta*kl_loss}, step + 1)
+            writer.add_scalars('loss metrics', {'train seg loss d': loss_d.get('supervised loss').get('loss'),
+                                                'train seg loss h': loss_h.get('supervised loss').get('loss'),
+                                                'train seg loss w': loss_w.get('supervised loss').get('loss'),
+                                                'train seg total loss': sup_loss,
+                                                'train pseudo loss': args.alpha * pseudo_loss,
+                                                'learnt threshold': learnt_threshold,
+                                                'train kl loss': args.beta * kl_loss}, step + 1)
+
+        else:
+
+            loss_o = train_semi(labelled_img=labelled_dict["plane"][0],
+                                labelled_label=labelled_dict["plane"][1],
+                                unlabelled_img=unlabelled_dict["plane"][0],
+                                model=model,
+                                t=args.temp,
+                                prior_mu=args.mu,
+                                prior_logsigma=args.sigma,
+                                augmentation_cutout=args.cutout)
+
+            sup_loss = loss_o.get('supervised loss').get('loss')
+
+            pseudo_loss = loss_o.get('pseudo loss').get('loss')
+
+            kl_loss = loss_o.get('kl loss').get('loss')
+
+            loss = sup_loss + current_alpha*pseudo_loss + current_beta*kl_loss
+
+            learnt_threshold = loss_o.get('kl loss').get('threshold unlabelled')
+
+            del labelled_dict
+
+            if loss != 0.0:
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+            for param_group in optimizer.param_groups:
+                # exponential decay
+                param_group["lr"] = args.lr * ((1 - float(step) / args.iterations) ** 0.99)
+
+            print(
+                'Step [{}/{}], '
+                'lr: {:.4f},'
+                'loss: {:.4f}, '
+                'pseudo loss: {:.4f}, '
+                'kl loss: {:.4f}, '
+                'Threshold: {:.4f}'.format(step + 1,
+                                           args.iterations,
+                                           optimizer.param_groups[0]["lr"],
+                                           loss_o.get('supervised loss').get('loss'),
+                                           current_alpha*pseudo_loss,
+                                           current_beta*kl_loss,
+                                           learnt_threshold)
+            )
+
+            # # # ================================================================== #
+            # # #                        TensorboardX Logging                        #
+            # # # # ================================================================ #
+
+            writer.add_scalars('loss metrics', {'train seg loss': loss_o.get('supervised loss').get('loss'),
+                                                'train pseudo loss': args.alpha*pseudo_loss,
+                                                'learnt threshold': learnt_threshold,
+                                                'train kl loss': args.beta*kl_loss}, step + 1)
 
         if step > args.saving_starting and step % args.saving_frequency == 0:
             save_model_name_full = saved_model_path + '/' + model_name + '_' + str(step) + '.pt'
