@@ -2,6 +2,8 @@
 import argparse
 from MainSemi import trainBPL
 
+# We use 0 or 1 for False or True as alternative for boolean operations in this argparse
+
 
 def main():
     parser = argparse.ArgumentParser(description='Training for semi supervised segmentation with bayesian pseudo labels.')
@@ -27,7 +29,7 @@ def main():
 
     # hyper parameters for training (specific for semi sup)
     parser.add_argument('--unlabelled', type=int, help='SSL, ratio between unlabelled and labelled data in one batch, if set up as 0, it will be supervised learning', default=1)
-    parser.add_argument('--detach', type=bool, help='SSL, true when we cut the gradients in consistency regularisation', default=True)
+    parser.add_argument('--detach', type=int, help='SSL, 1 when we cut the gradients in consistency regularisation or 0', default=1)
     parser.add_argument('--mu', type=float, help='SSL, prior Gaussian mean', default=0.5)  # mu
     parser.add_argument('--sigma', type=float, help='SSL, prior Gaussian std', default=0.1)  # sigma
     parser.add_argument('--alpha', type=float, help='SSL, weight on the unsupervised learning part', default=1.0)
@@ -35,18 +37,20 @@ def main():
     parser.add_argument('--warmup', type=float, help='SSL, ratio between the iterations of warming up and the whole training iterations', default=0.1)
 
     # flags for data preprocessing and augmentation in data loader:
-    parser.add_argument('--norm', type=bool, help='true when normalise each case individually', default=True)
-    parser.add_argument('--gaussian', type=bool, help='true when add random gaussian noise', default=True)
-    parser.add_argument('--cutout', type=bool, help='true when randomly cutout some patches', default=True)
+    parser.add_argument('--norm', type=int, help='1 when normalise each case individually', default=1)
+    parser.add_argument('--gaussian', type=int, help='1 when add random gaussian noise', default=1)
+    parser.add_argument('--cutout', type=int, help='1 when randomly cutout some patches', default=1)
     parser.add_argument('--sampling', type=int, help='weight for sampling the slices along each axis of 3d volume for training, '
                                                      'highest weights at the edges and lowest at the middle', default=5)
-    parser.add_argument('--zoom', type=bool, help='true when use random zoom in augmentation', default=True)
-    parser.add_argument('--contrast', type=bool, help='true when use random contrast using histogram equalization with random bins', default=True)
-    parser.add_argument('--lung_window', type=bool, help='True when we apply lung window on data', default=True)
-    parser.add_argument('--full_orthogonal', type=bool, help='true when each iteration has three orthogonal planes all together', default=False)
+    parser.add_argument('--zoom', type=int, help='1 when use random zoom in augmentation', default=1)
+    parser.add_argument('--contrast', type=int, help='1 when use random contrast using histogram equalization with random bins', default=1)
+    parser.add_argument('--lung_window', type=int, help='1 when we apply lung window on data', default=1)
+    # parser.add_argument('--full_orthogonal', action='store_true', help='true when each iteration has three orthogonal planes all together')
+    parser.add_argument('--full_orthogonal', type=int, help='1 when each iteration has three orthogonal planes all together', default=0)
+    # parser.add_argument('--resize', type=int, help='ratio for resizing the images', default=0.5)
 
     # flags for if we use fine-tuning on an trained model:
-    parser.add_argument('--resume', type=bool, help='resume training on an existing model', default=False)
+    parser.add_argument('--resume', type=int, help='resume training on an existing model', default=0)
     parser.add_argument('--checkpoint_path', type=str, help='path to the checkpoint model')
 
     global args

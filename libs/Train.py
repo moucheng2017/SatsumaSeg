@@ -92,32 +92,32 @@ def calculate_sup_loss(lbl,
                 return {'loss': loss.mean(),
                         'train iou': train_mean_iu_}
 
-            else:
-                # this is multi class segmentation
-                lbl = multi_class_label_processing(lbl, prob_output.size()[1]) # convert single channel multi integer class label to multi channel binary label
-                loss = 0
-                train_mean_iu_ = 0
-                effective_classes = 0
-                for i in range(prob_output.size()[1]): # multiple
-                    if torch.sum(lbl[:, i, :, :]) > 1.0:
-                        # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
-                        # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
-                        effective_classes += 1
-                        loss += SoftDiceLoss()(prob_output[:, i, :, :], lbl[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output[:, i, :, :].squeeze() + 1e-10, lbl[:, i, :, :].squeeze() + 1e-10).mean()
-                        class_outputs = (prob_output[:, i, :, :] > 0.95).float()
-                        train_mean_iu_list = segmentation_scores(lbl[:, i, :, :], class_outputs, 2)
-                        train_mean_iu_ += sum(train_mean_iu_list) / len(train_mean_iu_list)
-
-                loss = loss / effective_classes
-                train_mean_iu_ = train_mean_iu_ / effective_classes
-                return {'loss': loss,
-                        'train iou': train_mean_iu_}
+            # else:
+            #     # this is multi class segmentation
+            #     lbl = multi_class_label_processing(lbl, prob_output.size()[1]) # convert single channel multi integer class label to multi channel binary label
+            #     loss = 0
+            #     train_mean_iu_ = 0
+            #     effective_classes = 0
+            #     for i in range(prob_output.size()[1]): # multiple
+            #         if torch.sum(lbl[:, i, :, :]) > 1.0:
+            #             # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
+            #             # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
+            #             effective_classes += 1
+            #             loss += SoftDiceLoss()(prob_output[:, i, :, :], lbl[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output[:, i, :, :].squeeze() + 1e-10, lbl[:, i, :, :].squeeze() + 1e-10).mean()
+            #             class_outputs = (prob_output[:, i, :, :] > 0.95).float()
+            #             train_mean_iu_list = segmentation_scores(lbl[:, i, :, :], class_outputs, 2)
+            #             train_mean_iu_ += sum(train_mean_iu_list) / len(train_mean_iu_list)
+            #
+            #     loss = loss / effective_classes
+            #     train_mean_iu_ = train_mean_iu_ / effective_classes
+            #     return {'loss': loss.mean(),
+            #             'train iou': train_mean_iu_}
 
         else:
             print('the output is probably 3D and we do not support it yet')
 
     else:
-        loss = 0.0
+        loss = torch.tensor(0.0).to('cuda')
         train_mean_iu_ = 0.0
         return {'loss': loss,
                 'train iou': train_mean_iu_}
@@ -168,33 +168,34 @@ def calculate_pseudo_loss(outputs_dict,
     if cutout_aug is True:
         prob_output_u, pseudo_label_u = randomcutout(prob_output_u, pseudo_label_u)
 
-    if len(prob_output_u.size()) == 3:
-        # this is binary segmentation
-        loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
-        return {'loss': loss.mean()}
-
-    elif len(prob_output_u.size()) == 4:
-        if prob_output_u.size()[1] == 1:
-            # this is also binary segmentation
+    if torch.sum(pseudo_label_u) > 10:
+        if len(prob_output_u.size()) == 3:
+            # this is binary segmentation
             loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
             return {'loss': loss.mean()}
 
-        else:
-            # this is multi class segmentation
-            pseudo_label_u = multi_class_label_processing(pseudo_label_u, prob_output_u.size()[1])  # convert single channel multi integer class label to multi channel binary label
-            loss = 0
-            effective_classes = 0
-            for i in range(prob_output_u.size()[1]):  # multiple
-                if torch.sum(pseudo_label_u[:, i, :, :]) > 1.0:
-                    # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
-                    # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
-                    effective_classes += 1
-                    loss += SoftDiceLoss()(prob_output_u[:, i, :, :], pseudo_label_u[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output_u[:, i, :, :].squeeze() + 1e-10, pseudo_label_u[:, i, :, :].squeeze() + 1e-10).mean()
-            loss = loss / effective_classes
-            return {'loss': loss}
+        elif len(prob_output_u.size()) == 4:
+            if prob_output_u.size()[1] == 1:
+                # this is also binary segmentation
+                loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
+                return {'loss': loss.mean()}
+
+            else:
+                # this is multi class segmentation
+                pseudo_label_u = multi_class_label_processing(pseudo_label_u, prob_output_u.size()[1])  # convert single channel multi integer class label to multi channel binary label
+                loss = torch.tensor(0).to('cuda')
+                effective_classes = 0
+                for i in range(prob_output_u.size()[1]):  # multiple
+                    if torch.sum(pseudo_label_u[:, i, :, :]) > 1.0:
+                        # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
+                        # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
+                        effective_classes += 1
+                        loss += SoftDiceLoss()(prob_output_u[:, i, :, :], pseudo_label_u[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output_u[:, i, :, :].squeeze() + 1e-10, pseudo_label_u[:, i, :, :].squeeze() + 1e-10).mean()
+                loss = loss / effective_classes
+                return {'loss': loss.mean()}
 
     else:
-        print('the output is probably 3D and we do not support it yet')
+        return {'loss': torch.tensor(0.0).to('cuda').mean()}
 
 
 def train_sup(labelled_img,
