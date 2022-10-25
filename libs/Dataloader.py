@@ -32,7 +32,8 @@ class CT_Dataset_Orthogonal(Dataset):
     def __init__(self,
                  images_folder,
                  labels_folder=None,
-                 resize_ratio=(1, 1),
+                 new_size_h=384,
+                 new_size_w=384,
                  full_orthogonal=0,
                  sampling_weight=5,
                  lung_window=1,
@@ -64,7 +65,8 @@ class CT_Dataset_Orthogonal(Dataset):
                                                              zoom=zoom_aug,
                                                              sampling_weighting_slope=sampling_weight,
                                                              full_orthogonal=full_orthogonal,
-                                                             resize_image=resize_ratio)
+                                                             new_size_w=new_size_w,
+                                                             new_size_h=new_size_h)
 
     def __getitem__(self, index):
         # Lung masks:
@@ -192,13 +194,19 @@ class CT_Dataset_Orthogonal(Dataset):
             return inputs_dict, imagename
 
     def __len__(self):
-        # You should change 0 to the total size of your dataset.
-        return len(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
+        example = os.listdir(self.imgs_folder)[0]
+        if example.lower().endswith(('.nii.gz', '.nii')):
+            # You should change 0 to the total size of your dataset.
+            return len(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
+        elif example.lower().endswith('.npy'):
+            return len(glob.glob(os.path.join(self.imgs_folder, '*.npy')))
 
 
 def getData(data_directory,
             train_batchsize,
             sampling_weight,
+            new_size_h,
+            new_size_w,
             full_sampling_mode=0,
             norm=1,
             zoom_aug=1,
@@ -225,6 +233,8 @@ def getData(data_directory,
     train_dataset_labelled = CT_Dataset_Orthogonal(images_folder=train_image_folder_labelled,
                                                    labels_folder=train_label_folder_labelled,
                                                    sampling_weight=sampling_weight,
+                                                   new_size_h=new_size_h,
+                                                   new_size_w=new_size_w,
                                                    normalisation=norm,
                                                    zoom_aug=zoom_aug,
                                                    contrast_aug=contrast_aug,
@@ -245,6 +255,8 @@ def getData(data_directory,
                                                          sampling_weight=sampling_weight,
                                                          zoom_aug=0,
                                                          normalisation=norm,
+                                                         new_size_h=new_size_h,
+                                                         new_size_w=new_size_w,
                                                          contrast_aug=contrast_aug,
                                                          lung_window=lung_window,
                                                          full_orthogonal=full_sampling_mode)

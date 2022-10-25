@@ -47,7 +47,8 @@ def main():
     parser.add_argument('--lung_window', type=int, help='1 when we apply lung window on data', default=1)
     # parser.add_argument('--full_orthogonal', action='store_true', help='true when each iteration has three orthogonal planes all together')
     parser.add_argument('--full_orthogonal', type=int, help='1 when each iteration has three orthogonal planes all together', default=0)
-    # parser.add_argument('--resize', type=int, help='ratio for resizing the images', default=0.5)
+    parser.add_argument('--new_size_h', type=int, help='new size for the image height', default=384)
+    parser.add_argument('--new_size_w', type=int, help='new size for the image width', default=384)
 
     # flags for if we use fine-tuning on an trained model:
     parser.add_argument('--resume', type=int, help='resume training on an existing model', default=0)
