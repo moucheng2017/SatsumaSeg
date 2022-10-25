@@ -1,8 +1,11 @@
+import nibabel as nib
 import collections
 import glob
 import os
-
+import numpy.ma as ma
 from libs.Augmentations import *
+from torch.utils import data
+from torch.utils.data import Dataset
 
 
 def normalisation(label, image):
@@ -27,15 +30,16 @@ class CT_Dataset_Orthogonal(Dataset):
     Sequentially random augment image with multiple steps
     '''
     def __init__(self,
-                 full_orthogonal,
                  images_folder,
                  labels_folder=None,
+                 resize_ratio=(1, 1),
+                 full_orthogonal=0,
                  sampling_weight=5,
-                 lung_window=True,
-                 normalisation=True,
-                 gaussian_aug=True,
-                 zoom_aug=True,
-                 contrast_aug=True):
+                 lung_window=1,
+                 normalisation=1,
+                 gaussian_aug=1,
+                 zoom_aug=1,
+                 contrast_aug=1):
 
         # flags
         # self.labelled_flag = labelled
@@ -50,16 +54,17 @@ class CT_Dataset_Orthogonal(Dataset):
 
         self.lung_window_flag = lung_window
 
-        if self.contrast_aug_flag is True:
+        if self.contrast_aug_flag == 1:
             self.augmentation_contrast = RandomContrast(bin_range=(20, 255))
 
-        if self.gaussian_aug_flag is True:
+        if self.gaussian_aug_flag == 1:
             self.gaussian_noise = RandomGaussian()
 
         self.augmentation_cropping = RandomSlicingOrthogonal(discarded_slices=1,
                                                              zoom=zoom_aug,
                                                              sampling_weighting_slope=sampling_weight,
-                                                             full_orthogonal=full_orthogonal)
+                                                             full_orthogonal=full_orthogonal,
+                                                             resize_image=resize_ratio)
 
     def __getitem__(self, index):
         # Lung masks:
@@ -95,7 +100,7 @@ class CT_Dataset_Orthogonal(Dataset):
         imagename, imagetxt = os.path.splitext(imagename)
 
         # Now applying lung window:
-        if self.lung_window_flag is True:
+        if self.lung_window_flag == 1:
             image[image < -1000.0] = -1000.0
             image[image > 500.0] = 500.0
 
@@ -116,18 +121,18 @@ class CT_Dataset_Orthogonal(Dataset):
             image_queue = collections.deque()
 
             # Apply normalisation at each case-wise:
-            if self.normalisation_flag is True:
+            if self.normalisation_flag == 1:
                 image = normalisation(label, image)
 
             image_queue.append(image)
 
             # Random contrast:
-            if self.contrast_aug_flag is True:
+            if self.contrast_aug_flag == 1:
                 image_another_contrast = self.augmentation_contrast.randomintensity(image)
                 image_queue.append(image_another_contrast)
 
             # Random Gaussian:
-            if self.gaussian_aug_flag is True:
+            if self.gaussian_aug_flag == 1:
                 image_noise = self.gaussian_noise.gaussiannoise(image)
                 image_queue.append(image_noise)
 
@@ -142,7 +147,7 @@ class CT_Dataset_Orthogonal(Dataset):
             image_weighted = sum(image_weighted)
 
             # Apply normalisation at each case-wise again:
-            if self.normalisation_flag is True:
+            if self.normalisation_flag == 1:
                 image_weighted = normalisation(label, image_weighted)
 
             # get slices by weighted sampling on each axis with zoom in augmentation:
@@ -154,17 +159,17 @@ class CT_Dataset_Orthogonal(Dataset):
             image_queue = collections.deque()
 
             # Apply normalisation at each case-wise:
-            if self.normalisation_flag is True:
+            if self.normalisation_flag == 1:
                 image = normalisation(None, image)
             image_queue.append(image)
 
             # Random contrast:
-            if self.contrast_aug_flag is True:
+            if self.contrast_aug_flag == 1:
                 image_another_contrast = self.augmentation_contrast.randomintensity(image)
                 image_queue.append(image_another_contrast)
 
             # Random Gaussian:
-            if self.gaussian_aug_flag is True:
+            if self.gaussian_aug_flag == 1:
                 image_noise = self.gaussian_noise.gaussiannoise(image)
                 image_queue.append(image_noise)
 
@@ -179,7 +184,7 @@ class CT_Dataset_Orthogonal(Dataset):
             image_weighted = sum(image_weighted)
 
             # Apply normalisation at each case-wise again:
-            if self.normalisation_flag is True:
+            if self.normalisation_flag == 1:
                 image_weighted = normalisation(None, image_weighted)
 
             inputs_dict = self.augmentation_cropping.crop(image_weighted)
@@ -194,11 +199,11 @@ class CT_Dataset_Orthogonal(Dataset):
 def getData(data_directory,
             train_batchsize,
             sampling_weight,
-            full_sampling_mode,
-            norm=True,
-            zoom_aug=True,
-            contrast_aug=True,
-            lung_window=True,
+            full_sampling_mode=0,
+            norm=1,
+            zoom_aug=1,
+            contrast_aug=1,
+            lung_window=1,
             unlabelled=2):
     '''
     Args:
@@ -238,7 +243,7 @@ def getData(data_directory,
 
         train_dataset_unlabelled = CT_Dataset_Orthogonal(images_folder=train_image_folder_unlabelled,
                                                          sampling_weight=sampling_weight,
-                                                         zoom_aug=False,
+                                                         zoom_aug=0,
                                                          normalisation=norm,
                                                          contrast_aug=contrast_aug,
                                                          lung_window=lung_window,
