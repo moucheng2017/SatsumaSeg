@@ -1,3 +1,4 @@
+import os
 import torch
 from pathlib import Path
 
@@ -75,7 +76,8 @@ def network_intialisation(args):
 
 def make_saving_directories(model_name, args):
     save_model_name = model_name
-    saved_information_path = '../Results/' + args.log_tag
+    dataset_name = os.path.basename(os.path.normpath(args.data))
+    saved_information_path = '../../Results_' + dataset_name + '/' + args.log_tag
     Path(saved_information_path).mkdir(parents=True, exist_ok=True)
     saved_log_path = saved_information_path + '/Logs'
     Path(saved_log_path).mkdir(parents=True, exist_ok=True)
@@ -94,6 +96,8 @@ def get_iterators(args):
                            contrast_aug=args.contrast,
                            lung_window=args.lung_window,
                            unlabelled=args.unlabelled,
+                           new_size_h=args.new_size_h,
+                           new_size_w=args.new_size_w,
                            full_sampling_mode=args.full_orthogonal)
 
     return data_loaders

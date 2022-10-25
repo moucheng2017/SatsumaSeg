@@ -85,7 +85,8 @@ class RandomZoom(object):
 
 class RandomSlicingOrthogonal(object):
     def __init__(self,
-                 resize_image=(1, 1),
+                 new_size_h=384,
+                 new_size_w=384,
                  full_orthogonal=0,
                  discarded_slices=5,
                  zoom=1,
@@ -98,7 +99,8 @@ class RandomSlicingOrthogonal(object):
         self.discarded_slices = discarded_slices
         self.zoom = zoom
         self.full_orthogonal = full_orthogonal
-        self.resize_image_ratio = resize_image
+        self.new_size_h = new_size_h
+        self.new_size_w = new_size_w
 
         # Over sampling the slices on the two ends because they contain small difficult vessels
         # We give the middle slice the lowest weight and the slices at the two very ends the highest weights
@@ -125,22 +127,26 @@ class RandomSlicingOrthogonal(object):
             sample_position_h_h = np.random.choice(np.arange(newh), 1, p=self.sampling_weights_prob)
             sample_position_w_w = np.random.choice(np.arange(neww), 1, p=self.sampling_weights_prob)
 
-            for each_input in volumes:
+            for i, each_input in enumerate(volumes):
 
-                outputs["plane_d"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
-                outputs["plane_h"].append(np.squeeze(each_input[:, sample_position_h_h, :]))
-                outputs["plane_w"].append(np.squeeze(each_input[:, :, sample_position_w_w]))
-
-                # outputs["plane_d"].append(resize(np.squeeze(each_input[sample_position_d_d, :, :]), (newh // self.resize_image_ratio[0], newh // self.resize_image_ratio[1])))
+                # outputs["plane_d"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
                 # outputs["plane_h"].append(np.squeeze(each_input[:, sample_position_h_h, :]))
                 # outputs["plane_w"].append(np.squeeze(each_input[:, :, sample_position_w_w]))
+
+                if i == 0:
+                    outputs["plane_d"].append(resize(np.squeeze(each_input[sample_position_d_d, :, :]), (self.new_size_h, self.new_size_w), order=1))
+                    outputs["plane_h"].append(resize(np.squeeze(each_input[:, sample_position_h_h, :]), (self.new_size_h, self.new_size_w), order=1))
+                    outputs["plane_w"].append(resize(np.squeeze(each_input[:, :, sample_position_w_w]), (self.new_size_h, self.new_size_w), order=1))
+                elif i == 1:
+                    outputs["plane_d"].append(resize(np.squeeze(each_input[sample_position_d_d, :, :]), (self.new_size_h, self.new_size_w), order=0))
+                    outputs["plane_h"].append(resize(np.squeeze(each_input[:, sample_position_h_h, :]), (self.new_size_h, self.new_size_w), order=0))
+                    outputs["plane_w"].append(resize(np.squeeze(each_input[:, :, sample_position_w_w]), (self.new_size_h, self.new_size_w), order=0))
 
             if self.zoom is True:
                 if random.random() >= 0.5:
                     outputs["plane_d"][0], outputs["plane_d"][1] = self.zoom_aug.forward(outputs["plane_d"][0], outputs["plane_d"][1])
                     outputs["plane_h"][0], outputs["plane_h"][1] = self.zoom_aug.forward(outputs["plane_h"][0], outputs["plane_h"][1])
                     outputs["plane_w"][0], outputs["plane_w"][1] = self.zoom_aug.forward(outputs["plane_w"][0], outputs["plane_w"][1])
-
 
             return outputs
 
@@ -157,13 +163,13 @@ class RandomSlicingOrthogonal(object):
 
             if roll_a_dice < 0.34:
                 for each_input in volumes:
-                    outputs["plane"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
+                    outputs["plane"].append(resize(np.squeeze(each_input[sample_position_d_d, :, :]), (self.new_size_h, self.new_size_w)))
             elif roll_a_dice < 0.68:
                 for each_input in volumes:
-                    outputs["plane"].append(np.squeeze(each_input[:, sample_position_h_h, :]))
+                    outputs["plane"].append(resize(np.squeeze(each_input[:, sample_position_h_h, :]), (self.new_size_h, self.new_size_w)))
             else:
                 for each_input in volumes:
-                    outputs["plane"].append(np.squeeze(each_input[:, :, sample_position_w_w]))
+                    outputs["plane"].append(resize(np.squeeze(each_input[:, :, sample_position_w_w]), (self.new_size_h, self.new_size_w)))
 
             if self.zoom == 1:
                 if random.random() >= 0.5:

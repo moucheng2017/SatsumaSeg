@@ -210,7 +210,7 @@ def trainBPL(args):
             save_model_name_full = saved_model_path + '/' + model_name + '_' + str(step) + '.pt'
             torch.save(model, save_model_name_full)
 
-        elif step > args.iterations - 50 and step % 2 == 0:
+        elif step > args.iterations - 100 and step % 2 == 0:
             save_model_name_full = saved_model_path + '/' + model_name + '_' + str(step) + '.pt'
             torch.save(model, save_model_name_full)
 
