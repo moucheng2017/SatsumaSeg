@@ -27,6 +27,7 @@ def main():
     parser.add_argument('--saving_frequency', type=int, help='number of interval of iterations when it starts to save', default=500)
 
     # flags for data preprocessing and augmentation in data loader:
+    parser.add_argument('--unlabelled', type=int, help='0 unlabelled images', default=0)
     parser.add_argument('--norm', type=int, help='1 when normalise each case individually', default=1)
     parser.add_argument('--gaussian', type=int, help='1 when add random gaussian noise', default=1)
     parser.add_argument('--cutout', type=int, help='1 when randomly cutout some patches', default=1)
