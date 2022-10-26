@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import torch
 import timeit
@@ -22,9 +21,6 @@ def trainBPL(args):
     # put model in the gpu:
     model.cuda()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.999), eps=1e-8, weight_decay=args.l2)
-
-    # data loaders:
-    # data_loaders = Helpers.get_data_simple_wrapper(args)
 
     # make saving directories:
     writer, saved_model_path = Helpers.make_saving_directories(model_name, args)
