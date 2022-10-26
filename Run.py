@@ -24,8 +24,8 @@ def main():
     parser.add_argument('--temp', '--t', type=float, help='temperature scaling on output logits when applying sigmoid and softmax', default=2.0)
     parser.add_argument('--l2', type=float, help='l2 normalisation', default=0.01)
     parser.add_argument('--seed', type=int, help='random seed', default=1128)
-    parser.add_argument('--saving_starting', type=int, help='number of iterations when it starts to save', default=2000)
-    parser.add_argument('--saving_frequency', type=int, help='number of interval of iterations when it starts to save', default=2000)
+    parser.add_argument('--saving_starting', type=int, help='number of iterations when it starts to save', default=1000)
+    parser.add_argument('--saving_frequency', type=int, help='number of interval of iterations when it starts to save', default=500)
 
     # hyper parameters for training (specific for semi sup)
     parser.add_argument('--unlabelled', type=int, help='SSL, ratio between unlabelled and labelled data in one batch, if set up as 0, it will be supervised learning', default=1)

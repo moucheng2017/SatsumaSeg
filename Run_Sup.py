@@ -23,8 +23,8 @@ def main():
     parser.add_argument('--temp', '--t', type=float, help='temperature scaling on output logits when applying sigmoid and softmax', default=2.0)
     parser.add_argument('--l2', type=float, help='l2 normalisation', default=0.01)
     parser.add_argument('--seed', type=int, help='random seed', default=1128)
-    parser.add_argument('--saving_starting', type=int, help='number of iterations when it starts to save', default=2000)
-    parser.add_argument('--saving_frequency', type=int, help='number of interval of iterations when it starts to save', default=2000)
+    parser.add_argument('--saving_starting', type=int, help='number of iterations when it starts to save', default=1000)
+    parser.add_argument('--saving_frequency', type=int, help='number of interval of iterations when it starts to save', default=500)
 
     # flags for data preprocessing and augmentation in data loader:
     parser.add_argument('--norm', type=int, help='1 when normalise each case individually', default=1)
