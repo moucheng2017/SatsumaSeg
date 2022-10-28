@@ -99,8 +99,8 @@ def trainSup(args):
                                                     }, step + 1)
 
         elif args.full_orthogonal == 0:
-            loss_o = train_sup(labelled_img=labelled_dict["plaine"][0],
-                               labelled_label=labelled_dict["plaine"][1],
+            loss_o = train_sup(labelled_img=labelled_dict["plane"][0],
+                               labelled_label=labelled_dict["plane"][1],
                                model=model,
                                t=args.temp,
                                augmentation_cutout=args.cutout)
