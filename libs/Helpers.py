@@ -113,7 +113,7 @@ def get_data_dict(dataloader, iterator):
     return data_dict
 
 
-def ramp_up(weight, ratio, step, total_steps, starting=100):
+def ramp_up(weight, ratio, step, total_steps, starting=1000):
     '''
     Args:
         weight: final target weight value
@@ -127,11 +127,13 @@ def ramp_up(weight, ratio, step, total_steps, starting=100):
     # For the 1st 50 steps, the weighting is zero
     # For the ramp-up stage from starting through the length of ramping up, we linearly gradually ramp up the weight
     ramp_up_length = int(ratio*total_steps)
-    if step > starting:
+    if step < starting:
+        return 0.0
+    elif step < (ramp_up_length+starting):
         current_weight = weight * (step-starting) / ramp_up_length
+        return min(current_weight, weight)
     else:
-        current_weight = 0.0
-    return min(current_weight, weight)
+        return weight
 
 
 
