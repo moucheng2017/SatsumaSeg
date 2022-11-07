@@ -41,7 +41,7 @@ def trainBPL(args):
 
     # running loop:
     for step in range(args.iterations):
-
+        
         # ramp up alpha and beta:
         current_alpha = Helpers.ramp_up(args.alpha, args.warmup, step, args.iterations)
         current_beta = Helpers.ramp_up(args.beta, args.warmup, step, args.iterations)
