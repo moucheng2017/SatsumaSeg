@@ -123,8 +123,8 @@ class CT_Dataset_Orthogonal(Dataset):
             image_queue = collections.deque()
 
             # Apply normalisation at each case-wise:
-            if self.normalisation_flag == 1:
-                image = normalisation(label, image)
+            # if self.normalisation_flag == 1:
+            #     image = normalisation(label, image)
 
             image_queue.append(image)
 
@@ -161,8 +161,9 @@ class CT_Dataset_Orthogonal(Dataset):
             image_queue = collections.deque()
 
             # Apply normalisation at each case-wise:
-            if self.normalisation_flag == 1:
-                image = normalisation(None, image)
+            # if self.normalisation_flag == 1:
+                # image = normalisation(None, image)
+
             image_queue.append(image)
 
             # Random contrast:
