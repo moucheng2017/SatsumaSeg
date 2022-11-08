@@ -110,22 +110,26 @@ class RandomSlicingOrthogonalFast(object):
 
         d, h, w = np.shape(volumes[0])
 
-        sample_position_d = np.random.choice(np.arange(d), 1)
-        sample_position_h = np.random.choice(np.arange(h), 1)
-        sample_position_w = np.random.choice(np.arange(w), 1)
+        sample_position_d = random.randint(0, d-1)
+        sample_position_h = random.randint(0, h-1)
+        sample_position_w = random.randint(0, w-1)
 
-        if d > self.new_size_d:
-            sample_position_d_side = np.random.choice(np.arange(d-self.new_size_d), 1)
+        assert d >= self.new_size_d
+        assert h >= self.new_size_h
+        assert w >= self.new_size_w
+
+        if d-1 > self.new_size_d:
+            sample_position_d_side = random.randint(0, d-self.new_size_d)
         else:
             sample_position_d_side = 0
 
-        if h > self.new_size_h:
-            sample_position_h_side = np.random.choice(np.arange(h-self.new_size_h), 1)
+        if h-1 > self.new_size_h:
+            sample_position_h_side = random.randint(0, d-self.new_size_h)
         else:
             sample_position_h_side = 0
 
-        if w > self.new_size_w:
-            sample_position_w_side = np.random.choice(np.arange(w-self.new_size_w), 1)
+        if w-1 > self.new_size_w:
+            sample_position_w_side = random.randint(0, d-self.new_size_w)
         else:
             sample_position_w_side = 0
 
