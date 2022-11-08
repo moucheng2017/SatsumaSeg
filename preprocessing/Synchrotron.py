@@ -1,4 +1,5 @@
 import os
+import glob
 import SimpleITK as sitk
 os.chdir('E:\Dropbox (UCL)\PPFE\Exported data\GLE689_top_seg')
 import numpy as np

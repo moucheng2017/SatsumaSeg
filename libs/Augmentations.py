@@ -83,8 +83,78 @@ class RandomZoom(object):
         return image_zoomed, label_zoomed
 
 
+class RandomSlicingOrthogonalFast(object):
+    def __init__(self,
+                 input_size=(150, 150, 150),  # crop size on the input volume: d x h x w
+                 output_size=(384, 384, 384),  # new size of output augmented volume: d x h x w
+                 discarded_slices=5,
+                 zoom=1):
+
+        self.discarded_slices = discarded_slices
+        self.zoom = zoom
+
+        self.new_size_d = output_size[0]
+        self.new_size_h = output_size[1]
+        self.new_size_w = output_size[2]
+
+        self.input_size_d = input_size[0]
+        self.input_size_h = input_size[1]
+        self.input_size_w = input_size[2]
+
+        if self.zoom == 1:
+            self.zoom_aug = RandomZoom()
+
+    def crop(self, *volumes):
+
+        outputs = {"plane": []}
+
+        d, h, w = np.shape(volumes[0])
+
+        sample_position_d = np.random.choice(np.arange(d), 1)
+        sample_position_h = np.random.choice(np.arange(h), 1)
+        sample_position_w = np.random.choice(np.arange(w), 1)
+
+        if d > self.new_size_d:
+            sample_position_d_side = np.random.choice(np.arange(d-self.new_size_d), 1)
+        else:
+            sample_position_d_side = 0
+
+        if h > self.new_size_h:
+            sample_position_h_side = np.random.choice(np.arange(h-self.new_size_h), 1)
+        else:
+            sample_position_h_side = 0
+
+        if w > self.new_size_w:
+            sample_position_w_side = np.random.choice(np.arange(w-self.new_size_w), 1)
+        else:
+            sample_position_w_side = 0
+
+        roll_a_dice = random.random()
+
+        if roll_a_dice < 0.34:
+            for each_input in volumes:
+                outputs["plane"].append(resize(np.squeeze(each_input[sample_position_d,
+                                                          sample_position_h_side:sample_position_h_side+self.input_size_h,
+                                                          sample_position_w_side:sample_position_w_side+self.input_size_w]), (self.new_size_h, self.new_size_w)))
+        elif roll_a_dice < 0.68:
+            for each_input in volumes:
+                outputs["plane"].append(resize(np.squeeze(each_input[sample_position_d_side:sample_position_d_side+self.input_size_d,
+                                                          sample_position_h, sample_position_h_side:sample_position_h_side+self.input_size_h]), (self.new_size_d, self.new_size_w)))
+        else:
+            for each_input in volumes:
+                outputs["plane"].append(resize(np.squeeze(each_input[sample_position_d_side:sample_position_d_side+self.input_size_d,
+                                                          sample_position_h_side:sample_position_h_side+self.input_size_h, sample_position_w]), (self.new_size_d, self.new_size_h)))
+
+        if self.zoom == 1:
+            if random.random() >= 0.5:
+                outputs["plane"][0], outputs["plane"][1] = self.zoom_aug.forward(outputs["plane"][0], outputs["plane"][1])
+
+        return outputs
+
+
 class RandomSlicingOrthogonal(object):
     def __init__(self,
+                 new_size_d=384,
                  new_size_h=384,
                  new_size_w=384,
                  full_orthogonal=0,
@@ -99,6 +169,8 @@ class RandomSlicingOrthogonal(object):
         self.discarded_slices = discarded_slices
         self.zoom = zoom
         self.full_orthogonal = full_orthogonal
+
+        self.new_size_d = new_size_d
         self.new_size_h = new_size_h
         self.new_size_w = new_size_w
 
@@ -121,26 +193,26 @@ class RandomSlicingOrthogonal(object):
                        "plane_h": [],
                        "plane_w": []}
 
-            newd, newh, neww = np.shape(volumes[0])
+            d, h, w = np.shape(volumes[0])
+            sample_position_d_d = np.random.choice(np.arange(d), 1, p=self.sampling_weights_prob)
+            sample_position_h_h = np.random.choice(np.arange(h), 1, p=self.sampling_weights_prob)
+            sample_position_w_w = np.random.choice(np.arange(w), 1, p=self.sampling_weights_prob)
 
-            sample_position_d_d = np.random.choice(np.arange(newd), 1, p=self.sampling_weights_prob)
-            sample_position_h_h = np.random.choice(np.arange(newh), 1, p=self.sampling_weights_prob)
-            sample_position_w_w = np.random.choice(np.arange(neww), 1, p=self.sampling_weights_prob)
+            if d > self.new_size_d:
+                d_h = d - self.new_size_d
+                sample_position_d_h = np.random.choice(np.arange(d_h), 1)
+            else:
+                sample_position_d_h = 0
 
             for i, each_input in enumerate(volumes):
-
-                # outputs["plane_d"].append(np.squeeze(each_input[sample_position_d_d, :, :]))
-                # outputs["plane_h"].append(np.squeeze(each_input[:, sample_position_h_h, :]))
-                # outputs["plane_w"].append(np.squeeze(each_input[:, :, sample_position_w_w]))
-
                 if i == 0:
                     outputs["plane_d"].append(resize(np.squeeze(each_input[sample_position_d_d, :, :]), (self.new_size_h, self.new_size_w), order=1))
-                    outputs["plane_h"].append(resize(np.squeeze(each_input[:, sample_position_h_h, :]), (self.new_size_h, self.new_size_w), order=1))
-                    outputs["plane_w"].append(resize(np.squeeze(each_input[:, :, sample_position_w_w]), (self.new_size_h, self.new_size_w), order=1))
+                    outputs["plane_h"].append(resize(np.squeeze(each_input[sample_position_d_h:sample_position_d_h+self.new_size_d, sample_position_h_h, :]), (self.new_size_h, self.new_size_w), order=1))
+                    outputs["plane_w"].append(resize(np.squeeze(each_input[sample_position_d_h:sample_position_d_h+self.new_size_d, :, sample_position_w_w]), (self.new_size_h, self.new_size_w), order=1))
                 elif i == 1:
                     outputs["plane_d"].append(resize(np.squeeze(each_input[sample_position_d_d, :, :]), (self.new_size_h, self.new_size_w), order=0))
-                    outputs["plane_h"].append(resize(np.squeeze(each_input[:, sample_position_h_h, :]), (self.new_size_h, self.new_size_w), order=0))
-                    outputs["plane_w"].append(resize(np.squeeze(each_input[:, :, sample_position_w_w]), (self.new_size_h, self.new_size_w), order=0))
+                    outputs["plane_h"].append(resize(np.squeeze(each_input[sample_position_d_h:sample_position_d_h+self.new_size_d, sample_position_h_h, :]), (self.new_size_h, self.new_size_w), order=0))
+                    outputs["plane_w"].append(resize(np.squeeze(each_input[sample_position_d_h:sample_position_d_h+self.new_size_d, :, sample_position_w_w]), (self.new_size_h, self.new_size_w), order=0))
 
             if self.zoom is True:
                 if random.random() >= 0.5:
@@ -179,7 +251,7 @@ class RandomSlicingOrthogonal(object):
 
 
 class RandomContrast(object):
-    def __init__(self, bin_range=(100, 255)):
+    def __init__(self, bin_range=(10, 255)):
         # self.bin_low = bin_range[0]
         # self.bin_high = bin_range[1]
         self.bin_range = bin_range
