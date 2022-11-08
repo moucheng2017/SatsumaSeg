@@ -28,7 +28,7 @@ class HipCTDataset(Dataset):
     def __init__(self,
                  images_folder,
                  labels_folder=None,
-                 input_shape=(150, 150, 150),
+                 input_shape=(150, 140, 140),
                  output_shape=(160, 160, 160),
                  gaussian_aug=1,
                  zoom_aug=1,
