@@ -89,7 +89,7 @@ def make_saving_directories(model_name, args):
 
 def get_iterators(args):
     data_loaders = getHipData(data_directory=args.data,
-                           train_batchsize=args.batch,
+                             train_batchsize=args.batch,
                            zoom_aug=args.zoom,
                            contrast_aug=args.contrast,
                            unlabelled=args.unlabelled)
@@ -107,7 +107,7 @@ def get_data_dict(dataloader, iterator):
     return data_dict
 
 
-def ramp_up(weight, ratio, step, total_steps, starting=1000):
+def ramp_up(weight, ratio, step, total_steps):
     '''
     Args:
         weight: final target weight value
@@ -121,6 +121,8 @@ def ramp_up(weight, ratio, step, total_steps, starting=1000):
     # For the 1st 50 steps, the weighting is zero
     # For the ramp-up stage from starting through the length of ramping up, we linearly gradually ramp up the weight
     ramp_up_length = int(ratio*total_steps)
+    starting = total_steps // 10
+
     if step < starting:
         return 0.0
     elif step < (ramp_up_length+starting):

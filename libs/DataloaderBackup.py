@@ -28,7 +28,8 @@ class HipCTDataset(Dataset):
     def __init__(self,
                  images_folder,
                  labels_folder=None,
-                 output_shape=(160, 160),
+                 input_shape=(150, 140, 140),
+                 output_shape=(160, 160, 160),
                  gaussian_aug=1,
                  zoom_aug=1,
                  contrast_aug=1):
@@ -51,20 +52,15 @@ class HipCTDataset(Dataset):
 
         self.augmentation_cropping = RandomSlicingOrthogonalFast(discarded_slices=1,
                                                                  zoom=zoom_aug,
+                                                                 input_size=input_shape,
                                                                  output_size=output_shape)
 
     def __getitem__(self, index):
         # Check image extension:
-        # all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.npy*')))
-        all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
+        all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.npy*')))
         imagename = all_images[index]
         # load image and preprocessing:
-        image = nib.load(imagename)
-        image = image.get_fdata()
-
-        # imagename = all_images[index]
-        # load image and preprocessing:
-        # image = np.load(imagename)
+        image = np.load(imagename)
 
         image = np.array(image, dtype='float32')
         # transform dimension:
@@ -76,9 +72,8 @@ class HipCTDataset(Dataset):
 
         if self.lbls_folder:
             # Labels:
-            all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.nii.gz*')))
-            label = nib.load(all_labels[index])
-            label = label.get_fdata()
+            all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.npy*')))
+            label = np.load(all_labels[index])
 
             label = np.array(label, dtype='float32')
             label = np.transpose(label, (2, 0, 1))
@@ -147,8 +142,7 @@ class HipCTDataset(Dataset):
             return inputs_dict, imagename
 
     def __len__(self):
-        return len(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz')))
-        # return len(glob.glob(os.path.join(self.imgs_folder, '*.npy')))
+        return len(glob.glob(os.path.join(self.imgs_folder, '*.npy')))
 
 
 class CT_Dataset_Orthogonal(Dataset):
@@ -375,26 +369,6 @@ def getData(data_directory,
                                             num_workers=0,
                                             drop_last=True)
 
-    val_image_folder_labelled = data_directory + '/validate/imgs'
-    val_label_folder_labelled = data_directory + '/validate/lbls'
-
-    validate_dataset_labelled = CT_Dataset_Orthogonal(images_folder=val_image_folder_labelled,
-                                                      labels_folder=val_label_folder_labelled,
-                                                      sampling_weight=sampling_weight,
-                                                      new_size_h=new_size_h,
-                                                      new_size_w=new_size_w,
-                                                      normalisation=norm,
-                                                      zoom_aug=zoom_aug,
-                                                      contrast_aug=contrast_aug,
-                                                      lung_window=lung_window,
-                                                      full_orthogonal=full_sampling_mode)
-
-    validate_loader_labelled = data.DataLoader(dataset=validate_dataset_labelled,
-                                               batch_size=train_batchsize,
-                                               shuffle=True,
-                                               num_workers=0,
-                                               drop_last=True)
-
     # Unlabelled images data set and data loader:
     if unlabelled > 0:
         train_image_folder_unlabelled = data_directory + '/unlabelled/imgs'
@@ -417,18 +391,12 @@ def getData(data_directory,
 
         return {'train_data_l': train_dataset_labelled,
                 'train_loader_l': train_loader_labelled,
-                'val_data_l': validate_dataset_labelled,
-                'val_loader_l': validate_loader_labelled,
                 'train_data_u': train_dataset_unlabelled,
-                'train_loader_u': train_loader_unlabelled
-                }
+                'train_loader_u': train_loader_unlabelled}
 
     else:
         return {'train_data_l': train_dataset_labelled,
-                'train_loader_l': train_loader_labelled,
-                'val_data_l': validate_dataset_labelled,
-                'val_loader_l': validate_loader_labelled
-                }
+                'train_loader_l': train_loader_labelled}
 
 
 def getHipData(data_directory,
@@ -464,20 +432,6 @@ def getHipData(data_directory,
                                             num_workers=0,
                                             drop_last=True)
 
-    val_image_folder_labelled = data_directory + '/test/imgs'
-    val_label_folder_labelled = data_directory + '/test/lbls'
-
-    val_dataset_labelled = HipCTDataset(images_folder=val_image_folder_labelled,
-                                        labels_folder=val_label_folder_labelled,
-                                        zoom_aug=zoom_aug,
-                                        contrast_aug=contrast_aug)
-
-    val_loader_labelled = data.DataLoader(dataset=val_dataset_labelled,
-                                          batch_size=train_batchsize,
-                                          shuffle=True,
-                                          num_workers=0,
-                                          drop_last=True)
-
     # Unlabelled images data set and data loader:
     if unlabelled > 0:
         train_image_folder_unlabelled = data_directory + '/unlabelled/imgs'
@@ -494,17 +448,12 @@ def getHipData(data_directory,
 
         return {'train_data_l': train_dataset_labelled,
                 'train_loader_l': train_loader_labelled,
-                'val_data_l': val_dataset_labelled,
-                'val_loader_l': val_loader_labelled,
                 'train_data_u': train_dataset_unlabelled,
                 'train_loader_u': train_loader_unlabelled}
 
     else:
         return {'train_data_l': train_dataset_labelled,
-                'train_loader_l': train_loader_labelled,
-                'val_data_l': val_dataset_labelled,
-                'val_loader_l': val_loader_labelled
-                }
+                'train_loader_l': train_loader_labelled}
 
 
 if __name__ == '__main__':
