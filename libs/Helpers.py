@@ -113,7 +113,7 @@ def get_data_dict(dataloader, iterator):
     return data_dict
 
 
-def ramp_up(weight, ratio, step, total_steps, starting=1000):
+def ramp_up(weight, ratio, step, total_steps, starting=10):
     '''
     Args:
         weight: final target weight value

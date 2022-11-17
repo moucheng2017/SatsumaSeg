@@ -37,8 +37,8 @@ def trainBPL(args):
     iterator_train_labelled = iter(train_labelled_data_loader)
 
     # train labelled:
-    val_labelled_data_loader = data_iterators.get('val_loader_l')
-    iterator_val_labelled = iter(val_labelled_data_loader)
+    # val_labelled_data_loader = data_iterators.get('val_loader_l')
+    # iterator_val_labelled = iter(val_labelled_data_loader)
 
     # train unlabelled:
     train_unlabelled_data_loader = data_iterators.get('train_loader_u')
@@ -61,7 +61,7 @@ def trainBPL(args):
         unlabelled_dict = HelpersHip.get_data_dict(train_unlabelled_data_loader, iterator_train_unlabelled)
 
         # validate data:
-        validate_dict = HelpersHip.get_data_dict(val_labelled_data_loader, iterator_val_labelled)
+        # validate_dict = HelpersHip.get_data_dict(val_labelled_data_loader, iterator_val_labelled)
 
         if args.full_orthogonal == 1:
             loss_d = train_semi(labelled_img=labelled_dict["plane_d"][0],
