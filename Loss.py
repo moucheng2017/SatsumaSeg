@@ -17,10 +17,13 @@ import numpy as np
 from scipy.ndimage import distance_transform_edt
 
 
-def kld_loss(mu, logvar, mu_prior=0.5, var_prior=0.1):
-    # Kl between two Gaussians:
-    loss = -0.5 - logvar + math.log(var_prior) + (logvar.exp() + (mu - mu_prior)**2) / (2*(var_prior)**2)
-    return loss
+def kld_loss(mu, logvar, mu_prior):
+    # Kl between two Gaussians: =0.5, var_prior=0.1
+    # loss = - logvar.mean() + 50 * logvar.mean().exp() + 50 * (mu.mean() - 0.5).pow(2)
+    # loss = -logvar.mean() + 50 * (logvar.mean().exp() + (mu.mean() - 0.4).pow(2)) - 1.5  # N(0.4, 0.1)
+    # loss = -0.5 - logvar.mean() + math.log(var_prior) + (logvar.mean().exp() + (mu.mean() - mu_prior).pow(2)) / (2*(var_prior**2))
+    loss = -logvar.mean() + 50 * (logvar.mean().exp() + (mu.mean() - mu_prior).pow(2)) - 1.5  # N(0.4, 0.1)
+    return loss.mean()
 
 
 def softmax_helper(x):
