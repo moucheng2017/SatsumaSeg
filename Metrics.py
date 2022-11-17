@@ -100,21 +100,21 @@ def segmentation_scores(label_trues, label_preds, n_class):
     hist = np.zeros((n_class, n_class))
     for lt, lp in zip(label_trues, label_preds):
         hist += _fast_hist(lt.flatten(), lp.flatten(), n_class)
-    acc = np.diag(hist).sum() / hist.sum()
-    acc_cls = np.diag(hist) / hist.sum(axis=1)
-    acc_cls = np.nanmean(acc_cls)
+    # acc = np.diag(hist).sum() / hist.sum()
+    # acc_cls = np.diag(hist) / hist.sum(axis=1)
+    # acc_cls = np.nanmean(acc_cls)
     # iou:
     iu = np.diag(hist) / (hist.sum(axis=1) + hist.sum(axis=0) - np.diag(hist) + 1e-10)
     mean_iou = np.nanmean(iu)
 
-    freq = hist.sum(axis=1) / hist.sum()
-    fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
+    # freq = hist.sum(axis=1) / hist.sum()
+    # fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
     # iflat = label_preds.view(-1)
     # tflat = label_trues.view(-1)
     # intersection = (iflat * tflat).sum()
     # union = iflat.sum() + tflat.sum()
 
-    return mean_iou, acc_cls, fwavacc
+    return mean_iou
 # ==================================================================================
 
 

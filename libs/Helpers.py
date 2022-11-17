@@ -42,7 +42,6 @@ def network_intialisation(args):
                        '_i' + str(args.iterations) + \
                        '_l2_' + str(args.l2) + \
                        '_c_' + str(args.contrast) + \
-                       '_n_' + str(args.norm) + \
                        '_t' + str(args.temp)
 
     else:
@@ -52,8 +51,9 @@ def network_intialisation(args):
                         depth=args.depth,
                         out_ch=args.output_dim,
                         norm='in',
-                        ratio=8,
-                        detach=args.detach)
+                        ratio=8
+                        # detach=args.detach
+                        )
 
         model_name = 'BPUnet_l' + str(args.lr) + \
                        '_b' + str(args.batch) + \
@@ -63,14 +63,13 @@ def network_intialisation(args):
                        '_i' + str(args.iterations) + \
                        '_l2_' + str(args.l2) + \
                        '_c_' + str(args.contrast) + \
-                       '_n_' + str(args.norm) + \
                        '_t' + str(args.temp) + \
-                       '_de_' + str(args.detach) + \
                        '_mu' + str(args.mu) + \
-                       '_sig' + str(args.sigma) + \
                        '_a' + str(args.alpha) + \
                        '_w' + str(args.warmup)
 
+    # '_de_' + str(args.detach) + \
+    # '_sig' + str(args.sigma) + \
     return model, model_name
 
 
@@ -90,15 +89,14 @@ def make_saving_directories(model_name, args):
 def get_iterators(args):
     data_loaders = getData(data_directory=args.data,
                            train_batchsize=args.batch,
-                           norm=args.norm,
                            zoom_aug=args.zoom,
-                           sampling_weight=args.sampling,
+                           gaussian_aug=args.gaussian,
+                           # sampling_weight=args.sampling,
                            contrast_aug=args.contrast,
-                           lung_window=args.lung_window,
+                           # lung_window=args.lung_window,
                            unlabelled=args.unlabelled,
-                           new_size_h=args.new_size_h,
-                           new_size_w=args.new_size_w,
-                           full_sampling_mode=args.full_orthogonal)
+                           output_shape=(args.new_size_h, args.new_size_w),
+                           full_orthogonal=args.full_orthogonal)
 
     return data_loaders
 

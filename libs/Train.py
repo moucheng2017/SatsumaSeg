@@ -64,12 +64,12 @@ def calculate_sup_loss(lbl,
 
     if torch.sum(lbl) > 10: # check whether there are enough foreground pixels
         prob_output = outputs_dict.get('segmentation') # get segmentation map
-        if b_u > 0: # check if unlabelled data is included
+        if b_u: # check if unlabelled data is included
             prob_output, _ = torch.split(prob_output, [b_l, b_u], dim=0) # if both labelled and unlabelled, split the data and use the labelled
 
         prob_output = torch.sigmoid(prob_output / temp) # apply element-wise sigmoid
 
-        if cutout_aug is True: # apply cutout augmentation
+        if cutout_aug == 1: # apply cutout augmentation
             prob_output, lbl = randomcutout(prob_output, lbl)
 
         # channel-wise loss (this is for multi-channel sigmoid function as well):
@@ -78,7 +78,6 @@ def calculate_sup_loss(lbl,
             loss = SoftDiceLoss()(prob_output, lbl) + nn.BCELoss(reduction='mean')(prob_output.squeeze() + 1e-10, lbl.squeeze() + 1e-10)
             class_outputs = (prob_output > 0.95).float()
             train_mean_iu_ = segmentation_scores(lbl, class_outputs, 2)
-            train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
             return {'loss': loss.mean(),
                     'train iou': train_mean_iu_}
 
@@ -88,7 +87,6 @@ def calculate_sup_loss(lbl,
                 loss = SoftDiceLoss()(prob_output, lbl) + nn.BCELoss(reduction='mean')(prob_output.squeeze() + 1e-10, lbl.squeeze() + 1e-10)
                 class_outputs = (prob_output > 0.95).float()
                 train_mean_iu_ = segmentation_scores(lbl, class_outputs, 2)
-                train_mean_iu_ = sum(train_mean_iu_) / len(train_mean_iu_)
                 return {'loss': loss.mean(),
                         'train iou': train_mean_iu_}
 
@@ -127,7 +125,8 @@ def calculate_kl_loss(outputs_dict,
                       b_u,
                       b_l,
                       prior_u,
-                      prior_var):
+                      # prior_var
+                      ):
 
     assert b_u > 0
     posterior_mu = outputs_dict.get('mu')
@@ -135,7 +134,8 @@ def calculate_kl_loss(outputs_dict,
 
     confidence_threshold_learnt = outputs_dict.get('learnt_threshold')
 
-    loss = kld_loss(posterior_mu, posterior_logvar, prior_u, prior_var)
+    # loss = kld_loss(posterior_mu, posterior_logvar, prior_u, prior_var)
+    loss = kld_loss(posterior_mu, posterior_logvar, prior_u)
 
     threshold_learnt_l, threshold_learnt_u = torch.split(confidence_threshold_learnt, [b_l, b_u], dim=0)
 
@@ -148,7 +148,7 @@ def calculate_pseudo_loss(outputs_dict,
                           b_u,
                           b_l,
                           temp,
-                          cutout_aug,
+                          cutout_aug=0,
                           conf_threshold='bayesian'):
 
     assert b_u > 0
@@ -160,24 +160,28 @@ def calculate_pseudo_loss(outputs_dict,
     else:
         threshold = 0.5
 
-    _, predictions_u = torch.split(predictions_all, [b_l, b_u], dim=0)
-    _, threshold_u = torch.split(threshold, [b_l, b_u], dim=0)
+    predictions_l, predictions_u = torch.split(predictions_all, [b_l, b_u], dim=0)
+    threshold_l, threshold_u = torch.split(threshold, [b_l, b_u], dim=0)
     prob_output_u = torch.sigmoid(predictions_u / temp)
-    pseudo_label_u = (prob_output_u > threshold_u).float()
+    pseudo_label_u = (prob_output_u >= threshold_u).float()
+    prob_output_l = torch.sigmoid(predictions_l / temp)
+    pseudo_label_l = (prob_output_l >= threshold_l).float()
 
-    if cutout_aug is True:
+    if cutout_aug == 1:
         prob_output_u, pseudo_label_u = randomcutout(prob_output_u, pseudo_label_u)
 
     if torch.sum(pseudo_label_u) > 10:
         if len(prob_output_u.size()) == 3:
             # this is binary segmentation
             loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
+            loss += 0.5*SoftDiceLoss()(prob_output_l, pseudo_label_l) + nn.BCELoss(reduction='mean')(prob_output_l.squeeze() + 1e-10, pseudo_label_l.squeeze() + 1e-10)
             return {'loss': loss.mean()}
 
         elif len(prob_output_u.size()) == 4:
             if prob_output_u.size()[1] == 1:
                 # this is also binary segmentation
                 loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
+                loss += 0.5*SoftDiceLoss()(prob_output_l, pseudo_label_l) + nn.BCELoss(reduction='mean')(prob_output_l.squeeze() + 1e-10, pseudo_label_l.squeeze() + 1e-10)
                 return {'loss': loss.mean()}
 
             else:
@@ -186,11 +190,12 @@ def calculate_pseudo_loss(outputs_dict,
                 loss = torch.tensor(0).to('cuda')
                 effective_classes = 0
                 for i in range(prob_output_u.size()[1]):  # multiple
-                    if torch.sum(pseudo_label_u[:, i, :, :]) > 1.0:
+                    if torch.sum(pseudo_label_u[:, i, :, :]) > 10.0:
                         # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
                         # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
                         effective_classes += 1
                         loss += SoftDiceLoss()(prob_output_u[:, i, :, :], pseudo_label_u[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output_u[:, i, :, :].squeeze() + 1e-10, pseudo_label_u[:, i, :, :].squeeze() + 1e-10).mean()
+                        loss += 0.5*SoftDiceLoss()(prob_output_l[:, i, :, :], pseudo_label_l[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output_l[:, i, :, :].squeeze() + 1e-10, pseudo_label_l[:, i, :, :].squeeze() + 1e-10).mean()
                 loss = loss / effective_classes
                 return {'loss': loss.mean()}
 
@@ -202,7 +207,7 @@ def train_sup(labelled_img,
               labelled_label,
               model,
               t=2.0,
-              augmentation_cutout=True):
+              augmentation_cutout=0):
 
     inputs = np2tensor_all(**{'img_l':labelled_img, 'lbl':labelled_label})
     train_img = get_img(**inputs)
@@ -221,9 +226,9 @@ def train_semi(labelled_img,
                model,
                unlabelled_img,
                t=2.0,
-               prior_mu=0.6,
-               prior_logsigma=0.1,
-               augmentation_cutout=True):
+               prior_mu=0.7,
+               # prior_logsigma=0.1,
+               augmentation_cutout=0):
 
     # convert data from numpy to tensor:
     inputs = np2tensor_all(**{'img_l': labelled_img,
@@ -249,7 +254,8 @@ def train_semi(labelled_img,
                                 b_l=train_img.get('batch labelled'),
                                 b_u=train_img.get('batch unlabelled'),
                                 prior_u=prior_mu,
-                                prior_var=prior_logsigma)
+                                # prior_var=prior_logsigma
+                                )
 
     # pseudo label loss:
     pseudo_loss = calculate_pseudo_loss(outputs_dict=outputs_dict,
