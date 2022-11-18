@@ -8,6 +8,8 @@ import nibabel as nib
 
 def numpy2nifti(source_np_file):
     source_np = np.load(source_np_file)
+    source_np[source_np > 0] = 1
+    source_np[source_np < 0] = 0
     new_img = nib.Nifti1Image(source_np, affine=np.eye(4))
     return new_img
 
