@@ -171,7 +171,7 @@ def trainSup(args):
                 # # #                        TensorboardX Logging                        #
                 # # # # ================================================================ #
 
-                writer.add_scalars('loss metrics', {'train loss': loss.get('supervised loss').mean().item()}, step + 1)
+                writer.add_scalars('loss metrics', {'train loss': loss.item()}, step + 1)
                 writer.add_scalars('ious', {'train iu': train_iou,
                                             'val iu': validate_acc}, step + 1)
 
