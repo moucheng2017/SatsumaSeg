@@ -77,6 +77,10 @@ class CustomDataset(Dataset):
 
             label = np.array(label, dtype='float32')
 
+            # binary segmentation:
+            # (todo) this is temporary fix for binary segmentation
+            label[label != 1] = 0
+
             # Random Gaussian:
             if self.gaussian_aug_flag == 1:
                 if random.random() > .5:
