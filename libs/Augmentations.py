@@ -4,6 +4,33 @@ import math
 import numpy as np
 import scipy.ndimage
 from skimage.transform import resize
+import numpy.ma as ma
+
+
+def norm95(image):
+    # calculate the historgram of intensities of image and keep the top 95% then use mean of those to calculate
+    # sort the array of intensities:
+    image95 = image.flatten()
+    size = len(image95)
+    image95 = sorted(image95)[int(math.ceil((size * 5) / 100))-1:]
+    image = (image - np.nanmean(image95) + 1e-10) / (np.nanstd(image95) + 1e-10)
+    return image
+
+
+# def normalisation(label, image):
+#     # Case-wise normalisation
+#     # Normalisation using values inside of the foreground mask
+#
+#     if label is None:
+#         lung_mean = np.nanmean(image)
+#         lung_std = np.nanstd(image)
+#     else:
+#         image_masked = ma.masked_where(label > 0.5, image)
+#         lung_mean = np.nanmean(image_masked)
+#         lung_std = np.nanstd(image_masked)
+#
+#     image = (image - lung_mean + 1e-10) / (lung_std + 1e-10)
+#     return image
 
 
 class RandomZoom(object):
@@ -12,16 +39,18 @@ class RandomZoom(object):
     # We also zoom out the slices in the start and the end
     def __init__(self,
                  zoom_ratio_h=(0.5, 0.8),
-                 zoom_ratio_w=(0.5, 0.8)):
+                 zoom_ratio_w=(0.5, 0.8),
+                 debug=0):
 
         self.zoom_ratio_h = zoom_ratio_h
         self.zoom_ratio_w = zoom_ratio_w
+        self.debug = debug
 
-    def sample_positions(self, label):
+    def sample_positions(self, image):
         ratio_h = round(random.uniform(self.zoom_ratio_h[0], self.zoom_ratio_h[1]), 2)
         ratio_w = round(random.uniform(self.zoom_ratio_w[0], self.zoom_ratio_w[1]), 2)
         # get image size upper bounds:
-        h, w = np.shape(label)[-2], np.shape(label)[-1]
+        h, w = np.shape(image)[-2], np.shape(image)[-1]
         # get cropping upper bounds:
         upper_h, upper_w = int(h*(1-ratio_h)), int(w*(1-ratio_w))
         # sampling positions:
@@ -177,19 +206,15 @@ class RandomSlicingOrthogonal(object):
 
 
 class RandomContrast(object):
-    def __init__(self, bin_range=(10, 255)):
+    def __init__(self, bin_range=(10, 100)):
         # self.bin_low = bin_range[0]
         # self.bin_high = bin_range[1]
         self.bin_range = bin_range
 
     def randomintensity(self, input):
-
         augmentation_flag = np.random.rand()
-
         if augmentation_flag >= 0.5:
-            # bin = np.random.choice(self.bin_range)
             bin = random.randint(self.bin_range[0], self.bin_range[1])
-            # c, d, h, w = np.shape(input)
             c, h, w = np.shape(input)
             image_histogram, bins = np.histogram(input.flatten(), bin, density=True)
             cdf = image_histogram.cumsum()  # cumulative distribution function
@@ -203,7 +228,7 @@ class RandomContrast(object):
 
 
 class RandomGaussian(object):
-    def __init__(self, mean=0, std=0.01):
+    def __init__(self, mean=0, std=0.1):
         self.m = mean
         self.sigma = std
 
