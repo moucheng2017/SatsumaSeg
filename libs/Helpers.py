@@ -91,9 +91,9 @@ def get_iterators(args):
                            train_batchsize=args.batch,
                            zoom_aug=args.zoom,
                            gaussian_aug=args.gaussian,
+                           data_format=args.format,
                            # sampling_weight=args.sampling,
                            contrast_aug=args.contrast,
-                           # lung_window=args.lung_window,
                            unlabelled=args.unlabelled,
                            output_shape=(args.new_size_h, args.new_size_w),
                            full_orthogonal=args.full_orthogonal)
