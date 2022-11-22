@@ -1,6 +1,9 @@
 import os
 import numpy as np
 import pathlib
+import sys
+sys.path.append('..')
+from libs.Augmentations import norm95
 
 
 if __name__ == '__main__':
@@ -9,8 +12,8 @@ if __name__ == '__main__':
     new_class = 3.0
 
     # cut chunks along d dimension into cubes every 162 pixels
-    img_path = '/home/moucheng/projects_data/hipct_covid/original_labelled/imgs'
-    lbl_path = '/home/moucheng/projects_data/hipct_covid/original_labelled/lbls'
+    img_path = '/home/moucheng/projects_data/COVID_ML_data/original_labelled/imgs'
+    lbl_path = '/home/moucheng/projects_data/COVID_ML_data/original_labelled/lbls'
 
     save_path_img = '/home/moucheng/projects_data/hipct_covid/class' + str(new_class) + '/labelled/imgs/'
     save_path_lbl = '/home/moucheng/projects_data/hipct_covid/class' + str(new_class) + '/labelled/lbls/'
@@ -20,6 +23,7 @@ if __name__ == '__main__':
 
     imgs = os.listdir(img_path)
     lbls = os.listdir(lbl_path)
+
     imgs.sort()
     lbls.sort()
 
@@ -37,6 +41,7 @@ if __name__ == '__main__':
         lbl = np.load(lbl)
 
         img = np.asfarray(img)
+        img = norm95(img)
         lbl = np.asfarray(lbl)
 
         lbl[lbl == new_class] = 1.0
