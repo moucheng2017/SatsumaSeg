@@ -110,8 +110,10 @@ def trainBPL(args):
             sup_loss = sup_loss / 3
             # print(sup_loss)
 
-            train_iou = loss_d.get('supervised loss').get('train iou') + loss_h.get('supervised loss').get('train iou') + loss_w.get('supervised loss').get('train iou')
-            train_iou = train_iou / 3
+            train_iou_d = loss_d.get('supervised loss').get('train iou')
+            train_iou_h = loss_h.get('supervised loss').get('train iou')
+            train_iou_w = loss_w.get('supervised loss').get('train iou')
+            # train_iou = train_iou / 3
 
             pseudo_loss = loss_d.get('pseudo loss').get('loss') + loss_h.get('pseudo loss').get('loss') + loss_w.get('pseudo loss').get('loss')
             pseudo_loss = current_alpha*pseudo_loss / 3
@@ -147,7 +149,9 @@ def trainBPL(args):
                 print(
                     'Step [{}/{}], '
                     'lr: {:.4f},'
-                    'train iou: {:.4f},'
+                    'train iou d: {:.4f},'
+                    'train iou h: {:.4f},'
+                    'train iou w: {:.4f},'
                     'val iou: {:.4f},'
                     'loss d: {:.4f}, '
                     'loss h: {:.4f}, '
@@ -157,7 +161,9 @@ def trainBPL(args):
                     'Threshold: {:.4f}'.format(step + 1,
                                                args.iterations,
                                                optimizer.param_groups[0]["lr"],
-                                               train_iou,
+                                               train_iou_d,
+                                               train_iou_h,
+                                               train_iou_w,
                                                validate_acc,
                                                loss_d.get('supervised loss').get('loss').mean().item(),
                                                loss_h.get('supervised loss').get('loss').mean().item(),
@@ -179,7 +185,9 @@ def trainBPL(args):
                                                     'learnt threshold': learnt_threshold,
                                                     'train kl loss': kl_loss}, step + 1)
 
-                writer.add_scalars('ious', {'train iu': train_iou,
+                writer.add_scalars('ious', {'train iu d': train_iou_d,
+                                            'train iu h': train_iou_h,
+                                            'train iu w': train_iou_w,
                                             'val iu': validate_acc}, step + 1)
 
         elif args.full_orthogonal == 0:
