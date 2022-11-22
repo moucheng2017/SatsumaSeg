@@ -126,19 +126,10 @@ class RandomSlicingOrthogonal(object):
                        "plane_w": []}
 
             d, h, w = np.shape(volumes[0])
-            # sample_position_d_d = np.random.choice(np.arange(d), 1, p=self.sampling_weights_prob)
-            # sample_position_h_h = np.random.choice(np.arange(h), 1, p=self.sampling_weights_prob)
-            # sample_position_w_w = np.random.choice(np.arange(w), 1, p=self.sampling_weights_prob)
 
             sample_position_d = random.randint(0, d - 1)
             sample_position_h = random.randint(0, h - 1)
             sample_position_w = random.randint(0, w - 1)
-
-            # if d > self.new_size_d:
-            #     d_h = d - self.new_size_d
-            #     sample_position_d_h = np.random.choice(np.arange(d_h), 1)
-            # else:
-            #     sample_position_d_h = 0
 
             for i, each_input in enumerate(volumes):
                 if i == 0:
@@ -170,10 +161,6 @@ class RandomSlicingOrthogonal(object):
             sample_position_d = random.randint(0, d - 1)
             sample_position_h = random.randint(0, h - 1)
             sample_position_w = random.randint(0, w - 1)
-
-            # assert d >= self.new_size_d
-            # assert h >= self.new_size_h
-            # assert w >= self.new_size_w
 
             roll_a_dice = random.random()
 

@@ -49,7 +49,6 @@ class CustomDataset(Dataset):
             all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.npy*')))
             imagename = all_images[index]
             image = np.load(imagename)
-
         else:
             all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
             imagename = all_images[index]
@@ -65,6 +64,19 @@ class CustomDataset(Dataset):
         _, imagename = os.path.split(imagename)
         imagename, imagetxt = os.path.splitext(imagename)
 
+        # Random Gaussian:
+        if self.gaussian_aug_flag == 1:
+            if random.random() > .5:
+                image = self.gaussian_noise.gaussiannoise(image)
+
+        # Random contrast:
+        if self.contrast_aug_flag == 1:
+            if random.random() > .5:
+                image = self.augmentation_contrast.randomintensity(image)
+
+        # Renormalisation:
+        image = norm95(image)
+
         if self.lbls_folder:
             # Labels:
             if self.data_format == 'np':
@@ -74,44 +86,13 @@ class CustomDataset(Dataset):
                 all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.nii.gz*')))
                 label = nib.load(all_labels[index])
                 label = label.get_fdata()
-
             label = np.array(label, dtype='float32')
-
-            # binary segmentation:
-            # (todo) this is temporary fix for binary segmentation
-            label[label != 1] = 0
-
-            # Random Gaussian:
-            if self.gaussian_aug_flag == 1:
-                if random.random() > .5:
-                    image = self.gaussian_noise.gaussiannoise(image)
-
-            # Random contrast:
-            if self.contrast_aug_flag == 1:
-                if random.random() > .5:
-                    image = self.augmentation_contrast.randomintensity(image)
-
-            # get slices by weighted sampling on each axis with zoom in augmentation:
-            image = norm95(image)
             inputs_dict = self.augmentation_cropping.crop(image,
                                                           label)
-            return inputs_dict, imagename
-
         else:
-            # Random Gaussian:
-            if self.gaussian_aug_flag == 1:
-                if random.random() > .5:
-                    image = self.gaussian_noise.gaussiannoise(image)
-
-            # Random contrast:
-            if self.contrast_aug_flag == 1:
-                if random.random() > .5:
-                    image = self.augmentation_contrast.randomintensity(image)
-
-            image = norm95(image)
             inputs_dict = self.augmentation_cropping.crop(image)
 
-            return inputs_dict, imagename
+        return inputs_dict, imagename
 
     def __len__(self):
         if self.data_format == 'np':
@@ -179,7 +160,7 @@ def getData(data_directory,
     val_loader_labelled = data.DataLoader(dataset=val_dataset_labelled,
                                           batch_size=1,
                                           shuffle=True,
-                                          drop_last=True)
+                                          drop_last=False)
 
     # Unlabelled images data set and data loader:
     if unlabelled > 0:

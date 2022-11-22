@@ -3,15 +3,17 @@ from libs.Augmentations import *
 
 if __name__ == '__main__':
 
-    image_path = '/home/moucheng/projects_data/HipCT/COVID_ML_data/COVID-CNN/paired_dataset/stack_0.npy'
+    # change directories:
+    image_path = '/home/moucheng/projects_data/GLE689_mismatch_data/sub_volumes/image_sub_vol/image_sub_vol_1.npy'
     images = np.load(image_path)
     images = norm95(images)
-
-    label_path = '/home/moucheng/projects_data/HipCT/COVID_ML_data/COVID-CNN/paired_dataset/stack_0_labels.npy'
+    # change directories:
+    label_path = '/home/moucheng/projects_data/GLE689_mismatch_data/sub_volumes/labels_sub_vol/label_sub_vol_1.npy'
     labels = np.load(label_path)
-
-    direction = 0
-    slice_index = 50
+    # change index of slices and stuff:
+    direction = 2
+    slice_index = 256
+    save_flag = False
 
     if direction == 0:
         img = np.squeeze(images[slice_index, :, :])
@@ -80,11 +82,12 @@ if __name__ == '__main__':
     plt.imshow(lbl, cmap='gray')
     plt.axis('off')
 
-    if direction == 0:
-        plt.savefig('image_d.png', bbox_inches='tight')
-    elif direction == 1:
-        plt.savefig('image_h.png', bbox_inches='tight')
-    else:
-        plt.savefig('image_w.png', bbox_inches='tight')
+    if save_flag is True:
+        if direction == 0:
+            plt.savefig('image_d.png', bbox_inches='tight')
+        elif direction == 1:
+            plt.savefig('image_h.png', bbox_inches='tight')
+        else:
+            plt.savefig('image_w.png', bbox_inches='tight')
 
     plt.show()
