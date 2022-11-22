@@ -187,9 +187,9 @@ def trainSup(args):
         else:
             best_val_count += 1
             best_val = best_val
-            if best_val_count > args.patience:
+            if best_val_count > args.patience and best_val > 0.95:
                 for ema_param in model_ema.parameters():
-                    ema_param /= ema_count
+                    ema_param = ema_param / ema_count
                 save_model_name_full = saved_model_path + '/' + model_name + '_ema.pt'
                 torch.save(model_ema, save_model_name_full)
                 break
