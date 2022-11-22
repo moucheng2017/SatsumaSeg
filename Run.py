@@ -10,7 +10,7 @@ def main():
     parser = argparse.ArgumentParser(description='Training for semi supervised segmentation with bayesian pseudo labels.')
 
     # paths to the training data
-    parser.add_argument('--data', type=str, default='/home/moucheng/projects_data/hipct_covid/', help='Data path')
+    parser.add_argument('--data', type=str, default='/home/moucheng/projects_data/hipct_covid/class1.0/', help='Data path')
     parser.add_argument('--format', type=str, default='np', help='np for numpy data; nii for nifti')
     parser.add_argument('--log_tag', type=str, default='2.5D', help='experiment tag for the record')
 
