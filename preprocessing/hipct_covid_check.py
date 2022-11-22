@@ -7,15 +7,14 @@ from libs.Augmentations import *
 
 if __name__ == '__main__':
 
-    # image_path = '/home/moucheng/projects_data/HipCT/COVID_ML_data/COVID-CNN/paired_dataset/stack_0.npy'
+    image_path = '/home/moucheng/projects_data/hipct_covid/class1.0/labelled/imgs/1img.npy'
+    label_path = '/home/moucheng/projects_data/hipct_covid/class1.0/labelled/lbls/1lbl.npy'
 
-    image_path = '/home/moucheng/projects_data/hipct_covid/validate/imgs/0img.npy'
-    label_path = '/home/moucheng/projects_data/hipct_covid/validate/lbls/0lbl.npy'
+    # image_path = '/home/moucheng/projects_data/hipct_covid/original_labelled/imgs/stack_0.npy'
+    # label_path = '/home/moucheng/projects_data/hipct_covid/original_labelled/lbls/stack_0_labels.npy'
 
     images = np.load(image_path)
     images = norm95(images)
-
-    # label_path = '/home/moucheng/projects_data/HipCT/COVID_ML_data/COVID-CNN/paired_dataset/stack_0_labels.npy'
     labels = np.load(label_path)
 
     direction = 2
