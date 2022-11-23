@@ -7,13 +7,16 @@ from libs.Augmentations import *
 
 if __name__ == '__main__':
 
-    image_path = '/home/moucheng/projects_data/PPFE_HipCT/processed/imgs.npy'
+    image_path = '/home/moucheng/projects_data/PPFE_HipCT/processed/imgs/35img.npy'
     # label_path = '/home/moucheng/projects_data/hipct_covid/class1.0/labelled/lbls/1lbl.npy'
 
     images = np.load(image_path)
+    print(np.shape(images))
+    # images = images[:, 0:1200, 0:1200]
+    # np.save('/home/moucheng/projects_data/PPFE_HipCT/processed/imgs.npy', images)
 
-    direction = 2
-    slice_index = 50
+    direction = 0
+    slice_index = 53
 
     if direction == 0:
         img = np.squeeze(images[slice_index, :, :])
