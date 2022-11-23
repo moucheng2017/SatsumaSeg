@@ -282,6 +282,9 @@ def trainBPL(args):
                 save_model_name_full = saved_model_path + '/' + model_name + '_ema.pt'
                 torch.save(model_ema, save_model_name_full)
                 break
+            else:
+                save_model_name_full = saved_model_path + '/' + model_name + '_ema.pt'
+                torch.save(model_ema, save_model_name_full)
 
     stop = timeit.default_timer()
     training_time = stop - start

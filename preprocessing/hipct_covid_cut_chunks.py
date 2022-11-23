@@ -10,13 +10,14 @@ if __name__ == '__main__':
 
     #new binary class
     new_class = 3.0
+    tag = 'labelled' # labelled
 
     # cut chunks along d dimension into cubes every 162 pixels
-    img_path = '/home/moucheng/projects_data/COVID_ML_data/original_labelled/imgs'
-    lbl_path = '/home/moucheng/projects_data/COVID_ML_data/original_labelled/lbls'
+    img_path = '/home/moucheng/projects_data/COVID_ML_data/original_' + tag + '/imgs'
+    lbl_path = '/home/moucheng/projects_data/COVID_ML_data/original_' + tag + '/lbls'
 
-    save_path_img = '/home/moucheng/projects_data/hipct_covid/class' + str(new_class) + '/labelled/imgs/'
-    save_path_lbl = '/home/moucheng/projects_data/hipct_covid/class' + str(new_class) + '/labelled/lbls/'
+    save_path_img = '/home/moucheng/projects_data/hipct_covid/class' + str(new_class) + '/' + tag + '/imgs/'
+    save_path_lbl = '/home/moucheng/projects_data/hipct_covid/class' + str(new_class) + '/' + tag + '/lbls/'
 
     pathlib.Path(save_path_img).mkdir(parents=True, exist_ok=True)
     pathlib.Path(save_path_lbl).mkdir(parents=True, exist_ok=True)
