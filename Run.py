@@ -2,7 +2,6 @@
 import argparse
 from MainSemi import trainBPL
 from MainSup import trainSup
-
 # We use 0 or 1 for False or True as alternative for boolean operations in this argparse
 
 
@@ -49,8 +48,6 @@ def main():
     # flags for if we use fine-tuning on an trained model:
     parser.add_argument('--resume', type=int, help='resume training on an existing model', default=0)
     parser.add_argument('--checkpoint_path', type=str, help='path to the checkpoint model')
-
-    # flags to save the
 
     global args
     args = parser.parse_args()

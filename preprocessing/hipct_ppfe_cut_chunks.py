@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pathlib
+import scipy
 import sys
 sys.path.append('..')
 from libs.Augmentations import norm95
@@ -46,7 +47,10 @@ if __name__ == '__main__':
         hh = h % new_dim // 2
         ww = w % new_dim // 2
 
-        img = img[:dd, hh:hh+new_dim, ww:ww+new_dim]
+        img = img[1412-800:, 311:311+800, 311:311+800]
+        # img = img[d - dd:, hh:h - hh - 1, ww:w - ww - 1]
+        d, h, w = np.shape(img)
+        print(np.shape(img))
 
         sub_imgs = np.split(img, d // new_dim, axis=0)
         for each_sub_img in sub_imgs:
@@ -54,7 +58,8 @@ if __name__ == '__main__':
             for each_sub_sub_img in sub_sub_imgs:
                 sub_sub_sub_imgs = np.split(each_sub_sub_img, w // new_dim, axis=2)
                 for each_sub_sub_sub_img in sub_sub_sub_imgs:
-                    np.save(save_path_img+str(count)+'img.npy', each_sub_sub_sub_img)
+                    # each_sub_sub_sub_img = scipy.ndimage.zoom(input=each_sub_sub_sub_img, zoom=(1, 160 // new_dim, 160 // new_dim), order=0)
+                    np.save(save_path_img + str(count) + 'img.npy', each_sub_sub_sub_img)
                     count += 1
 
     print('Done')

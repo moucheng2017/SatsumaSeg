@@ -7,7 +7,8 @@ from libs.Augmentations import *
 
 if __name__ == '__main__':
 
-    image_path = '/home/moucheng/projects_data/PPFE_HipCT/processed/imgs/35img.npy'
+    image_path = '/home/moucheng/projects_data/PPFE_HipCT/processed/imgs/2img.npy'
+    # image_path = '/home/moucheng/projects_data/PPFE_HipCT/processed/original_labelled/imgs.npy'
     # label_path = '/home/moucheng/projects_data/hipct_covid/class1.0/labelled/lbls/1lbl.npy'
 
     images = np.load(image_path)
@@ -15,8 +16,8 @@ if __name__ == '__main__':
     # images = images[:, 0:1200, 0:1200]
     # np.save('/home/moucheng/projects_data/PPFE_HipCT/processed/imgs.npy', images)
 
-    direction = 0
-    slice_index = 53
+    direction = 2
+    slice_index = 90
 
     if direction == 0:
         img = np.squeeze(images[slice_index, :, :])
@@ -27,7 +28,7 @@ if __name__ == '__main__':
     else:
         img = np.squeeze(images[:, :, slice_index])
 
-    img = norm95(img)
+    # img = norm95(img)
     img = resize(img, (256, 256), order=1)
     # lbl = resize(lbl, (256, 256), order=0)
 

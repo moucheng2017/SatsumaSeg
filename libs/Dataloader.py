@@ -14,7 +14,7 @@ class CustomDataset(Dataset):
     def __init__(self,
                  images_folder,
                  labels_folder=None,
-                 data_format='np',
+                 data_format='np', # np for numpy and the default is nii
                  output_shape=(160, 160),
                  full_orthogonal=0,
                  gaussian_aug=1,
@@ -168,11 +168,11 @@ def getData(data_directory,
 
         train_dataset_unlabelled = CustomDataset(images_folder=train_image_folder_unlabelled,
                                                  zoom_aug=0,
-                                                 contrast_aug=contrast_aug,
+                                                 contrast_aug=0,
                                                  output_shape=output_shape,
                                                  data_format=data_format,
                                                  full_orthogonal=full_orthogonal,
-                                                 gaussian_aug=gaussian_aug
+                                                 gaussian_aug=0
                                                  )
 
         train_loader_unlabelled = data.DataLoader(dataset=train_dataset_unlabelled,
