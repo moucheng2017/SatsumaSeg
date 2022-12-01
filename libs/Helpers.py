@@ -1,0 +1,142 @@
+import os
+import torch
+from pathlib import Path
+
+import random
+import numpy as np
+import torch.backends.cudnn as cudnn
+
+# model:
+from Models2D import Unet, UnetBPL
+
+# data:
+from libs.Dataloader import getData
+
+# track the training
+from tensorboardX import SummaryWriter
+
+
+def reproducibility(args):
+    cudnn.benchmark = False
+    cudnn.deterministic = True
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+
+
+def network_intialisation(args):
+    if args.unlabelled == 0:
+        # supervised learning:
+        model = Unet(in_ch=args.input_dim,
+                     width=args.width,
+                     depth=args.depth,
+                     classes=args.output_dim,
+                     norm='in',
+                     side_output=False)
+
+        model_name = 'Unet_l' + str(args.lr) + \
+                       '_b' + str(args.batch) + \
+                       '_w' + str(args.width) + \
+                       '_d' + str(args.depth) + \
+                       '_i' + str(args.iterations) + \
+                       '_l2_' + str(args.l2) + \
+                       '_c_' + str(args.contrast) + \
+                       '_t' + str(args.temp)
+
+    else:
+        # supervised learning plus pseudo labels:
+        model = UnetBPL(in_ch=args.input_dim,
+                        width=args.width,
+                        depth=args.depth,
+                        out_ch=args.output_dim,
+                        norm='in',
+                        ratio=8
+                        # detach=args.detach
+                        )
+
+        model_name = 'BPUnet_l' + str(args.lr) + \
+                       '_b' + str(args.batch) + \
+                       '_u' + str(args.unlabelled) + \
+                       '_w' + str(args.width) + \
+                       '_d' + str(args.depth) + \
+                       '_i' + str(args.iterations) + \
+                       '_l2_' + str(args.l2) + \
+                       '_c_' + str(args.contrast) + \
+                       '_t' + str(args.temp) + \
+                       '_mu' + str(args.mu) + \
+                       '_a' + str(args.alpha) + \
+                       '_w' + str(args.warmup)
+
+    # '_de_' + str(args.detach) + \
+    # '_sig' + str(args.sigma) + \
+    return model, model_name
+
+
+def make_saving_directories(model_name, args):
+    save_model_name = model_name
+    dataset_name = os.path.basename(os.path.normpath(args.data))
+    saved_information_path = '../../Results_' + dataset_name + '/' + args.log_tag
+    Path(saved_information_path).mkdir(parents=True, exist_ok=True)
+    saved_log_path = saved_information_path + '/Logs'
+    Path(saved_log_path).mkdir(parents=True, exist_ok=True)
+    saved_model_path = saved_information_path + '/' + save_model_name + '/trained_models'
+    Path(saved_model_path).mkdir(parents=True, exist_ok=True)
+    writer = SummaryWriter(saved_log_path + '/Log_' + save_model_name)
+    return writer, saved_model_path
+
+
+def get_iterators(args):
+    data_loaders = getData(data_directory=args.data,
+                           train_batchsize=args.batch,
+                           zoom_aug=args.zoom,
+                           gaussian_aug=args.gaussian,
+                           data_format=args.format,
+                           # sampling_weight=args.sampling,
+                           contrast_aug=args.contrast,
+                           unlabelled=args.unlabelled,
+                           output_shape=(args.new_size_h, args.new_size_w),
+                           full_orthogonal=args.full_orthogonal)
+
+    return data_loaders
+
+
+def get_data_dict(dataloader, iterator):
+    try:
+        data_dict, data_name = next(iterator)
+    except StopIteration:
+        iterator = iter(dataloader)
+        data_dict, data_name = next(iterator)
+    del data_name
+    return data_dict
+
+
+def ramp_up(weight, ratio, step, total_steps, starting=10):
+    '''
+    Args:
+        weight: final target weight value
+        ratio: ratio between the length of ramping up and the total steps
+        step: current step
+        total_steps: total steps
+        starting: starting step for ramping up
+    Returns:
+        current weight value
+    '''
+    # For the 1st 50 steps, the weighting is zero
+    # For the ramp-up stage from starting through the length of ramping up, we linearly gradually ramp up the weight
+    ramp_up_length = int(ratio*total_steps)
+    if step < starting:
+        return 0.0
+    elif step < (ramp_up_length+starting):
+        current_weight = weight * (step-starting) / ramp_up_length
+        return min(current_weight, weight)
+    else:
+        return weight
+
+
+
+
+
+
+
+

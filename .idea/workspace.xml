@@ -5,9 +5,81 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tutorial/code/helpers.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tutorial/code/train.py" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MainSemi.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MainSup.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models2D.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Run.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/airway01.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/airway02.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/covid01.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/covid02.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/covid03.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/Augmentations.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/Dataloader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/LabelEncoding.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/AirThreshold.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/AirwayRegionGrowingWithExplosionControl.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/CloseBranchesInTree.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/IsSimplePoint.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/TopOfTrachea.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/Tree.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/TreeSegment.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/WaveFront.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/readme.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/PTKAirways/util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/Rampups.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/Train.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/Validate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postprocessing/analysis/CheckContrast.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postprocessing/analysis/CheckDimension.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postprocessing/analysis/PlotSliceSegmentation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postprocessing/inference/Inference2D.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postprocessing/inference/Inference2DOrthogonal.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postprocessing/inference/Inference2DOrthogonalAvg.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postprocessing/inference/Inference2DOrthogonalEnsemble.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postprocessing/inference/Inference2DOrthogonalEnsemble_Leuven.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postprocessing/inference/Inference3D.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postprocessing/inference/modelensemble.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/BatchNiiConvert.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/Convert512.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/GenLungMask.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/LungMaskLeuven.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/MergeLabel.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/Padding.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/Synchrotron.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/datapreview.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/dicom3nifti.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/hipct_covid_check.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/hipct_covid_cut_chunks.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_check.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_cut_chunks.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_sampling.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/image_d.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/image_h.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/image_w.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/nii2np.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/np2nii.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/ppfe_example_d.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/ppfe_example_h.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/ppfe_example_w.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pytorch1.4.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/req.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/.ipynb_checkpoints/torchvision_aug_seg-checkpoint.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/test_augmentations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/Loss.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/Metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/lungseg.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/lungseg.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
