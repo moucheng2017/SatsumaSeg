@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tutorial/code/helpers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tutorial/code/train.py" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="21MnHFoRFbxGIJOVltZtK6fX9Wk" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tutorial/data/test" />
+      <recent name="$PROJECT_DIR$/tutorial/data/labelled" />
+      <recent name="$PROJECT_DIR$/cluster" />
+      <recent name="$PROJECT_DIR$/preprocessing" />
+      <recent name="$PROJECT_DIR$/libs" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/cluster" />
+      <recent name="$PROJECT_DIR$/libs" />
+      <recent name="$PROJECT_DIR$/preprocessing" />
+      <recent name="$PROJECT_DIR$/postprocessing" />
+      <recent name="$PROJECT_DIR$/arxiv" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.Inference2DOrthogonalEnsemble">
+    <configuration name="Inference2DOrthogonalEnsemble" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="MedicalMetaLearning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/pytorch1.4/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/inference" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/inference/Inference2DOrthogonalEnsemble.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Padding" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="MedicalMetaLearning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/pytorch1.4/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/preprocessing" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/preprocessing/Padding.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Run" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="MedicalMetaLearning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/pytorch1.4/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Run.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.Inference2DOrthogonalEnsemble" />
+      <item itemvalue="Python.Padding" />
+      <item itemvalue="Python.Run" />
+    </list>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="" />
+      <created>1637759733331</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1637759733331</updated>
+    </task>
+    <task id="LOCAL-00143" summary="2021 07 19 a: trying ensemble on cluster">
+      <created>1658232587276</created>
+      <option name="number" value="00143" />
+      <option name="presentableId" value="LOCAL-00143" />
+      <option name="project" value="LOCAL" />
+      <updated>1658232587278</updated>
+    </task>
+    <task id="LOCAL-00144" summary="2021 07 19 a: no connection to the last level of parent folder">
+      <created>1658238469396</created>
+      <option name="number" value="00144" />
+      <option name="presentableId" value="LOCAL-00144" />
+      <option name="project" value="LOCAL" />
+      <updated>1658238469397</updated>
+    </task>
+    <task id="LOCAL-00145" summary="2021 07 12: clearning up the code, to factoroise the training code">
+      <created>1658420668093</created>
+      <option name="number" value="00145" />
+      <option name="presentableId" value="LOCAL-00145" />
+      <option name="project" value="LOCAL" />
+      <updated>1658420668094</updated>
+    </task>
+    <task id="LOCAL-00146" summary="2021 07 28 a">
+      <created>1659023162718</created>
+      <option name="number" value="00146" />
+      <option name="presentableId" value="LOCAL-00146" />
+      <option name="project" value="LOCAL" />
+      <updated>1659023162720</updated>
+    </task>
+    <task id="LOCAL-00147" summary="2021 07 29: refactorise model with bayesian pseudo labels">
+      <created>1659114155530</created>
+      <option name="number" value="00147" />
+      <option name="presentableId" value="LOCAL-00147" />
+      <option name="project" value="LOCAL" />
+      <updated>1659114155530</updated>
+    </task>
+    <task id="LOCAL-00148" summary="2021 07 30: some inference for parse">
+      <created>1659212502899</created>
+      <option name="number" value="00148" />
+      <option name="presentableId" value="LOCAL-00148" />
+      <option name="project" value="LOCAL" />
+      <updated>1659212502900</updated>
+    </task>
+    <task id="LOCAL-00149" summary="2021 08 01 a: adding argparse">
+      <created>1659374602338</created>
+      <option name="number" value="00149" />
+      <option name="presentableId" value="LOCAL-00149" />
+      <option name="project" value="LOCAL" />
+      <updated>1659374602339</updated>
+    </task>
+    <task id="LOCAL-00150" summary="2021 08 04: update ignore">
+      <created>1659615390566</created>
+      <option name="number" value="00150" />
+      <option name="presentableId" value="LOCAL-00150" />
+      <option name="project" value="LOCAL" />
+      <updated>1659615390567</updated>
+    </task>
+    <task id="LOCAL-00151" summary="2021 08 04b: need to update trainbase">
+      <created>1659630092916</created>
+      <option name="number" value="00151" />
+      <option name="presentableId" value="LOCAL-00151" />
+      <option name="project" value="LOCAL" />
+      <updated>1659630092916</updated>
+    </task>
+    <task id="LOCAL-00152" summary="2021 08 05a: adding ssl loss and sup loss">
+      <created>1659719123521</created>
+      <option name="number" value="00152" />
+      <option name="presentableId" value="LOCAL-00152" />
+      <option name="project" value="LOCAL" />
+      <updated>1659719123521</updated>
+    </task>
+    <task id="LOCAL-00153" summary="2021 08 11a: now merging train scripts together">
+      <created>1660234834294</created>
+      <option name="number" value="00153" />
+      <option name="presentableId" value="LOCAL-00153" />
+      <option name="project" value="LOCAL" />
+      <updated>1660234834295</updated>
+    </task>
+    <task id="LOCAL-00154" summary="2021 08 12 a: new data augmentation added">
+      <created>1660322505616</created>
+      <option name="number" value="00154" />
+      <option name="presentableId" value="LOCAL-00154" />
+      <option name="project" value="LOCAL" />
+      <updated>1660322505617</updated>
+    </task>
+    <task id="LOCAL-00155" summary="2021 08 12 b: pseudo loss was missing! I need to add it">
+      <created>1660323384014</created>
+      <option name="number" value="00155" />
+      <option name="presentableId" value="LOCAL-00155" />
+      <option name="project" value="LOCAL" />
+      <updated>1660323384014</updated>
+    </task>
+    <task id="LOCAL-00156" summary="2021 08 12 b: pseudo loss was missing! I need to add it">
+      <created>1660323482480</created>
+      <option name="number" value="00156" />
+      <option name="presentableId" value="LOCAL-00156" />
+      <option name="project" value="LOCAL" />
+      <updated>1660323482480</updated>
+    </task>
+    <task id="LOCAL-00157" summary="2021 08 15 a: i need to add multi channel sigmoid for multi class segmentation">
+      <created>1660579963391</created>
+      <option name="number" value="00157" />
+      <option name="presentableId" value="LOCAL-00157" />
+      <option name="project" value="LOCAL" />
+      <updated>1660579963391</updated>
+    </task>
+    <task id="LOCAL-00158" summary="2021 08 16 a: we have finished training loops i think let's put everyting together">
+      <created>1660666757534</created>
+      <option name="number" value="00158" />
+      <option name="presentableId" value="LOCAL-00158" />
+      <option name="project" value="LOCAL" />
+      <updated>1660666757534</updated>
+    </task>
+    <task id="LOCAL-00159" summary="2021 08 17a: adding some stuff">
+      <created>1660760844496</created>
+      <option name="number" value="00159" />
+      <option name="presentableId" value="LOCAL-00159" />
+      <option name="project" value="LOCAL" />
+      <updated>1660760844496</updated>
+    </task>
+    <task id="LOCAL-00160" summary="2021 08 22 a: keep updated with the code base">
+      <created>1661182659108</created>
+      <option name="number" value="00160" />
+      <option name="presentableId" value="LOCAL-00160" />
+      <option name="project" value="LOCAL" />
+      <updated>1661182659108</updated>
+    </task>
+    <task id="LOCAL-00161" summary="2021 08 23 a: augmentation finsiehd, now we have cutout, weighted random crop and weighted random zoom in">
+      <created>1661282855874</created>
+      <option name="number" value="00161" />
+      <option name="presentableId" value="LOCAL-00161" />
+      <option name="project" value="LOCAL" />
+      <updated>1661282855875</updated>
+    </task>
+    <task id="LOCAL-00162" summary="2021 08 26 a: started to ensemble the train loop, seems like i might still need to write a few more functions to separate sup and ssl">
+      <created>1661525665865</created>
+      <option name="number" value="00162" />
+      <option name="presentableId" value="LOCAL-00162" />
+      <option name="project" value="LOCAL" />
+      <updated>1661525665865</updated>
+    </task>
+    <task id="LOCAL-00163" summary="2021 09 13 a: adding new stuff">
+      <created>1663089795489</created>
+      <option name="number" value="00163" />
+      <option name="presentableId" value="LOCAL-00163" />
+      <option name="project" value="LOCAL" />
+      <updated>1663089795490</updated>
+    </task>
+    <task id="LOCAL-00164" summary="2021 10 14a: new method">
+      <created>1665766493573</created>
+      <option name="number" value="00164" />
+      <option name="presentableId" value="LOCAL-00164" />
+      <option name="project" value="LOCAL" />
+      <updated>1665766493574</updated>
+    </task>
+    <task id="LOCAL-00165" summary="2021 10 14b: refining the augmentation">
+      <created>1665768235450</created>
+      <option name="number" value="00165" />
+      <option name="presentableId" value="LOCAL-00165" />
+      <option name="project" value="LOCAL" />
+      <updated>1665768235450</updated>
+    </task>
+    <task id="LOCAL-00166" summary="2021 10 18 a: data augmentation done">
+      <created>1666116364812</created>
+      <option name="number" value="00166" />
+      <option name="presentableId" value="LOCAL-00166" />
+      <option name="project" value="LOCAL" />
+      <updated>1666116364812</updated>
+    </task>
+    <task id="LOCAL-00167" summary="2021 10 20 a: debugged semi supervised learning part">
+      <created>1666288490708</created>
+      <option name="number" value="00167" />
+      <option name="presentableId" value="LOCAL-00167" />
+      <option name="project" value="LOCAL" />
+      <updated>1666288490709</updated>
+    </task>
+    <task id="LOCAL-00168" summary="2021 10 21 a: semi supervised part runs now">
+      <created>1666377181064</created>
+      <option name="number" value="00168" />
+      <option name="presentableId" value="LOCAL-00168" />
+      <option name="project" value="LOCAL" />
+      <updated>1666377181065</updated>
+    </task>
+    <task id="LOCAL-00169" summary="2021 10 24 a">
+      <created>1666625903833</created>
+      <option name="number" value="00169" />
+      <option name="presentableId" value="LOCAL-00169" />
+      <option name="project" value="LOCAL" />
+      <updated>1666625903834</updated>
+    </task>
+    <task id="LOCAL-00170" summary="2021 10 24 b">
+      <created>1666640461084</created>
+      <option name="number" value="00170" />
+      <option name="presentableId" value="LOCAL-00170" />
+      <option name="project" value="LOCAL" />
+      <updated>1666640461084</updated>
+    </task>
+    <task id="LOCAL-00171" summary="2021 10 25 a: fixed a few bugs">
+      <created>1666709088422</created>
+      <option name="number" value="00171" />
+      <option name="presentableId" value="LOCAL-00171" />
+      <option name="project" value="LOCAL" />
+      <updated>1666709088422</updated>
+    </task>
+    <task id="LOCAL-00172" summary="2021 10 25 b: new exp added">
+      <created>1666713653345</created>
+      <option name="number" value="00172" />
+      <option name="presentableId" value="LOCAL-00172" />
+      <option name="project" value="LOCAL" />
+      <updated>1666713653346</updated>
+    </task>
+    <task id="LOCAL-00173" summary="2021 10 25 c: adding supervised learning">
+      <created>1666782184080</created>
+      <option name="number" value="00173" />
+      <option name="presentableId" value="LOCAL-00173" />
+      <option name="project" value="LOCAL" />
+      <updated>1666782184081</updated>
+    </task>
+    <task id="LOCAL-00174" summary="2021 10 25 e: trying to push the experiments">
+      <created>1666786058585</created>
+      <option name="number" value="00174" />
+      <option name="presentableId" value="LOCAL-00174" />
+      <option name="project" value="LOCAL" />
+      <updated>1666786058585</updated>
+    </task>
+    <task id="LOCAL-00175" summary="2021 10 25 f: cluster memory issue">
+      <created>1666804127641</created>
+      <option name="number" value="00175" />
+      <option name="presentableId" value="LOCAL-00175" />
+      <option name="project" value="LOCAL" />
+      <updated>1666804127641</updated>
+    </task>
+    <task id="LOCAL-00176" summary="2021 10 26 a: memory issue again">
+      <created>1666816681067</created>
+      <option name="number" value="00176" />
+      <option name="presentableId" value="LOCAL-00176" />
+      <option name="project" value="LOCAL" />
+      <updated>1666816681067</updated>
+    </task>
+    <task id="LOCAL-00177" summary="2021 10 28 b: running some stuff">
+      <created>1666974647555</created>
+      <option name="number" value="00177" />
+      <option name="presentableId" value="LOCAL-00177" />
+      <option name="project" value="LOCAL" />
+      <updated>1666974647555</updated>
+    </task>
+    <task id="LOCAL-00178" summary="2021 10 28 c: adding new stuff">
+      <created>1666983350109</created>
+      <option name="number" value="00178" />
+      <option name="presentableId" value="LOCAL-00178" />
+      <option name="project" value="LOCAL" />
+      <updated>1666983350109</updated>
+    </task>
+    <task id="LOCAL-00179" summary="2021 11 07 a: adding new warmup schedule">
+      <created>1667821266680</created>
+      <option name="number" value="00179" />
+      <option name="presentableId" value="LOCAL-00179" />
+      <option name="project" value="LOCAL" />
+      <updated>1667821266682</updated>
+    </task>
+    <task id="LOCAL-00180" summary="2021 11 07 b: norm after augmentation">
+      <created>1667821691137</created>
+      <option name="number" value="00180" />
+      <option name="presentableId" value="LOCAL-00180" />
+      <option name="project" value="LOCAL" />
+      <updated>1667821691137</updated>
+    </task>
+    <task id="LOCAL-00181" summary="2021 11 08 a: adding a new script for training hip ct">
+      <created>1667928878674</created>
+      <option name="number" value="00181" />
+      <option name="presentableId" value="LOCAL-00181" />
+      <option name="project" value="LOCAL" />
+      <updated>1667928878674</updated>
+    </task>
+    <task id="LOCAL-00182" summary="2021 11 08 b: debugging01: wrong run file before">
+      <created>1667929535719</created>
+      <option name="number" value="00182" />
+      <option name="presentableId" value="LOCAL-00182" />
+      <option name="project" value="LOCAL" />
+      <updated>1667929535719</updated>
+    </task>
+    <task id="LOCAL-00183" summary="2021 11 08 c: debugging: use randonint for sampling slices now">
+      <created>1667930713136</created>
+      <option name="number" value="00183" />
+      <option name="presentableId" value="LOCAL-00183" />
+      <option name="project" value="LOCAL" />
+      <updated>1667930713136</updated>
+    </task>
+    <task id="LOCAL-00184" summary="2021 11 08 d: debugging again for the right size of input volume">
+      <created>1667932259184</created>
+      <option name="number" value="00184" />
+      <option name="presentableId" value="LOCAL-00184" />
+      <option name="project" value="LOCAL" />
+      <updated>1667932259184</updated>
+    </task>
+    <task id="LOCAL-00185" summary="2021 11 16 a: add validate">
+      <created>1668634523278</created>
+      <option name="number" value="00185" />
+      <option name="presentableId" value="LOCAL-00185" />
+      <option name="project" value="LOCAL" />
+      <updated>1668634523279</updated>
+    </task>
+    <task id="LOCAL-00186" summary="2021 11 17 a before branching out">
+      <created>1668691561757</created>
+      <option name="number" value="00186" />
+      <option name="presentableId" value="LOCAL-00186" />
+      <option name="project" value="LOCAL" />
+      <updated>1668691561757</updated>
+    </task>
+    <task id="LOCAL-00187" summary="2021 11 17 b: debugged sup and unsup kl still wrong but that's okay">
+      <created>1668714827127</created>
+      <option name="number" value="00187" />
+      <option name="presentableId" value="LOCAL-00187" />
+      <option name="project" value="LOCAL" />
+      <updated>1668714827127</updated>
+    </task>
+    <task id="LOCAL-00188" summary="2022 11 23: unexpected bug on cluster when run the airway segmentation very strange no idea">
+      <created>1669214489476</created>
+      <option name="number" value="00188" />
+      <option name="presentableId" value="LOCAL-00188" />
+      <option name="project" value="LOCAL" />
+      <updated>1669214489477</updated>
+    </task>
+    <task id="LOCAL-00189" summary="2022 11 24b: ..">
+      <created>1669300201140</created>
+      <option name="number" value="00189" />
+      <option name="presentableId" value="LOCAL-00189" />
+      <option name="project" value="LOCAL" />
+      <updated>1669300201141</updated>
+    </task>
+    <task id="LOCAL-00190" summary="2022 11 25a: new exps">
+      <created>1669385779359</created>
+      <option name="number" value="00190" />
+      <option name="presentableId" value="LOCAL-00190" />
+      <option name="project" value="LOCAL" />
+      <updated>1669385779359</updated>
+    </task>
+    <task id="LOCAL-00191" summary="2022 11 25 b: large gpu for training with unlabelled images">
+      <created>1669388615777</created>
+      <option name="number" value="00191" />
+      <option name="presentableId" value="LOCAL-00191" />
+      <option name="project" value="LOCAL" />
+      <updated>1669388615777</updated>
+    </task>
+    <option name="localTasksCounter" value="192" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="2021 10 20 a: debugged semi supervised learning part" />
+    <MESSAGE value="2021 10 21 a: semi supervised part runs now" />
+    <MESSAGE value="2021 10 24 a" />
+    <MESSAGE value="2021 10 24 b" />
+    <MESSAGE value="2021 10 25 a: fixed a few bugs" />
+    <MESSAGE value="2021 10 25 b: new exp added" />
+    <MESSAGE value="2021 10 25 c: adding supervised learning" />
+    <MESSAGE value="2021 10 25 e: trying to push the experiments" />
+    <MESSAGE value="2021 10 25 f: cluster memory issue" />
+    <MESSAGE value="2021 10 26 a: memory issue again" />
+    <MESSAGE value="2021 10 28 b: running some stuff" />
+    <MESSAGE value="2021 10 28 c: adding new stuff" />
+    <MESSAGE value="2021 11 07 a: adding new warmup schedule" />
+    <MESSAGE value="2021 11 07 b: norm after augmentation" />
+    <MESSAGE value="2021 11 08 a: adding a new script for training hip ct" />
+    <MESSAGE value="2021 11 08 b: debugging01: wrong run file before" />
+    <MESSAGE value="2021 11 08 c: debugging: use randonint for sampling slices now" />
+    <MESSAGE value="2021 11 08 d: debugging again for the right size of input volume" />
+    <MESSAGE value="2021 11 16 a: add validate" />
+    <MESSAGE value="2021 11 17 a before branching out" />
+    <MESSAGE value="2021 11 17 b: debugged sup and unsup kl still wrong but that's okay" />
+    <MESSAGE value="2022 11 23: unexpected bug on cluster when run the airway segmentation very strange no idea" />
+    <MESSAGE value="2022 11 24b: .." />
+    <MESSAGE value="2022 11 25a: new exps" />
+    <MESSAGE value="2022 11 25 b: large gpu for training with unlabelled images" />
+    <option name="LAST_COMMIT_MESSAGE" value="2022 11 25 b: large gpu for training with unlabelled images" />
+  </component>
+</project>
