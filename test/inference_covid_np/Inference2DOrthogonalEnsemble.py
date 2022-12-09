@@ -1,20 +1,16 @@
 import nibabel
+
 import sys
-import torch
-
 sys.path.append("..")
+sys.path.append("../..")
 
+import torch
 import numpy as np
 import os
-from pathlib import Path
-
-import nibabel as nib
 
 import numpy.ma as ma
 
-from libs.old.Dataloader import RandomContrast
-
-from libs.old.Models2DOrthogonal import Unet2DMultiChannel
+from libs.Augmentations import RandomContrast, norm95
 
 from libs.PTKAirways import RunPTKAirways
 from skimage.measure import label
@@ -279,7 +275,7 @@ def main(test_data_path,
     all_models = os.listdir(model_path)
     all_models.sort()
 
-    # ran inference for each model:
+    # ran inference_covid for each model:
     for model_name in all_models:
 
         step = model_name.split("_")[-1]

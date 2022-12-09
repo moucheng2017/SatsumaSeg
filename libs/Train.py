@@ -67,7 +67,7 @@ def calculate_sup_loss(lbl,
         if b_u: # check if unlabelled data is included
             prob_output, _ = torch.split(prob_output, [b_l, b_u], dim=0) # if both labelled and unlabelled, split the data and use the labelled
 
-        prob_output = torch.sigmoid(prob_output / temp) # apply element-wise sigmoid
+        prob_output = torch.sigmoid(prob_output) # apply element-wise sigmoid
 
         if cutout_aug == 1: # apply cutout augmentation
             prob_output, lbl = randomcutout(prob_output, lbl)
