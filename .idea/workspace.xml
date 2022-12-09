@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/cluster/airway03.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -50,10 +49,10 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/test" />
       <recent name="$PROJECT_DIR$/tutorial/data/test" />
       <recent name="$PROJECT_DIR$/tutorial/data/labelled" />
-      <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/preprocessing" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -142,13 +141,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00144" summary="2021 07 19 a: no connection to the last level of parent folder">
-      <created>1658238469396</created>
-      <option name="number" value="00144" />
-      <option name="presentableId" value="LOCAL-00144" />
-      <option name="project" value="LOCAL" />
-      <updated>1658238469397</updated>
     </task>
     <task id="LOCAL-00145" summary="2021 07 12: clearning up the code, to factoroise the training code">
       <created>1658420668093</created>
@@ -486,7 +478,14 @@
       <option name="project" value="LOCAL" />
       <updated>1670588079442</updated>
     </task>
-    <option name="localTasksCounter" value="193" />
+    <task id="LOCAL-00193" summary="2022 12 09b: use larger resolution 480">
+      <created>1670590877146</created>
+      <option name="number" value="00193" />
+      <option name="presentableId" value="LOCAL-00193" />
+      <option name="project" value="LOCAL" />
+      <updated>1670590877147</updated>
+    </task>
+    <option name="localTasksCounter" value="194" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -502,7 +501,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 10 21 a: semi supervised part runs now" />
     <MESSAGE value="2021 10 24 a" />
     <MESSAGE value="2021 10 24 b" />
     <MESSAGE value="2021 10 25 a: fixed a few bugs" />
@@ -527,6 +525,7 @@
     <MESSAGE value="2022 11 25a: new exps" />
     <MESSAGE value="2022 11 25 b: large gpu for training with unlabelled images" />
     <MESSAGE value="2022 12 09: adding temp scaling for pseudo loss and adjust the resolution of iamges to fit into the gpus" />
-    <option name="LAST_COMMIT_MESSAGE" value="2022 12 09: adding temp scaling for pseudo loss and adjust the resolution of iamges to fit into the gpus" />
+    <MESSAGE value="2022 12 09b: use larger resolution 480" />
+    <option name="LAST_COMMIT_MESSAGE" value="2022 12 09b: use larger resolution 480" />
   </component>
 </project>
