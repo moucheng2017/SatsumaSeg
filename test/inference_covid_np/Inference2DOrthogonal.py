@@ -142,19 +142,23 @@ def merge_segs(folder):
 def segment2D(test_data_path,
               model_path,
               threshold,
-              temperature):
+              temperature,
+              contrast=(10, 20)):
 
     # nii --> np:
     # data = nii2np(test_data_path)
     # d, h, w = np.shape(data)
     # print(np.shape(data))
 
-    # data = torch.from_numpy(data).to(device='cuda', dtype=torch.float32)
     data = np.load(test_data_path)
     d, h, w = np.shape(data)
     data = resize(data, (d, 160, 160))
 
-    # load model:
+    # Use different contrast:
+    contrast_augmentation = RandomContrast(bin_range=[contrast[0], contrast[1]])
+    data = contrast_augmentation.randomintensity(data)
+
+    # Load model:
     model = torch.load(model_path)
     model.cuda()
     model.eval()
@@ -191,24 +195,29 @@ def save_seg(save_path,
 
 
 if __name__ == "__main__":
-    case = '4'
-    threshold = 0.9
+    case = '2'
+    threshold = 0.99
     temperature = 2.0
+    contrast = 200
 
-    save_path = '/home/moucheng/Results_class1.0/Segmentation/'
-    data_path = '/home/moucheng/projects_data/COVID_ML_data/COVID-CNN/validation_dataset/stack_' + case + '.npy'
+    save_path = '/home/moucheng/Results_class1.0/PPFE/'
+    data_path = '/home/moucheng/projects_data/PPFE_HipCT/processed/imgs/' + case + 'img.npy'
+
+    # save_path = '/home/moucheng/Results_class1.0/'
+    # data_path = '/home/moucheng/projects_data/COVID_ML_data/COVID-CNN/validation_dataset/stack_' + case + '.npy'
 
     model_path = '/home/moucheng/Results_class1.0/2.5D/Unet_l0.0005_b16_w32_d4_i200000_l2_0.01_c_1_t2.0/trained_models/'
     model_name = 'Unet_l0.0005_b16_w32_d4_i200000_l2_0.01_c_1_t2.0_best_val.pt'
     model_path_full = model_path + model_name
 
-    save_name = case + '_seg_2Dorthogonal_thresh' + str(threshold) + '_temp' + str(temperature) + '.npy'
-    save_name_prob = case + '_prob_2Dorthogonal_thresh' + str(threshold) + '_temp' + str(temperature) + '.npy'
+    save_name = case + '_seg_2Dorthogonal_thresh' + str(threshold) + '_temp' + str(temperature) + '_ctr' + str(contrast) + '.npy'
+    save_name_prob = case + '_prob_2Dorthogonal_thresh' + str(threshold) + '_temp' + str(temperature) + '_ctr' + str(contrast) + '.npy'
 
     segmentation, probability = segment2D(data_path,
                                           model_path_full,
                                           threshold,
-                                          temperature)
+                                          temperature,
+                                          (contrast, contrast))
 
     save_seg(save_path, save_name, segmentation)
     save_seg(save_path, save_name_prob, probability)

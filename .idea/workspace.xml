@@ -5,7 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_zoom_in.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/100_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/100_s300_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/10_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/200_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/200_s100_image_d_seg_lbl_PPFE.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/200_s300_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/200_s80_image_d_seg_lbl_PPFE.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/20_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/20_s300_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/300_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/30_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/400_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/500_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/50_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/50_s300_image_d_seg_lbl.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/covid_seg_check.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/np2nifti.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_sampling.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_sampling.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/ppfe_example_w.png" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/ppfe_example_w.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/Inference2DOrthogonal.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/inference_covid_np/Inference2DOrthogonal.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,27 +64,27 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/preprocessing",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/preprocessing" />
       <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/test" />
       <recent name="$PROJECT_DIR$/tutorial/data/test" />
       <recent name="$PROJECT_DIR$/tutorial/data/labelled" />
-      <recent name="$PROJECT_DIR$/preprocessing" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/test/inference_covid_np" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/test" />
       <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/libs" />
-      <recent name="$PROJECT_DIR$/preprocessing" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.Inference2DOrthogonalEnsemble">
+  <component name="RunManager">
     <configuration name="Inference2DOrthogonalEnsemble" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="MedicalMetaLearning" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -141,13 +162,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00145" summary="2021 07 12: clearning up the code, to factoroise the training code">
-      <created>1658420668093</created>
-      <option name="number" value="00145" />
-      <option name="presentableId" value="LOCAL-00145" />
-      <option name="project" value="LOCAL" />
-      <updated>1658420668094</updated>
     </task>
     <task id="LOCAL-00146" summary="2021 07 28 a">
       <created>1659023162718</created>
@@ -485,7 +499,14 @@
       <option name="project" value="LOCAL" />
       <updated>1670590877147</updated>
     </task>
-    <option name="localTasksCounter" value="194" />
+    <task id="LOCAL-00194" summary="2022 12 09c: try to use the 80g gpu">
+      <created>1670604854985</created>
+      <option name="number" value="00194" />
+      <option name="presentableId" value="LOCAL-00194" />
+      <option name="project" value="LOCAL" />
+      <updated>1670604854985</updated>
+    </task>
+    <option name="localTasksCounter" value="195" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -501,7 +522,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 10 24 a" />
     <MESSAGE value="2021 10 24 b" />
     <MESSAGE value="2021 10 25 a: fixed a few bugs" />
     <MESSAGE value="2021 10 25 b: new exp added" />
@@ -526,6 +546,7 @@
     <MESSAGE value="2022 11 25 b: large gpu for training with unlabelled images" />
     <MESSAGE value="2022 12 09: adding temp scaling for pseudo loss and adjust the resolution of iamges to fit into the gpus" />
     <MESSAGE value="2022 12 09b: use larger resolution 480" />
-    <option name="LAST_COMMIT_MESSAGE" value="2022 12 09b: use larger resolution 480" />
+    <MESSAGE value="2022 12 09c: try to use the 80g gpu" />
+    <option name="LAST_COMMIT_MESSAGE" value="2022 12 09c: try to use the 80g gpu" />
   </component>
 </project>

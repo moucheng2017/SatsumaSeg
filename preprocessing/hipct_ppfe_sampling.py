@@ -45,7 +45,8 @@ if __name__ == '__main__':
 
     img_volume = img_volume[:, edges:-edges, edges:-edges]
     img_volume = img_volume / 255.
-    np.save('/home/moucheng/projects_data/PPFE_HipCT/processed/imgs.npy', img_volume)
+    img_save_name = '/home/moucheng/projects_data/PPFE_HipCT/processed/imgs' + str() + '.npy'
+    np.save(img_save_name, img_volume)
     print('slices saved from the tiff images.')
 
     # # np.save('')
