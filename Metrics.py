@@ -312,7 +312,7 @@ def __surface_distances(result, reference, class_no, voxelspacing=None, connecti
     # binary structure
     footprint = generate_binary_structure(result.ndim, connectivity)
 
-    # test for emptiness
+    # inference for emptiness
     if 0 == np.count_nonzero(result):
         raise RuntimeError('The first supplied array does not contain any binary object.')
     if 0 == np.count_nonzero(reference):

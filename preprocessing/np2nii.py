@@ -24,6 +24,6 @@ def batch_numpy2nifti(source_np_folder, save_folder):
 
 
 if __name__ == '__main__':
-    folder = '/home/moucheng/projects_data/HipCT/COVID_ML_data/hip_covid/test/imgs'
+    folder = '/home/moucheng/projects_data/HipCT/COVID_ML_data/hip_covid/inference/imgs'
     batch_numpy2nifti(folder, folder)
     print('COMPLETE')

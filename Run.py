@@ -14,6 +14,8 @@ def main():
     parser.add_argument('--log_tag', type=str, default='2.5D', help='experiment tag for the record')
 
     # hyper parameters for training (both sup and semi sup):
+    # model_3d
+    parser.add_argument('--model_3d', type=int, help='use 3D model or not', default=0)
     parser.add_argument('--input_dim', type=int, help='dimension for the input image, e.g. 1 for CT, 3 for RGB, and more for 3D inputs', default=1)
     parser.add_argument('--output_dim', type=int, help='dimension for the output, e.g. 1 for binary segmentation, 3 for 3 classes', default=1)
     parser.add_argument('--iterations', type=int, help='number of iterations', default=200000) # for covid, each epoch is roughly: 160 x 20 / batch,

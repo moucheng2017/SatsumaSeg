@@ -8,8 +8,9 @@ from libs import Helpers
 
 from libs.Validate import validate
 
+from arguments import get_args
 
-def trainBPL(args):
+def main(args):
     # fix a random seed:
     Helpers.reproducibility(args)
 
@@ -300,7 +301,9 @@ def trainBPL(args):
 
 
 
-
+if __name__ == "__main__":
+    args = get_args()
+    main(args=args)
 
 
 

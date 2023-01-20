@@ -346,12 +346,12 @@ if __name__ == "__main__":
 
     for case in cases:
         data_path = (
-            "/home/moucheng/projects_data/Pulmonary_data/airway/test/imgs/"
+            "/home/moucheng/projects_data/Pulmonary_data/airway/inference/imgs/"
             + case
             + ".nii.gz"
         )
         lung_path = (
-            "/home/moucheng/projects_data/Pulmonary_data/airway/test/lung/"
+            "/home/moucheng/projects_data/Pulmonary_data/airway/inference/lung/"
             + case
             + "_lunglabel.nii.gz"
         )

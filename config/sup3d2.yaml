@@ -1,0 +1,59 @@
+name: ppfe-segmentation-supervised-type2
+
+dataset:
+  name: ppfe
+  num_workers: 0 # default 0 because we do not use large batch size with 3D model and volumes anyways
+  data_dir: '/SAN/medic/PerceptronHead/data/ppfe/res256_type2'
+  data_format: 'np'
+
+
+model:
+  name: u-net
+  use_3d: 1
+  input_dim: 1
+  output_dim: 2
+  width: 32
+  depth: 4
+
+
+train:
+  optimizer:
+    weight_decay: 0.0005
+  lr: 0.0003
+  iterations: 10000
+  stop_iteration: 10000
+  batch: 1
+  save_ema_start: 200 # 10 epochs
+  patience: 10000
+  temp: 2.0
+  contrast: True
+  zoom: False
+  gaussian: True
+  new_size_h: 160 # for 2 d
+  new_size_w: 160 # for 2 d
+  full_orthogonal: False # for 2 d
+  batch_u: 0 # this has to be zero in supervised setting
+  mu: 0.5
+  alpha: 1.0
+  warmup: 100
+
+
+checkpoint:
+  resume: False
+  checkpoint_path: '/some/path/to/saved/model'
+
+
+eval:
+  optimizer:
+    weight_decay: 0
+  batch: 1
+
+
+logger:
+  tag: '3d_ppfe_supervised_multiclasses'
+
+seed: 1024
+
+
+
+

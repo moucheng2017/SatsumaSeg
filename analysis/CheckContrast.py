@@ -37,7 +37,7 @@ def plot_different_contrast_ct(volume_path, contrasts, slice_no):
 
 
 if __name__ == "__main__":
-    plot_different_contrast_ct(volume_path='/home/moucheng/projects_data/Task08_HepaticVessel/ssl/test/imgs/hepaticvessel_001.nii.gz',
+    plot_different_contrast_ct(volume_path='/home/moucheng/projects_data/Task08_HepaticVessel/ssl/inference/imgs/hepaticvessel_001.nii.gz',
                                contrasts=[150, 180, 255],
                                slice_no=[10, 20])
 

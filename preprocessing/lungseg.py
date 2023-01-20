@@ -181,7 +181,7 @@ def run_all_cases(path, tag):
 
 
 if __name__ == '__main__':
-    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Mixed/test/imgs/Pat25b.nii.gz'
+    data_path = '/home/moucheng/projects_data/Pulmonary_data/airway/Mixed/inference/imgs/Pat25b.nii.gz'
     # ct = load_nifti(data_path)
     # slope = ct.dataobj.slope
     # intercept = ct.dataobj.inter

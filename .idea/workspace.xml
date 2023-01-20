@@ -5,28 +5,56 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_zoom_in.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/100_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/100_s300_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/10_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/200_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/200_s100_image_d_seg_lbl_PPFE.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/200_s300_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/200_s80_image_d_seg_lbl_PPFE.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/20_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/20_s300_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/300_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/30_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/400_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/500_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/50_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/50_s300_image_d_seg_lbl.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/covid_seg_check.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/inference_covid_np/np2nifti.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MainSup3D.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models3D.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/arguments.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/sup3d1.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/sup3d2.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/sup3d3.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/Dataloader3D.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/libs/Train3D.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_prepare_training.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_tiff_to_numpy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/names.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_sampling.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_sampling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/ppfe_example_w.png" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/ppfe_example_w.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/Inference2DOrthogonal.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/inference_covid_np/Inference2DOrthogonal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSemi.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSup.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/Metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Run.py" beforeDir="false" afterPath="$PROJECT_DIR$/Run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/CheckContrast.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/CheckContrast.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/airway01.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/airway02.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/airway03.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/covid01.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/ppfe3.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/covid02.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/ppfe1.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/covid03.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/ppfe2.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_sampling.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_numpy_to_nifti.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_zoom_in.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/lungseg.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/lungseg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/np2nii.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/np2nii.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/100_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/100_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/100_s300_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/100_s300_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/10_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/10_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/200_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/200_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/200_s100_image_d_seg_lbl_PPFE.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/200_s100_image_d_seg_lbl_PPFE.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/200_s300_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/200_s300_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/200_s80_image_d_seg_lbl_PPFE.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/200_s80_image_d_seg_lbl_PPFE.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/20_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/20_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/20_s300_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/20_s300_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/300_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/300_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/30_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/30_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/400_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/400_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/500_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/500_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/50_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/50_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/50_s300_image_d_seg_lbl.png" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/50_s300_image_d_seg_lbl.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/Inference2DOrthogonal.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/Inference2DOrthogonal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/Inference2DOrthogonalEnsemble.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/Inference2DOrthogonalEnsemble.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/Inference3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/Inference3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/covid_seg_check.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/covid_seg_check.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/inference_covid_np/np2nifti.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/np2nifti.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/test_augmentations.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,6 +69,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="12" />
+      </list>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitSEFilterConfiguration">
@@ -64,17 +97,18 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/preprocessing",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/preprocessing" />
       <recent name="$PROJECT_DIR$/cluster" />
-      <recent name="$PROJECT_DIR$/test" />
-      <recent name="$PROJECT_DIR$/tutorial/data/test" />
-      <recent name="$PROJECT_DIR$/tutorial/data/labelled" />
+      <recent name="$PROJECT_DIR$/config" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/libs" />
+      <recent name="$PROJECT_DIR$/preprocessing" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/test/inference_covid_np" />
@@ -162,13 +196,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00146" summary="2021 07 28 a">
-      <created>1659023162718</created>
-      <option name="number" value="00146" />
-      <option name="presentableId" value="LOCAL-00146" />
-      <option name="project" value="LOCAL" />
-      <updated>1659023162720</updated>
     </task>
     <task id="LOCAL-00147" summary="2021 07 29: refactorise model with bayesian pseudo labels">
       <created>1659114155530</created>
@@ -506,7 +533,14 @@
       <option name="project" value="LOCAL" />
       <updated>1670604854985</updated>
     </task>
-    <option name="localTasksCounter" value="195" />
+    <task id="LOCAL-00195" summary="2022 12 12 update">
+      <created>1671195154300</created>
+      <option name="number" value="00195" />
+      <option name="presentableId" value="LOCAL-00195" />
+      <option name="project" value="LOCAL" />
+      <updated>1671195154300</updated>
+    </task>
+    <option name="localTasksCounter" value="196" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -522,7 +556,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 10 24 b" />
     <MESSAGE value="2021 10 25 a: fixed a few bugs" />
     <MESSAGE value="2021 10 25 b: new exp added" />
     <MESSAGE value="2021 10 25 c: adding supervised learning" />
@@ -547,6 +580,7 @@
     <MESSAGE value="2022 12 09: adding temp scaling for pseudo loss and adjust the resolution of iamges to fit into the gpus" />
     <MESSAGE value="2022 12 09b: use larger resolution 480" />
     <MESSAGE value="2022 12 09c: try to use the 80g gpu" />
-    <option name="LAST_COMMIT_MESSAGE" value="2022 12 09c: try to use the 80g gpu" />
+    <MESSAGE value="2022 12 12 update" />
+    <option name="LAST_COMMIT_MESSAGE" value="2022 12 12 update" />
   </component>
 </project>
