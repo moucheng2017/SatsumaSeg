@@ -62,7 +62,8 @@ def calculate_sup_loss(lbl,
                        temp,
                        cutout_aug):
 
-    if torch.sum(lbl) > 10: # check whether there are enough foreground pixels
+
+    if torch.sum(lbl) > 1000: # check whether there are enough foreground pixels
         prob_output = outputs_dict.get('segmentation') # get segmentation map
         if b_u: # check if unlabelled data is included
             prob_output, _ = torch.split(prob_output, [b_l, b_u], dim=0) # if both labelled and unlabelled, split the data and use the labelled

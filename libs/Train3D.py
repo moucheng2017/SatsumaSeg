@@ -73,6 +73,7 @@ def calculate_sup_loss(lbl,
     prob_output_foreground = prob_output*mask_labelled
     lbl_foreground = lbl*mask_labelled
     raw_output_foreground = output*mask_labelled
+    pseudo_label_foreground = pseudo_label*mask_labelled
 
     # for labelled parts:
     loss_sup = SoftDiceLoss()(prob_output_foreground, lbl_foreground) + nn.CrossEntropyLoss(reduction='mean')(raw_output_foreground, lbl_foreground.long())
@@ -82,7 +83,7 @@ def calculate_sup_loss(lbl,
     # loss_unsup = SoftDiceLoss()(prob_output, pseudo_label, mask_unlabelled) + nn.CrossEntropyLoss(reduction='mean')(output*mask_unlabelled / temp, pseudo_label.long()*mask_unlabelled.long())
 
     # training iou
-    train_mean_iu_ = segmentation_scores(lbl, pseudo_label, prob_output.size()[1])
+    train_mean_iu_ = segmentation_scores(lbl_foreground, pseudo_label_foreground, prob_output.size()[1])
 
     return {'loss_sup': loss_sup,
             'train iou': train_mean_iu_}

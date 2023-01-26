@@ -48,6 +48,7 @@ if __name__ == '__main__':
     foreground_1 = sum(sum(sum(foreground_1))) / (d*h*w)
     foreground_2 = sum(sum(sum(foreground_2))) / (d*h*w)
     foreground_3 = sum(sum(sum(foreground_3))) / (d*h*w)
+    foreground_all = foreground_1 + foreground_2 + foreground_3
     print('The ratio of the foreground areas in percentages. class1: {:.10f}; ' 'class2: {:.10f}; ' 'class3: {:.10f}'.format(foreground_1*100, foreground_2*100, foreground_3*100))
 
     # with open('/home/moucheng/projects_data/PPFE_HipCT/processed/foreground_stats.csv', 'w', newline='') as csvfile:
@@ -117,7 +118,7 @@ if __name__ == '__main__':
                 foreground = np.zeros_like(each_img_w)
                 foreground[each_lbl_w == 1] = 1
                 foreground = sum(sum(sum(foreground)))
-                threshold = new_dim*new_dim*new_dim*foreground_2*0.5
+                threshold = new_dim*new_dim*new_dim*foreground_all*0.5
 
                 if foreground > threshold:
                     np.save(save_path_img + str(count) + 'img.npy', each_img_w)
