@@ -5,14 +5,54 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/analysis/synthetic_gradient_dice.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/sup3d3a.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MainSemi3D.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/config/sup3d3b.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/sup3d_local.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/check_processed_data/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/check_raw_data/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/data_format_process/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocessing/generate_lung_masks/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/sup3d3.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Loss.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSemi.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi2D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSup.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup2D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/Models2D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/Models3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Run.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/CheckContrast.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/check_raw_data/CheckContrast.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/CheckDimension.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/check_raw_data/CheckDimension.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/PlotSliceSegmentation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/synthetic_gradient_dice.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/ppfe3.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/ppfe3b.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/sup3d3a.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3a.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/Inference3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_covid_np/Inference3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/LabelEncoding.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/LabelEncoding.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Train.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/libs/Train3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Train3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_prepare_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_prepare_training.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Validate.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Validate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/BatchNiiConvert.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/data_format_process/BatchNiiConvert.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/Convert512.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/data_format_process/Convert512.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/GenLungMask.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/generate_lung_masks/GenLungMask.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/LungMaskLeuven.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/generate_lung_masks/LungMaskLeuven.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/datapreview.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/check_raw_data/datapreview.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/dicom3nifti.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/data_format_process/dicom3nifti.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_covid_check.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/check_raw_data/hipct_covid_check.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_check.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/check_raw_data/hipct_ppfe_check.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_check_training_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/check_processed_data/hipct_ppfe_check_training_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_numpy_to_nifti.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/data_format_process/hipct_ppfe_numpy_to_nifti.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_tiff_to_numpy.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/data_format_process/hipct_ppfe_tiff_to_numpy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/image_d.png" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/images/image_d.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/image_h.png" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/images/image_h.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/image_w.png" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/images/image_w.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/lungseg.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/generate_lung_masks/lungseg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/names.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/nii2np.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/data_format_process/nii2np.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/np2nii.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/data_format_process/np2nii.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/ppfe_example_d.png" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/images/ppfe_example_d.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/ppfe_example_h.png" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/images/ppfe_example_h.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/ppfe_example_w.png" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/images/ppfe_example_w.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,27 +93,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/moucheng/projects_codes/SatsumaSeg/config&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/config" />
-      <recent name="$PROJECT_DIR$/preprocessing" />
       <recent name="$PROJECT_DIR$/cluster" />
+      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/preprocessing" />
       <recent name="$PROJECT_DIR$/libs" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/test/inference_covid_np" />
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/test" />
-      <recent name="$PROJECT_DIR$/cluster" />
-      <recent name="$PROJECT_DIR$/libs" />
+      <recent name="$PROJECT_DIR$/preprocessing/data_format_process" />
+      <recent name="$PROJECT_DIR$/preprocessing/check_processed_data" />
+      <recent name="$PROJECT_DIR$/preprocessing/check_raw_data" />
+      <recent name="$PROJECT_DIR$/preprocessing/images" />
+      <recent name="$PROJECT_DIR$/preprocessing/Generate_lung_masks" />
     </key>
   </component>
   <component name="RunManager">
@@ -154,13 +194,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00149" summary="2021 08 01 a: adding argparse">
-      <created>1659374602338</created>
-      <option name="number" value="00149" />
-      <option name="presentableId" value="LOCAL-00149" />
-      <option name="project" value="LOCAL" />
-      <updated>1659374602339</updated>
     </task>
     <task id="LOCAL-00150" summary="2021 08 04: update ignore">
       <created>1659615390566</created>
@@ -498,7 +531,14 @@
       <option name="project" value="LOCAL" />
       <updated>1674751798910</updated>
     </task>
-    <option name="localTasksCounter" value="198" />
+    <task id="LOCAL-00198" summary="2023 01 27 a: train with 128 x 128 x 128 cubes supervised learning">
+      <created>1674834979155</created>
+      <option name="number" value="00198" />
+      <option name="presentableId" value="LOCAL-00198" />
+      <option name="project" value="LOCAL" />
+      <updated>1674834979156</updated>
+    </task>
+    <option name="localTasksCounter" value="199" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -514,7 +554,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 10 25 c: adding supervised learning" />
     <MESSAGE value="2021 10 25 e: trying to push the experiments" />
     <MESSAGE value="2021 10 25 f: cluster memory issue" />
     <MESSAGE value="2021 10 26 a: memory issue again" />
@@ -539,6 +578,7 @@
     <MESSAGE value="2022 12 12 update" />
     <MESSAGE value="2023 01 20 a: trial 1 on supervised learning with 256 crop on PPFE" />
     <MESSAGE value="2023 01 20 b: trying with more foreground voxels" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 01 20 b: trying with more foreground voxels" />
+    <MESSAGE value="2023 01 27 a: train with 128 x 128 x 128 cubes supervised learning" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 01 27 a: train with 128 x 128 x 128 cubes supervised learning" />
   </component>
 </project>

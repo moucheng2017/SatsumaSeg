@@ -5,7 +5,7 @@ import pathlib
 import scipy
 import sys
 import argparse
-sys.path.append('..')
+sys.path.append('../..')
 import matplotlib.pyplot as plt
 from skimage.transform import resize
 

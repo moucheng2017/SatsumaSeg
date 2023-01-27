@@ -3,7 +3,7 @@ name: ppfe-segmentation-supervised-type3-local
 dataset:
   name: ppfe
   num_workers: 0 # default 0 because we do not use large batch size with 3D model and volumes anyways
-  data_dir: '/SAN/medic/PerceptronHead/data/ppfe/res128_type3'
+  data_dir: '/SAN/medic/PerceptronHead/data/ppfe/res256_type3'
   data_format: 'np'
 
 model:
@@ -18,11 +18,11 @@ train:
   optimizer:
     weight_decay: 0.0005
   lr: 0.0003
-  iterations: 14500
-  stop_iteration: 14500
-  batch: 2
-  save_ema_start: 1450 # 10 epochs
-  patience: 10000
+  iterations: 6200
+  stop_iteration: 6200
+  batch: 1
+  save_ema_start: 310 # 10 epochs
+  patience: 1000
   temp: 1.0
   contrast: True
   zoom: False
@@ -45,7 +45,7 @@ eval:
   batch: 1
 
 logger:
-  tag: '3d_ppfe_sup_binary_res128'
+  tag: '3d_ppfe_sup_binary_res256'
 
 seed: 1024
 

@@ -7,10 +7,10 @@ import numpy as np
 import torch.backends.cudnn as cudnn
 
 # model:
-from Models2D import Unet, UnetBPL
+from models.Models2D import Unet, UnetBPL
 
 # model
-from Models3D import Unet3D
+from models.Models3D import Unet3D
 
 # data:
 from libs.Dataloader import getData

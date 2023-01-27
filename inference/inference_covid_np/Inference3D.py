@@ -10,7 +10,7 @@ from os import listdir
 
 import nibabel as nib
 
-from Metrics import segmentation_scores
+from libs.Metrics import segmentation_scores
 
 
 def segment_whole_volume(model,
