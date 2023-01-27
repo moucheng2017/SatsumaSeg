@@ -5,9 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_check_training_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/analysis/synthetic_gradient_dice.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/sup3d3a.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/sup3d3b.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/sup3d_local.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Train.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/sup3d3.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/libs/Train3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Train3D.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_prepare_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_prepare_training.py" afterDir="false" />
     </list>
@@ -50,18 +53,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/preprocessing",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/moucheng/projects_codes/SatsumaSeg/config&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/preprocessing" />
       <recent name="$PROJECT_DIR$/cluster" />
-      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/libs" />
     </key>
@@ -151,13 +154,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00148" summary="2021 07 30: some inference for parse">
-      <created>1659212502899</created>
-      <option name="number" value="00148" />
-      <option name="presentableId" value="LOCAL-00148" />
-      <option name="project" value="LOCAL" />
-      <updated>1659212502900</updated>
     </task>
     <task id="LOCAL-00149" summary="2021 08 01 a: adding argparse">
       <created>1659374602338</created>
@@ -495,7 +491,14 @@
       <option name="project" value="LOCAL" />
       <updated>1674234674541</updated>
     </task>
-    <option name="localTasksCounter" value="197" />
+    <task id="LOCAL-00197" summary="2023 01 20 b: trying with more foreground voxels">
+      <created>1674751798910</created>
+      <option name="number" value="00197" />
+      <option name="presentableId" value="LOCAL-00197" />
+      <option name="project" value="LOCAL" />
+      <updated>1674751798910</updated>
+    </task>
+    <option name="localTasksCounter" value="198" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -511,7 +514,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 10 25 b: new exp added" />
     <MESSAGE value="2021 10 25 c: adding supervised learning" />
     <MESSAGE value="2021 10 25 e: trying to push the experiments" />
     <MESSAGE value="2021 10 25 f: cluster memory issue" />
@@ -536,6 +538,7 @@
     <MESSAGE value="2022 12 09c: try to use the 80g gpu" />
     <MESSAGE value="2022 12 12 update" />
     <MESSAGE value="2023 01 20 a: trial 1 on supervised learning with 256 crop on PPFE" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 01 20 a: trial 1 on supervised learning with 256 crop on PPFE" />
+    <MESSAGE value="2023 01 20 b: trying with more foreground voxels" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 01 20 b: trying with more foreground voxels" />
   </component>
 </project>

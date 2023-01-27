@@ -59,31 +59,33 @@ def calculate_sup_loss(lbl,
                        outputs_dict,
                        temp):
 
-    output = outputs_dict.get('segmentation')
-    _, pseudo_label = torch.max(output, dim=1)
-    prob_output = torch.softmax(output / temp, dim=1)
+    raw_output = outputs_dict.get('segmentation')
+    _, pseudo_label = torch.max(raw_output, dim=1)
+    prob_output = torch.softmax(raw_output / temp, dim=1)
 
     # mask_labelled = torch.zeros_like(lbl).cuda()
     # mask_unlabelled = torch.zeros_like(lbl).cuda()
     # mask_labelled[lbl > 0] = 1
     # mask_unlabelled[lbl == 0] = 1
-    mask_labelled = lbl.ge(0.5)
+    # mask_labelled = lbl.ge(0.5)
 
     # mask the labels:
-    prob_output_foreground = prob_output*mask_labelled
-    lbl_foreground = lbl*mask_labelled
-    raw_output_foreground = output*mask_labelled
-    pseudo_label_foreground = pseudo_label*mask_labelled
+    # prob_output_foreground = prob_output*mask_labelled
+    # lbl_foreground = lbl*mask_labelled
+    # raw_output_foreground = raw_output*mask_labelled
+    # pseudo_label_foreground = pseudo_label*mask_labelled
 
     # for labelled parts:
-    loss_sup = SoftDiceLoss()(prob_output_foreground, lbl_foreground) + nn.CrossEntropyLoss(reduction='mean')(raw_output_foreground, lbl_foreground.long())
+    # loss_sup = SoftDiceLoss()(prob_output_foreground, lbl_foreground) + nn.CrossEntropyLoss(reduction='mean')(raw_output_foreground, lbl_foreground.long())
+    loss_sup = SoftDiceLoss()(prob_output, lbl) + nn.CrossEntropyLoss(reduction='mean')(raw_output, lbl.long())
 
     # # for unlabelled parts:
     # # (todo) fix this
     # loss_unsup = SoftDiceLoss()(prob_output, pseudo_label, mask_unlabelled) + nn.CrossEntropyLoss(reduction='mean')(output*mask_unlabelled / temp, pseudo_label.long()*mask_unlabelled.long())
 
     # training iou
-    train_mean_iu_ = segmentation_scores(lbl_foreground, pseudo_label_foreground, prob_output.size()[1])
+    # train_mean_iu_ = segmentation_scores(lbl_foreground, pseudo_label_foreground, prob_output.size()[1])
+    train_mean_iu_ = segmentation_scores(lbl, pseudo_label, prob_output.size()[1])
 
     return {'loss_sup': loss_sup,
             'train iou': train_mean_iu_}

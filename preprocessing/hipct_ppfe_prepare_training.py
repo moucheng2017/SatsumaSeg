@@ -10,7 +10,7 @@ sys.path.append('..')
 
 if __name__ == '__main__':
     #  Change here:
-    new_dim = 256
+    new_dim = 128
     label_merge = 3
 
     img_source = '/home/moucheng/projects_data/PPFE_HipCT/processed/img_volume.npy'
@@ -99,8 +99,8 @@ if __name__ == '__main__':
 
     imgs_d = np.split(img, d // new_dim, axis=0)
     lbls_d = np.split(lbl, d // new_dim, axis=0)
-
     count = 0
+
     for each_img_d, each_lbl_d in zip(imgs_d, lbls_d):
         imgs_d_h = np.split(each_img_d, h // new_dim, axis=1)
         lbls_d_h = np.split(each_lbl_d, h // new_dim, axis=1)
@@ -123,8 +123,6 @@ if __name__ == '__main__':
                 if foreground > threshold:
                     np.save(save_path_img + str(count) + 'img.npy', each_img_w)
                     np.save(save_path_lbl + str(count) + 'lbl.npy', each_lbl_w)
-                # else:
-                #     np.save(save_path_img_unlabelled + str(count) + 'img.npy', each_img_w)
 
                 count += 1
 

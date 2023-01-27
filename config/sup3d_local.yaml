@@ -1,29 +1,27 @@
-name: ppfe-segmentation-supervised-type3
+name: ppfe-segmentation-supervised-type3-local
 
 dataset:
   name: ppfe
   num_workers: 0 # default 0 because we do not use large batch size with 3D model and volumes anyways
-  data_dir: '/SAN/medic/PerceptronHead/data/ppfe/res256_type3'
+  data_dir: '/home/moucheng/projects_data/PPFE_HipCT/processed/res128_type3'
   data_format: 'np'
-
 
 model:
   name: u-net
   use_3d: 1
   input_dim: 1
   output_dim: 2
-  width: 32
+  width: 8
   depth: 4
-
 
 train:
   optimizer:
     weight_decay: 0.0005
   lr: 0.0003
-  iterations: 21000
-  stop_iteration: 21000
+  iterations: 29000
+  stop_iteration: 29000
   batch: 1
-  save_ema_start: 420 # 10 epochs
+  save_ema_start: 7250 # 10 epochs
   patience: 10000
   temp: 2.0
   contrast: True
@@ -37,17 +35,14 @@ train:
   alpha: 1.0
   warmup: 100
 
-
 checkpoint:
   resume: False
   checkpoint_path: '/some/path/to/saved/model'
-
 
 eval:
   optimizer:
     weight_decay: 0
   batch: 1
-
 
 logger:
   tag: '3d_ppfe_supervised_multiclasses'
