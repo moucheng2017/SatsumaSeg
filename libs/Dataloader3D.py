@@ -15,18 +15,17 @@ class CustomDataset3D(Dataset):
                  images_folder,
                  labels_folder=None,
                  data_format='np', # np for numpy and the default is nii
-                 # output_shape=(160, 160),
-                 # full_orthogonal=0,
+                 output_shape=(128, 128, 120),
+                 crop_aug=1,
                  gaussian_aug=1,
-                 # zoom_aug=1,
                  contrast_aug=1
                  ):
 
         # flags
-        # self.labelled_flag = labelled
         self.contrast_aug_flag = contrast_aug
         self.gaussian_aug_flag = gaussian_aug
-        # self.zoom_aug_flag = zoom_aug
+        self.crop_aug_flag = crop_aug
+
         self.data_format = data_format
 
         # data
@@ -39,9 +38,8 @@ class CustomDataset3D(Dataset):
         if self.gaussian_aug_flag == 1:
             self.gaussian_noise = RandomGaussian()
 
-        # self.augmentation_cropping = RandomSlicingOrthogonal(zoom=zoom_aug,
-        #                                                      output_size=output_shape,
-        #                                                      full_orthogonal=full_orthogonal)
+        if self.crop_aug_flag == 1:
+            self.augmentation_crop = RandomCrop(output_shape)
 
     def __getitem__(self, index):
         # Check image extension:
@@ -50,7 +48,7 @@ class CustomDataset3D(Dataset):
             imagename = all_images[index]
             image = np.load(imagename)
         else:
-            all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.gz*')))
+            all_images = sorted(glob.glob(os.path.join(self.imgs_folder, '*.nii.*')))
             imagename = all_images[index]
             image = nib.load(imagename)
             image = image.get_fdata()
@@ -77,32 +75,23 @@ class CustomDataset3D(Dataset):
         # Renormalisation:
         image = norm95(image)
 
-        # Labels:
-        if self.data_format == 'np':
-            all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.npy')))
-            label = np.load(all_labels[index])
+        if self.lbls_folder:
+            # Labels:
+            if self.data_format == 'np':
+                all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.npy')))
+                label = np.load(all_labels[index])
+            else:
+                all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.nii.gz*')))
+                label = nib.load(all_labels[index])
+                label = label.get_fdata()
+            label = np.array(label, dtype='float32')
+            if self.crop_aug_flag == 1:
+                image, label = self.augmentation_crop.crop_xy(image, label)
+            return {'img': image, 'lbl': label}, imagename
         else:
-            all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.nii.gz*')))
-            label = nib.load(all_labels[index])
-            label = label.get_fdata()
-        label = np.array(label, dtype='float32')
-
-        # if self.lbls_folder:
-        #     # Labels:
-        #     if self.data_format == 'np':
-        #         all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.npy')))
-        #         label = np.load(all_labels[index])
-        #     else:
-        #         all_labels = sorted(glob.glob(os.path.join(self.lbls_folder, '*.nii.gz*')))
-        #         label = nib.load(all_labels[index])
-        #         label = label.get_fdata()
-        #     label = np.array(label, dtype='float32')
-        #     inputs_dict = self.augmentation_cropping.crop(image,
-        #                                                   label)
-        # else:
-        #     inputs_dict = self.augmentation_cropping.crop(image)
-
-        return {'img': image, 'lbl': label}, imagename
+            if self.crop_aug_flag == 1:
+                image = self.augmentation_crop.crop_x(image)
+            return {'img': image}, imagename
 
     def __len__(self):
         if self.data_format == 'np':
@@ -112,15 +101,14 @@ class CustomDataset3D(Dataset):
 
 
 def getData3D(data_directory,
-            train_batchsize=1,
-            zoom_aug=1,
-            data_format='np',
-            contrast_aug=1,
-            unlabelled=1,
-            output_shape=(160, 160),
-            full_orthogonal=0,
-            gaussian_aug=1,
-            ):
+              train_batchsize=1,
+              data_format='np',
+              contrast_aug=1,
+              unlabelled=1,
+              crop_aug=1,
+              output_shape=(128, 128, 128),
+              gaussian_aug=1,
+              ):
     '''
     Args:
         data_directory:
@@ -139,23 +127,42 @@ def getData3D(data_directory,
     train_label_folder_labelled = data_directory + '/labelled/lbls'
 
     train_dataset_labelled = CustomDataset3D(images_folder=train_image_folder_labelled,
-                                           labels_folder=train_label_folder_labelled,
-                                           # zoom_aug=zoom_aug,
-                                           data_format=data_format,
-                                           contrast_aug=contrast_aug,
-                                           # output_shape=output_shape,
-                                           # full_orthogonal=full_orthogonal,
-                                           gaussian_aug=gaussian_aug
-                                           )
+                                             labels_folder=train_label_folder_labelled,
+                                             data_format=data_format,
+                                             contrast_aug=contrast_aug,
+                                             gaussian_aug=gaussian_aug,
+                                             crop_aug=crop_aug,
+                                             output_shape=output_shape
+                                             )
 
     train_loader_labelled = data.DataLoader(dataset=train_dataset_labelled,
                                             batch_size=train_batchsize,
                                             shuffle=True,
-                                            num_workers=2,
                                             drop_last=True)
 
-    return {'train_data_l': train_dataset_labelled,
-            'train_loader_l': train_loader_labelled}
+    if unlabelled > 0:
+        train_image_folder_unlabelled = data_directory + '/unlabelled/imgs'
+        train_dataset_unlabelled = CustomDataset3D(images_folder=train_image_folder_unlabelled,
+                                                   data_format=data_format,
+                                                   contrast_aug=contrast_aug,
+                                                   gaussian_aug=gaussian_aug,
+                                                   crop_aug=crop_aug,
+                                                   output_shape=output_shape
+                                                   )
+
+        train_loader_unlabelled = data.DataLoader(dataset=train_dataset_unlabelled,
+                                                  batch_size=train_batchsize,
+                                                  shuffle=True,
+                                                  drop_last=True)
+
+        return {'train_data_l': train_dataset_labelled,
+                'train_data_u': train_dataset_unlabelled,
+                'train_loader_l': train_loader_labelled,
+                'train_loader_u': train_loader_unlabelled}
+
+    else:
+        return {'train_data_l': train_dataset_labelled,
+                'train_loader_l': train_loader_labelled}
 
     # val_image_folder_labelled = data_directory + '/validate/imgs'
     # val_label_folder_labelled = data_directory + '/validate/lbls'

@@ -1,1 +1,4 @@
-# SatsumaSeg
+# SatsumaSeg:
+
+
+# Training scripts:

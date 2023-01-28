@@ -36,7 +36,6 @@ def network_intialisation(args):
         if args.model.use_3d == 0:
             model = Unet(in_ch=args.model.input_dim,
                          width=args.model.width,
-                         depth=args.model.depth,
                          classes=args.model.output_dim,
                          norm='in',
                          side_output=False)
@@ -44,7 +43,6 @@ def network_intialisation(args):
             model_name = 'Unet_l' + str(args.train.lr) + \
                            '_b' + str(args.train.batch) + \
                            '_w' + str(args.model.width) + \
-                           '_d' + str(args.model.depth) + \
                            '_i' + str(args.train.iterations) + \
                            '_l2_' + str(args.train.optimizer.weight_decay) + \
                            '_c_' + str(args.train.contrast) + \
@@ -52,15 +50,12 @@ def network_intialisation(args):
         else:
             model = Unet3D(in_ch=args.model.input_dim,
                            width=args.model.width,
-                           depth=args.model.depth,
                            classes=args.model.output_dim,
-                            norm='in',
-                            side_output=False)
+                           side_output=False)
 
             model_name = 'Unet3D_l_' + str(args.train.lr) + \
                          '_b' + str(args.train.batch) + \
                          '_w' + str(args.model.width) + \
-                         '_d' + str(args.model.depth) + \
                          '_i' + str(args.train.iterations) + \
                          '_l2_' + str(args.train.optimizer.weight_decay) + \
                          '_c_' + str(args.train.contrast) + \
@@ -68,34 +63,44 @@ def network_intialisation(args):
 
     else:
 
-        if args.model.use_3d != 0:
-            raise NotImplementedError
+        # if args.model.use_3d != 0:
+        #     raise NotImplementedError
+        if args.model.use_3d == 0:
+            # supervised learning plus pseudo labels:
+            model = UnetBPL(in_ch=args.model.input_dim,
+                            width=args.model.width,
+                            depth=args.model.depth,
+                            out_ch=args.model.output_dim,
+                            norm='in',
+                            ratio=8
+                            # detach=args.detach
+                            )
 
-        # supervised learning plus pseudo labels:
-        model = UnetBPL(in_ch=args.model.input_dim,
-                        width=args.model.width,
-                        depth=args.model.depth,
-                        out_ch=args.model.output_dim,
-                        norm='in',
-                        ratio=8
-                        # detach=args.detach
-                        )
+            model_name = 'Unet3D_l' + str(args.train.lr) + \
+                           '_b' + str(args.train.batch) + \
+                           '_u' + str(args.train.batch_u) + \
+                           '_w' + str(args.model.width) + \
+                           '_i' + str(args.train.iterations) + \
+                           '_l2_' + str(args.train.optimizer.weight_decay) + \
+                           '_c_' + str(args.train.contrast) + \
+                           '_t' + str(args.train.temp) + \
+                           '_mu' + str(args.train.mu) + \
+                           '_a' + str(args.train.alpha) + \
+                           '_w' + str(args.train.warmup)
+        else:
+            model = Unet3D(in_ch=args.model.input_dim,
+                           width=args.model.width,
+                           classes=args.model.output_dim,
+                           side_output=False)
 
-        model_name = 'BPUnet_l' + str(args.train.lr) + \
-                       '_b' + str(args.train.batch) + \
-                       '_u' + str(args.train.batch_u) + \
-                       '_w' + str(args.model.width) + \
-                       '_d' + str(args.model.depth) + \
-                       '_i' + str(args.train.iterations) + \
-                       '_l2_' + str(args.train.optimizer.weight_decay) + \
-                       '_c_' + str(args.train.contrast) + \
-                       '_t' + str(args.train.temp) + \
-                       '_mu' + str(args.train.mu) + \
-                       '_a' + str(args.train.alpha) + \
-                       '_w' + str(args.train.warmup)
+            model_name = 'Unet3D_l_' + str(args.train.lr) + \
+                         '_b' + str(args.train.batch) + \
+                         '_w' + str(args.model.width) + \
+                         '_i' + str(args.train.iterations) + \
+                         '_l2_' + str(args.train.optimizer.weight_decay) + \
+                         '_c_' + str(args.train.contrast) + \
+                         '_t' + str(args.train.temp)
 
-    # '_de_' + str(args.detach) + \
-    # '_sig' + str(args.sigma) + \
     return model, model_name
 
 
@@ -119,32 +124,31 @@ def get_iterators(args):
                                zoom_aug=args.train.zoom,
                                gaussian_aug=args.train.gaussian,
                                data_format=args.dataset.data_format,
-                               # sampling_weight=args.sampling,
                                contrast_aug=args.train.contrast,
                                unlabelled=args.train.batch_u,
                                output_shape=(args.train.new_size_h, args.train.new_size_w),
                                full_orthogonal=args.train.full_orthogonal)
     else:
         data_loaders = getData3D(data_directory=args.dataset.data_dir,
-                               train_batchsize=args.train.batch,
-                               zoom_aug=args.train.zoom,
-                               gaussian_aug=args.train.gaussian,
-                               data_format=args.dataset.data_format,
-                               # sampling_weight=args.sampling,
-                               contrast_aug=args.train.contrast,
-                               unlabelled=args.train.batch_u,
-                               output_shape=(args.train.new_size_h, args.train.new_size_w),
-                               full_orthogonal=args.train.full_orthogonal)
+                                 train_batchsize=args.train.batch,
+                                 crop_aug=args.train.crop_aug,
+                                 gaussian_aug=args.train.gaussian,
+                                 data_format=args.dataset.data_format,
+                                 contrast_aug=args.train.contrast,
+                                 unlabelled=args.train.batch_u,
+                                 output_shape=(args.train.new_size, args.train.new_size, args.train.new_size))
 
     return data_loaders
 
 
 def get_data_dict(dataloader, iterator):
+
     try:
         data_dict, data_name = next(iterator)
     except StopIteration:
         iterator = iter(dataloader)
         data_dict, data_name = next(iterator)
+
     del data_name
     return data_dict
 

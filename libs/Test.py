@@ -64,14 +64,15 @@ def segment_whole_volume(model,
     subvolume = volume[:, d-train_size[0]:d, h-train_size[1]:h, w-train_size[2]:w]
     subvolume = torch.from_numpy(subvolume).to(device='cuda', dtype=torch.float32)
 
-    # print(subvolume.unsqueeze(0).size())
     subseg, _ = model(subvolume.unsqueeze(0))
+
     if class_no == 2:
         subseg = torch.sigmoid(subseg)
     else:
         subseg = torch.softmax(subseg, dim=1)
+
     segmentation[:, d-train_size[0]:d, h-train_size[1]:h, w-train_size[2]:w] = subseg.squeeze(0).detach().cpu().numpy()
-    # segmentation[:, d-train_size[0]:d, h-train_size[1]:h, w-train_size[2]:w] = subseg.squeeze(0)
+
     return segmentation
 
 

@@ -241,7 +241,7 @@ class DoubleRandomDilatedConv(nn.Module):
 
 class Unet3D(nn.Module):
     # Stochastic Receptive Field Net
-    def __init__(self, in_ch, width, classes, depth=4, z_downsample=4, norm='in', side_output=False):
+    def __init__(self, in_ch, width, classes, side_output=False):
         super(Unet3D, self).__init__()
 
         self.final_in = classes
@@ -298,7 +298,7 @@ class Unet3D(nn.Module):
         return {'segmentation': y}
 
 
-def double_conv_3d(in_channels, out_channels, step, norm):
+def double_conv_3d(in_channels, out_channels, step, norm='in'):
     '''
     Args:
         in_channels:

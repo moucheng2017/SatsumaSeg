@@ -54,10 +54,10 @@ def model_forward(model, img):
 
 
 def calculate_sup_loss(lbl,
-                       outputs_dict,
+                       raw_output,
                        temp):
-
-    raw_output = outputs_dict.get('segmentation')
+    # outputs_dict,
+    # raw_output = outputs_dict.get('segmentation')
     _, pseudo_label = torch.max(raw_output, dim=1)
     prob_output = torch.softmax(raw_output / temp, dim=1)
 
@@ -75,11 +75,10 @@ def calculate_sup_loss(lbl,
 
     # for labelled parts:
     # loss_sup = SoftDiceLoss()(prob_output_foreground, lbl_foreground) + nn.CrossEntropyLoss(reduction='mean')(raw_output_foreground, lbl_foreground.long())
-    loss_sup = SoftDiceLoss()(prob_output, lbl) + nn.CrossEntropyLoss(reduction='mean')(raw_output, lbl.long())
-
-    # # for unlabelled parts:
-    # # (todo) fix this
-    # loss_unsup = SoftDiceLoss()(prob_output, pseudo_label, mask_unlabelled) + nn.CrossEntropyLoss(reduction='mean')(output*mask_unlabelled / temp, pseudo_label.long()*mask_unlabelled.long())
+    if lbl.sum() > 100:
+        loss_sup = SoftDiceLoss()(prob_output, lbl) + nn.CrossEntropyLoss(reduction='mean')(raw_output, lbl.long())
+    else:
+        loss_sup = torch.zeros(1).cuda()
 
     # training iou
     # train_mean_iu_ = segmentation_scores(lbl_foreground, pseudo_label_foreground, prob_output.size()[1])
@@ -89,6 +88,86 @@ def calculate_sup_loss(lbl,
             'train iou': train_mean_iu_}
 
 
+
+def train_semi(labelled_img,
+               labelled_label,
+               model,
+               unlabelled_img,
+               t=2.0,
+               prior_mu=0.7):
+
+    # convert data from numpy to tensor:
+    inputs = np2tensor_all(**{'img_l': labelled_img,
+                              'lbl': labelled_label,
+                              'img_u': unlabelled_img})
+
+    # concatenate labelled and unlabelled for ssl otherwise just use labelled img
+    train_img = get_img(**inputs)
+
+    # forward pass:
+    outputs_dict = model_forward(model, train_img.get('train img').unsqueeze(1))
+    b_l = train_img.get('batch labelled')
+    b_u = train_img.get('batch unlabelled')
+    # print(b_l)
+    # print(b_u)
+
+    # get output for the labelled part:
+    raw_output = outputs_dict.get('segmentation')
+    # print(raw_output.size())
+    raw_output_l, raw_output_u = torch.split(raw_output, [b_l, b_u], dim=0)
+
+    # get output for the unlabelled part:
+
+    # supervised loss:
+    sup_loss = calculate_sup_loss(raw_output=raw_output_l,
+                                  lbl=inputs.get('lbl').unsqueeze(1),
+                                  temp=t)
+
+    # # calculate the kl and get the learnt threshold:
+    # kl_loss = calculate_kl_loss(outputs_dict=outputs_dict,
+    #                             b_l=train_img.get('batch labelled'),
+    #                             b_u=train_img.get('batch unlabelled'),
+    #                             prior_u=prior_mu,
+    #                             # prior_var=prior_logsigma
+    #                             )
+
+    # pseudo label loss:
+    pseudo_loss = calculate_pseudo_loss(raw_output=raw_output_u,
+                                        temp=t
+                                        )
+
+    # return {'supervised loss': sup_loss,
+    #         'pseudo loss': pseudo_loss,
+    #         'kl loss': kl_loss}
+
+    return {'supervised losses': sup_loss,
+            'pseudo losses': pseudo_loss}
+
+
+def calculate_pseudo_loss(raw_output,
+                          temp):
+
+    _, pseudo_label = torch.max(raw_output, dim=1)
+    prob_output = torch.softmax(raw_output / temp, dim=1)
+    mask = prob_output.ge(0.95)
+
+    # mask the labels:
+    prob_output_selected = prob_output*mask
+    raw_output_selected = raw_output*mask
+    pseudo_label_selected = pseudo_label*mask
+    # print(pseudo_label_selected.size())
+    # print(raw_output_selected.size())
+
+    # for unlabelled parts:
+    if pseudo_label.sum() > 100:
+        loss_unsup = SoftDiceLoss()(prob_output_selected, pseudo_label_selected)
+        loss_unsup += nn.CrossEntropyLoss(reduction='mean')(raw_output_selected, pseudo_label_selected.squeeze().long())
+    else:
+        loss_unsup = 0.0
+
+    return {'loss_unsup': loss_unsup}
+
+
 def train_sup(labelled_img,
               labelled_label,
               model,
@@ -96,17 +175,19 @@ def train_sup(labelled_img,
 
     inputs = np2tensor_all(**{'img_l': labelled_img, 'lbl': labelled_label})
     train_img = get_img(**inputs)
+    train_img_data = train_img.get('train img').unsqueeze(1)
 
-    # Check if the input is 3D:
-    if len(train_img.get('train img').size()) == 3: # 2D
-        train_img_data = train_img.get('train img').unsqueeze(1)
-    elif len(train_img.get('train img').size()) == 4: # 3D
-        train_img_data = train_img.get('train img').unsqueeze(1)
-    else:
-        raise NotImplementedError
+    # # Check if the input is 3D:
+    # if len(train_img.get('train img').size()) == 3: # 2D
+    #     train_img_data = train_img.get('train img').unsqueeze(1)
+    # elif len(train_img.get('train img').size()) == 4: # 3D
+    #     train_img_data = train_img.get('train img').unsqueeze(1)
+    # else:
+    #     raise NotImplementedError
 
     outputs_dict = model_forward(model, train_img_data)
-    sup_loss = calculate_sup_loss(outputs_dict=outputs_dict,
+    raw_output = outputs_dict.get('segmentation')
+    sup_loss = calculate_sup_loss(raw_output=raw_output,
                                   lbl=inputs.get('lbl'),
                                   temp=t)
 
@@ -151,7 +232,7 @@ def train_sup(labelled_img,
 #
 #     confidence_threshold_learnt = outputs_dict.get('learnt_threshold')
 #
-#     # loss = kld_loss(posterior_mu, posterior_logvar, prior_u, prior_var)
+#     # loss = kld_loss(posterior_mu, posteriosup_lossr_logvar, prior_u, prior_var)
 #     loss = kld_loss(posterior_mu, posterior_logvar, prior_u)
 #
 #     threshold_learnt_l, threshold_learnt_u = torch.split(confidence_threshold_learnt, [b_l, b_u], dim=0)
@@ -185,92 +266,45 @@ def train_sup(labelled_img,
 #     prob_output_l = torch.softmax(predictions_l / temp, dim=1)
 #     pseudo_label_l = (prob_output_l >= threshold_l).float()
 #
-#     if cutout_aug == 1:
-#         prob_output_u, pseudo_label_u = randomcutout(prob_output_u, pseudo_label_u)
+#     # if cutout_aug == 1:
+#     #     prob_output_u, pseudo_label_u = randomcutout(prob_output_u, pseudo_label_u)
 #
 #     mask = torch.zeros_like(lbl)
+#
+#     if torch.sum(pseudo_label_u) > 10:
+#         if len(prob_output_u.size()) == 3:
+#             # this is binary segmentation
+#             loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
+#             loss += 0.5*SoftDiceLoss()(prob_output_l, pseudo_label_l) + nn.BCELoss(reduction='mean')(prob_output_l.squeeze() + 1e-10, pseudo_label_l.squeeze() + 1e-10)
+#             return {'loss': loss.mean()}
+#
+#         elif len(prob_output_u.size()) == 4:
+#             if prob_output_u.size()[1] == 1:
+#                 # this is also binary segmentation
+#                 loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
+#                 loss += 0.5*SoftDiceLoss()(prob_output_l, pseudo_label_l) + nn.BCELoss(reduction='mean')(prob_output_l.squeeze() + 1e-10, pseudo_label_l.squeeze() + 1e-10)
+#                 return {'loss': loss.mean()}
+#
+#             else:
+#                 # this is multi class segmentation
+#                 pseudo_label_u = multi_class_label_processing(pseudo_label_u, prob_output_u.size()[1])  # convert single channel multi integer class label to multi channel binary label
+#                 loss = torch.tensor(0).to('cuda')
+#                 effective_classes = 0
+#                 for i in range(prob_output_u.size()[1]):  # multiple
+#                     if torch.sum(pseudo_label_u[:, i, :, :]) > 10.0:
+#                         # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
+#                         # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
+#                         effective_classes += 1
+#                         loss += SoftDiceLoss()(prob_output_u[:, i, :, :], pseudo_label_u[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output_u[:, i, :, :].squeeze() + 1e-10, pseudo_label_u[:, i, :, :].squeeze() + 1e-10).mean()
+#                         loss += 0.5*SoftDiceLoss()(prob_output_l[:, i, :, :], pseudo_label_l[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output_l[:, i, :, :].squeeze() + 1e-10, pseudo_label_l[:, i, :, :].squeeze() + 1e-10).mean()
+#                 loss = loss / effective_classes
+#                 return {'loss': loss.mean()}
+#
+#     else:
+#         return {'loss': torch.tensor(0.0).to('cuda').mean()}
 
-    # if torch.sum(pseudo_label_u) > 10:
-    #     if len(prob_output_u.size()) == 3:
-    #         # this is binary segmentation
-    #         loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
-    #         loss += 0.5*SoftDiceLoss()(prob_output_l, pseudo_label_l) + nn.BCELoss(reduction='mean')(prob_output_l.squeeze() + 1e-10, pseudo_label_l.squeeze() + 1e-10)
-    #         return {'loss': loss.mean()}
-    #
-    #     elif len(prob_output_u.size()) == 4:
-    #         if prob_output_u.size()[1] == 1:
-    #             # this is also binary segmentation
-    #             loss = SoftDiceLoss()(prob_output_u, pseudo_label_u) + nn.BCELoss(reduction='mean')(prob_output_u.squeeze() + 1e-10, pseudo_label_u.squeeze() + 1e-10)
-    #             loss += 0.5*SoftDiceLoss()(prob_output_l, pseudo_label_l) + nn.BCELoss(reduction='mean')(prob_output_l.squeeze() + 1e-10, pseudo_label_l.squeeze() + 1e-10)
-    #             return {'loss': loss.mean()}
-    #
-    #         else:
-    #             # this is multi class segmentation
-    #             pseudo_label_u = multi_class_label_processing(pseudo_label_u, prob_output_u.size()[1])  # convert single channel multi integer class label to multi channel binary label
-    #             loss = torch.tensor(0).to('cuda')
-    #             effective_classes = 0
-    #             for i in range(prob_output_u.size()[1]):  # multiple
-    #                 if torch.sum(pseudo_label_u[:, i, :, :]) > 10.0:
-    #                     # If the channel is not empty, we learn it otherwise we ignore that channel because sometimes we do learn some very weird stuff
-    #                     # It is necessary to use this condition because some labels do not necessarily contain all of the classes in one image.
-    #                     effective_classes += 1
-    #                     loss += SoftDiceLoss()(prob_output_u[:, i, :, :], pseudo_label_u[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output_u[:, i, :, :].squeeze() + 1e-10, pseudo_label_u[:, i, :, :].squeeze() + 1e-10).mean()
-    #                     loss += 0.5*SoftDiceLoss()(prob_output_l[:, i, :, :], pseudo_label_l[:, i, :, :]).mean() + nn.BCELoss(reduction='mean')(prob_output_l[:, i, :, :].squeeze() + 1e-10, pseudo_label_l[:, i, :, :].squeeze() + 1e-10).mean()
-    #             loss = loss / effective_classes
-    #             return {'loss': loss.mean()}
-
-    # else:
-    #     return {'loss': torch.tensor(0.0).to('cuda').mean()}
 
 
-# b_l = train_img.get('batch labelled'),
-# b_u = train_img.get('batch unlabelled'),
 
-# def train_semi(labelled_img,
-#                labelled_label,
-#                model,
-#                unlabelled_img,
-#                t=2.0,
-#                prior_mu=0.7,
-#                # prior_logsigma=0.1,
-#                augmentation_cutout=0):
-#
-#     # convert data from numpy to tensor:
-#     inputs = np2tensor_all(**{'img_l': labelled_img,
-#                               'lbl': labelled_label,
-#                               'img_u': unlabelled_img})
-#
-#     # concatenate labelled and unlabelled for ssl otherwise just use labelled img
-#     train_img = get_img(**inputs)
-#
-#     # forward pass:
-#     outputs_dict = model_forward(model, train_img.get('train img'))
-#
-#     # supervised loss:
-#     sup_loss = calculate_sup_loss(outputs_dict=outputs_dict,
-#                                   lbl=inputs.get('lbl'),
-#                                   temp=t,
-#                                   b_l=train_img.get('batch labelled'),
-#                                   b_u=train_img.get('batch unlabelled'),
-#                                   cutout_aug=augmentation_cutout)
-#
-#     # calculate the kl and get the learnt threshold:
-#     kl_loss = calculate_kl_loss(outputs_dict=outputs_dict,
-#                                 b_l=train_img.get('batch labelled'),
-#                                 b_u=train_img.get('batch unlabelled'),
-#                                 prior_u=prior_mu,
-#                                 # prior_var=prior_logsigma
-#                                 )
-#
-#     # pseudo label loss:
-#     pseudo_loss = calculate_pseudo_loss(outputs_dict=outputs_dict,
-#                                         b_l=train_img.get('batch labelled'),
-#                                         b_u=train_img.get('batch unlabelled'),
-#                                         temp=t,
-#                                         cutout_aug=augmentation_cutout
-#                                         )
-#
-#     return {'supervised loss': sup_loss,
-#             'pseudo loss': pseudo_loss,
-#             'kl loss': kl_loss}
+
 

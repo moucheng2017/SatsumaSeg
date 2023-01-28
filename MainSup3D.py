@@ -3,7 +3,6 @@ import torch
 import timeit
 import shutil
 import math
-
 import numpy as np
 
 from libs.Train3D import train_sup
@@ -11,6 +10,7 @@ from libs import Helpers
 from libs.Validate import validate
 
 from arguments import get_args
+
 
 def main(args):
     # fix a random seed:

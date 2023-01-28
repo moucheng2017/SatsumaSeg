@@ -17,22 +17,6 @@ def norm95(image):
     return image
 
 
-# def normalisation(label, image):
-#     # Case-wise normalisation
-#     # Normalisation using values inside of the foreground mask
-#
-#     if label is None:
-#         lung_mean = np.nanmean(image)
-#         lung_std = np.nanstd(image)
-#     else:
-#         image_masked = ma.masked_where(label > 0.5, image)
-#         lung_mean = np.nanmean(image_masked)
-#         lung_std = np.nanstd(image_masked)
-#
-#     image = (image - lung_mean + 1e-10) / (lung_std + 1e-10)
-#     return image
-
-
 class RandomZoom(object):
     # Zoom in augmentation
     # We zoom out the foreground parts when labels are available
@@ -84,6 +68,41 @@ class RandomZoom(object):
         assert w2 == w
 
         return image_zoomed, label_zoomed
+
+
+class RandomCrop(object):
+    def __init__(self,
+                 output_shape=(128, 128, 128)
+                 ):
+        self.output_shape = output_shape
+
+    def crop_x(self, x):
+        d, h, w = np.shape(x)
+        sample_position_d = random.randint(0, d - 1 - self.output_shape[0])
+        sample_position_h = random.randint(0, h - 1 - self.output_shape[1])
+        sample_position_w = random.randint(0, w - 1 - self.output_shape[2])
+
+        x = x[sample_position_d:sample_position_d+self.output_shape[0],
+              sample_position_h:sample_position_h+self.output_shape[1],
+              sample_position_w:sample_position_w+self.output_shape[2]]
+
+        return x
+
+    def crop_xy(self, x, y):
+        d, h, w = np.shape(x)
+        sample_position_d = random.randint(0, d - 1 - self.output_shape[0])
+        sample_position_h = random.randint(0, h - 1 - self.output_shape[1])
+        sample_position_w = random.randint(0, w - 1 - self.output_shape[2])
+
+        x = x[sample_position_d:sample_position_d+self.output_shape[0],
+              sample_position_h:sample_position_h+self.output_shape[1],
+              sample_position_w:sample_position_w+self.output_shape[2]]
+
+        y = y[sample_position_d:sample_position_d+self.output_shape[0],
+              sample_position_h:sample_position_h+self.output_shape[1],
+              sample_position_w:sample_position_w+self.output_shape[2]]
+
+        return x, y
 
 
 class RandomSlicingOrthogonal(object):

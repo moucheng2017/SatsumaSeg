@@ -131,8 +131,8 @@ class Unet(nn.Module):
     def __init__(self,
                  in_ch,
                  width,
-                 depth,
                  classes,
+                 depth=4,
                  norm='in',
                  side_output=False):
         '''
