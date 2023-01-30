@@ -5,20 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/config/airway_local.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/seg_ppfe.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSemi3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSup3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/test_augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/test_augmentations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Augmentations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Dataloader3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Dataloader3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway_local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway_local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/libs/Helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Train3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Train3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/Models2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/Models2D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/Models3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/Models3D.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,15 +53,15 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/config",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/models" />
-      <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/preprocessing" />
     </key>
@@ -160,13 +151,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00151" summary="2021 08 04b: need to update trainbase">
-      <created>1659630092916</created>
-      <option name="number" value="00151" />
-      <option name="presentableId" value="LOCAL-00151" />
-      <option name="project" value="LOCAL" />
-      <updated>1659630092916</updated>
     </task>
     <task id="LOCAL-00152" summary="2021 08 05a: adding ssl loss and sup loss">
       <created>1659719123521</created>
@@ -504,7 +488,14 @@
       <option name="project" value="LOCAL" />
       <updated>1674836513475</updated>
     </task>
-    <option name="localTasksCounter" value="200" />
+    <task id="LOCAL-00200" summary="2023 01 28 a: to do add inference on ppfe, have debugged training for 3d code and now running an airway 3d experiment on local machine">
+      <created>1674928859764</created>
+      <option name="number" value="00200" />
+      <option name="presentableId" value="LOCAL-00200" />
+      <option name="project" value="LOCAL" />
+      <updated>1674928859764</updated>
+    </task>
+    <option name="localTasksCounter" value="201" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -520,7 +511,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 10 25 f: cluster memory issue" />
     <MESSAGE value="2021 10 26 a: memory issue again" />
     <MESSAGE value="2021 10 28 b: running some stuff" />
     <MESSAGE value="2021 10 28 c: adding new stuff" />
@@ -545,6 +535,7 @@
     <MESSAGE value="2023 01 20 b: trying with more foreground voxels" />
     <MESSAGE value="2023 01 27 a: train with 128 x 128 x 128 cubes supervised learning" />
     <MESSAGE value="2023 01 27 b: new training experiments" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 01 27 b: new training experiments" />
+    <MESSAGE value="2023 01 28 a: to do add inference on ppfe, have debugged training for 3d code and now running an airway 3d experiment on local machine" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 01 28 a: to do add inference on ppfe, have debugged training for 3d code and now running an airway 3d experiment on local machine" />
   </component>
 </project>

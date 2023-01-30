@@ -5,7 +5,7 @@ import pathlib
 import scipy
 import sys
 import argparse
-
+import nibabel as nib
 import torch
 
 sys.path.append('../..')
@@ -15,10 +15,10 @@ from skimage.transform import resize
 # This prints out a grid: rows are different images, each row has three columns of image, label, and overlapped image
 
 parser = argparse.ArgumentParser('Run inference on PPFE')
-parser.add_argument('--img_source', type=str, help='source file', default='/home/moucheng/projects_data/PPFE_HipCT/processed/res256_type3/labelled/imgs')
-parser.add_argument('--model_source', type=str, help='model path', default='/home/moucheng/model')
-parser.add_argument('--save_path', type=str, help='save path', default='/home/moucheng/projects_data/PPFE_HipCT/processed/res256_type3/labelled/lbls')
-parser.add_argument('--new_dim', type=int, help='new dimension', default=224)
+parser.add_argument('--img_source', type=str, help='source file', default='/SAN/medic/PerceptronHead/data/ppfe/img_volume.npy')
+parser.add_argument('--model_source', type=str, help='model path', default='/SAN/medic/PerceptronHead/Results_res256_type3/3d_ppfe_sup_binary_res256/Unet3D_l_0.0003_b1_w8_d4_i6200_l2_0.0005_c_True_t1.0/trained_models/Unet3D_l_0.0003_b1_w8_d4_i6200_l2_0.0005_c_True_t1.0_ema.pt')
+parser.add_argument('--save_path', type=str, help='save path', default='/SAN/medic/PerceptronHead/data/ppfe/')
+parser.add_argument('--new_dim', type=int, help='new dimension', default=256)
 args = parser.parse_args()
 
 
@@ -52,24 +52,29 @@ if __name__ == '__main__':
     assert w % new_dim == 0
 
     imgs_d = np.split(img, d // new_dim, axis=0)
-    count = 0
 
-    for each_img_d in imgs_d:
+    for i, each_img_d in zip(imgs_d):
         imgs_d_h = np.split(each_img_d, h // new_dim, axis=1)
-        for each_img_h in imgs_d_h:
+        for j, each_img_h in zip(imgs_d_h):
             imgs_d_h_w = np.split(each_img_h, w // new_dim, axis=2)
-            for each_img_w in imgs_d_h_w:
+            for k, each_img_w in zip(imgs_d_h_w):
                 d_, h_, w_ = np.shape(each_img_w)
 
-                print('The shape of the saved subvolume. Depth: {:.1f}; ' 'Height: {:.1f}; ' 'Width: {:.1f}'.format(d_, h_, w_))
                 assert d_ == new_dim
                 assert h_ == new_dim
                 assert w_ == new_dim
 
-                # run inference
                 seg_ = torch.from_numpy(each_img_w).cuda().unsqueeze(1)
                 seg_ = model(seg_)
+                seg_ = seg_.get('segmentation')
                 _, seg_ = torch.max(seg_, dim=1)
+                seg[i*new_dim:(i+1)*new_dim, j*new_dim:(j+1)*new_dim, k*new_dim:(k+1)*new_dim] = seg_
+
+    seg = nib.Nifti1Image(seg, affine=np.eye(4))
+    seg_name = str(args.new_dim) + '_segmentation.nii'
+    save_file = os.path.join(args.save_path, seg_name)
+    nib.save(seg, save_file)
+
 
 
 

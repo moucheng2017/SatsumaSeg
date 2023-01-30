@@ -148,7 +148,7 @@ def get_data_dict(dataloader, iterator):
     except StopIteration:
         iterator = iter(dataloader)
         data_dict, data_name = next(iterator)
-
+    # print(data_name)
     del data_name
     return data_dict
 
