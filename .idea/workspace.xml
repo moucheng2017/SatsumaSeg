@@ -5,12 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSemi2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi2D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSemi3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSup2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup2D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSup3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_prepare_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_prepare_training.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway1.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway1.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway2.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway2.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway3.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway3.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway4.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway4.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway5.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway5.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway_local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway_local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/sup3d3a.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3a.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/sup3d3b.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/sup3d3c.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3c.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -152,13 +155,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00161" summary="2021 08 23 a: augmentation finsiehd, now we have cutout, weighted random crop and weighted random zoom in">
-      <created>1661282855874</created>
-      <option name="number" value="00161" />
-      <option name="presentableId" value="LOCAL-00161" />
-      <option name="project" value="LOCAL" />
-      <updated>1661282855875</updated>
     </task>
     <task id="LOCAL-00162" summary="2021 08 26 a: started to ensemble the train loop, seems like i might still need to write a few more functions to separate sup and ssl">
       <created>1661525665865</created>
@@ -496,7 +492,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675180361798</updated>
     </task>
-    <option name="localTasksCounter" value="210" />
+    <task id="LOCAL-00210" summary="2023 01 31 h: new saving scheme">
+      <created>1675185270227</created>
+      <option name="number" value="00210" />
+      <option name="presentableId" value="LOCAL-00210" />
+      <option name="project" value="LOCAL" />
+      <updated>1675185270227</updated>
+    </task>
+    <option name="localTasksCounter" value="211" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -512,7 +515,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 11 08 d: debugging again for the right size of input volume" />
     <MESSAGE value="2021 11 16 a: add validate" />
     <MESSAGE value="2021 11 17 a before branching out" />
     <MESSAGE value="2021 11 17 b: debugged sup and unsup kl still wrong but that's okay" />
@@ -537,6 +539,7 @@
     <MESSAGE value="2023 01 31e: new experiments" />
     <MESSAGE value="2023 01 31e: new running" />
     <MESSAGE value="2023 01 31g: new configurations" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31g: new configurations" />
+    <MESSAGE value="2023 01 31 h: new saving scheme" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31 h: new saving scheme" />
   </component>
 </project>

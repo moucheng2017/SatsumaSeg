@@ -20,7 +20,7 @@ train:
   iterations: 12400
   stop_iteration: 12400
   batch: 1
-  save_ema_start: 620 # 10 epochs
+  save_ema_start: 11400 # 10 epochs
   patience: 1000
   temp: 1.0
   contrast: True

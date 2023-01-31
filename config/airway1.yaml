@@ -23,7 +23,7 @@ train:
   iterations: 31437
   stop_iteration: 31437
   batch: 1
-  save_ema_start: 10000
+  save_ema_start: 30437
   temp: 1.0
   patience: 10000
   contrast: True
