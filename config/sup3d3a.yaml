@@ -45,7 +45,7 @@ eval:
   batch: 1
 
 logger:
-  tag: '3d_ppfe_sup_binary_res128'
+  tag: '3d_ppfe_sup_binary_res128_new'
 
 seed: 1024
 
