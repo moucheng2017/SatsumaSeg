@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="2023 01 31a: new airway experiments always save the last current model">
+    <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/cluster/airway5.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/airway5.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSup3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSemi2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi2D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSemi3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSup2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup2D.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,14 +54,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/config",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/config" />
+      <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/preprocessing" />
@@ -148,13 +152,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00154" summary="2021 08 12 a: new data augmentation added">
-      <created>1660322505616</created>
-      <option name="number" value="00154" />
-      <option name="presentableId" value="LOCAL-00154" />
-      <option name="project" value="LOCAL" />
-      <updated>1660322505617</updated>
     </task>
     <task id="LOCAL-00155" summary="2021 08 12 b: pseudo loss was missing! I need to add it">
       <created>1660323384014</created>
@@ -492,7 +489,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675171955636</updated>
     </task>
-    <option name="localTasksCounter" value="203" />
+    <task id="LOCAL-00203" summary="2023 01 31b: save the current last model">
+      <created>1675172279818</created>
+      <option name="number" value="00203" />
+      <option name="presentableId" value="LOCAL-00203" />
+      <option name="project" value="LOCAL" />
+      <updated>1675172279819</updated>
+    </task>
+    <option name="localTasksCounter" value="204" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -508,7 +512,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 10 28 c: adding new stuff" />
     <MESSAGE value="2021 11 07 a: adding new warmup schedule" />
     <MESSAGE value="2021 11 07 b: norm after augmentation" />
     <MESSAGE value="2021 11 08 a: adding a new script for training hip ct" />
@@ -533,6 +536,7 @@
     <MESSAGE value="2023 01 28 a: to do add inference on ppfe, have debugged training for 3d code and now running an airway 3d experiment on local machine" />
     <MESSAGE value="2023 01 30 a: run inference on cluster" />
     <MESSAGE value="2023 01 31a: new airway experiments" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31a: new airway experiments" />
+    <MESSAGE value="2023 01 31b: save the current last model" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31b: save the current last model" />
   </component>
 </project>

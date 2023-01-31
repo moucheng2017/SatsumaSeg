@@ -270,6 +270,9 @@ def main(args):
                 for ema_param, param in zip(model_ema.parameters(), model.parameters()):
                     ema_param.data.add_(param.data)
 
+        save_model_name_full = saved_model_path + '_current.pt'
+        torch.save(model, save_model_name_full)
+
         if validate_acc > best_val:
             save_model_name_full = saved_model_path + '/' + model_name + '_best_val.pt'
             torch.save(model, save_model_name_full)
