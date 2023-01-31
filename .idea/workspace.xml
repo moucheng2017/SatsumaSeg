@@ -5,10 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/cluster/ppfe3c.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/sup3d3c.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/sup3d3a.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3a.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/sup3d3b.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3b.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,14 +51,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/config",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/cluster" />
+      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/preprocessing" />
@@ -150,13 +149,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00159" summary="2021 08 17a: adding some stuff">
-      <created>1660760844496</created>
-      <option name="number" value="00159" />
-      <option name="presentableId" value="LOCAL-00159" />
-      <option name="project" value="LOCAL" />
-      <updated>1660760844496</updated>
     </task>
     <task id="LOCAL-00160" summary="2021 08 22 a: keep updated with the code base">
       <created>1661182659108</created>
@@ -494,7 +486,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675178842304</updated>
     </task>
-    <option name="localTasksCounter" value="208" />
+    <task id="LOCAL-00208" summary="2023 01 31g: new configurations">
+      <created>1675180098495</created>
+      <option name="number" value="00208" />
+      <option name="presentableId" value="LOCAL-00208" />
+      <option name="project" value="LOCAL" />
+      <updated>1675180098495</updated>
+    </task>
+    <option name="localTasksCounter" value="209" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -510,7 +509,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 11 08 c: debugging: use randonint for sampling slices now" />
     <MESSAGE value="2021 11 08 d: debugging again for the right size of input volume" />
     <MESSAGE value="2021 11 16 a: add validate" />
     <MESSAGE value="2021 11 17 a before branching out" />
@@ -535,6 +533,7 @@
     <MESSAGE value="2023 01 31d: not enough memory for super large volume 448" />
     <MESSAGE value="2023 01 31e: new experiments" />
     <MESSAGE value="2023 01 31e: new running" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31e: new running" />
+    <MESSAGE value="2023 01 31g: new configurations" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31g: new configurations" />
   </component>
 </project>
