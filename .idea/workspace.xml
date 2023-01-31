@@ -5,9 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/cluster/ppfe3c.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/sup3d3c.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSemi2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi2D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSemi3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSup2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup2D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSup3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocessing/hipct_ppfe_prepare_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/hipct_ppfe_prepare_training.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -149,13 +152,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00160" summary="2021 08 22 a: keep updated with the code base">
-      <created>1661182659108</created>
-      <option name="number" value="00160" />
-      <option name="presentableId" value="LOCAL-00160" />
-      <option name="project" value="LOCAL" />
-      <updated>1661182659108</updated>
     </task>
     <task id="LOCAL-00161" summary="2021 08 23 a: augmentation finsiehd, now we have cutout, weighted random crop and weighted random zoom in">
       <created>1661282855874</created>
@@ -493,7 +489,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675180098495</updated>
     </task>
-    <option name="localTasksCounter" value="209" />
+    <task id="LOCAL-00209" summary="2023 01 31g: new configurations">
+      <created>1675180361798</created>
+      <option name="number" value="00209" />
+      <option name="presentableId" value="LOCAL-00209" />
+      <option name="project" value="LOCAL" />
+      <updated>1675180361798</updated>
+    </task>
+    <option name="localTasksCounter" value="210" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

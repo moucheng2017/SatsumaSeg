@@ -46,6 +46,7 @@ def main(args):
 
     # initialisation of best acc tracker
     best_val = 0.0
+    best_train = 0.0
 
     # initialisation of counter for ema avg:
     ema_count = 0
@@ -192,8 +193,13 @@ def main(args):
             for ema_param, param in zip(model_ema.parameters(), model.parameters()):
                 ema_param.data.add_(param.data)
 
-        save_model_name_full = saved_model_path + '_current.pt'
+        save_model_name_full = saved_model_path + '/' + model_name + '_last.pt'
         torch.save(model, save_model_name_full)
+
+        if train_iou > best_train:
+            save_model_name_full = saved_model_path + '/' + model_name + '_best_train.pt'
+            torch.save(model, save_model_name_full)
+            best_train = max(best_train, train_iou)
 
         if validate_acc > best_val:
             save_model_name_full = saved_model_path + '/' + model_name + '_best_val.pt'
@@ -202,7 +208,7 @@ def main(args):
         else:
             best_val_count += 1
             best_val = best_val
-            if best_val_count > args.patience and best_val > 0.95:
+            if best_val_count > args.train.patience and best_val > 0.95:
                 for ema_param in model_ema.parameters():
                     ema_param = ema_param / ema_count
                 save_model_name_full = saved_model_path + '/' + model_name + '_ema.pt'

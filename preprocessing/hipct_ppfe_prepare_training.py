@@ -10,8 +10,9 @@ sys.path.append('..')
 
 if __name__ == '__main__':
     #  Change here:
-    new_dim = 128
+    new_dim = 512
     label_merge = 3
+    foreground_threshold_flag = False
 
     img_source = '/home/moucheng/projects_data/PPFE_HipCT/processed/img_volume.npy'
     lbl_source = '/home/moucheng/projects_data/PPFE_HipCT/processed/lbl_volume.npy'
@@ -120,7 +121,11 @@ if __name__ == '__main__':
                 foreground = sum(sum(sum(foreground)))
                 threshold = new_dim*new_dim*new_dim*foreground_all*0.5
 
-                if foreground > threshold:
+                if foreground_threshold_flag is True:
+                    if foreground > threshold:
+                        np.save(save_path_img + str(count) + 'img.npy', each_img_w)
+                        np.save(save_path_lbl + str(count) + 'lbl.npy', each_lbl_w)
+                else:
                     np.save(save_path_img + str(count) + 'img.npy', each_img_w)
                     np.save(save_path_lbl + str(count) + 'lbl.npy', each_lbl_w)
 

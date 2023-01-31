@@ -49,6 +49,7 @@ def main(args):
 
     # initialisation of best acc tracker
     best_val = 0.0
+    best_train = 0.0
 
     # initialisation of counter for ema avg:
     ema_count = 0
@@ -261,6 +262,9 @@ def main(args):
                 writer.add_scalars('ious', {'train iu': train_iou,
                                             'val iu': validate_acc}, step + 1)
 
+            else:
+                train_iou = 0.0
+
         if step > args.ema_saving_starting:
             ema_count += 1
             if (step - args.ema_saving_starting) == 1:
@@ -272,6 +276,11 @@ def main(args):
 
         save_model_name_full = saved_model_path + '_current.pt'
         torch.save(model, save_model_name_full)
+
+        if train_iou > best_train:
+            save_model_name_full = saved_model_path + '/' + model_name + '_best_train.pt'
+            torch.save(model, save_model_name_full)
+            best_train = max(best_train, train_iou)
 
         if validate_acc > best_val:
             save_model_name_full = saved_model_path + '/' + model_name + '_best_val.pt'
