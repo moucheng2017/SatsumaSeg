@@ -5,10 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/sup3d3a.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3a.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/sup3d3b.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3b.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -150,13 +148,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00157" summary="2021 08 15 a: i need to add multi channel sigmoid for multi class segmentation">
-      <created>1660579963391</created>
-      <option name="number" value="00157" />
-      <option name="presentableId" value="LOCAL-00157" />
-      <option name="project" value="LOCAL" />
-      <updated>1660579963391</updated>
     </task>
     <task id="LOCAL-00158" summary="2021 08 16 a: we have finished training loops i think let's put everyting together">
       <created>1660666757534</created>
@@ -494,7 +485,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675175927750</updated>
     </task>
-    <option name="localTasksCounter" value="206" />
+    <task id="LOCAL-00206" summary="2023 01 31e: new experiments">
+      <created>1675178630567</created>
+      <option name="number" value="00206" />
+      <option name="presentableId" value="LOCAL-00206" />
+      <option name="project" value="LOCAL" />
+      <updated>1675178630567</updated>
+    </task>
+    <option name="localTasksCounter" value="207" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -510,7 +508,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 11 08 a: adding a new script for training hip ct" />
     <MESSAGE value="2021 11 08 b: debugging01: wrong run file before" />
     <MESSAGE value="2021 11 08 c: debugging: use randonint for sampling slices now" />
     <MESSAGE value="2021 11 08 d: debugging again for the right size of input volume" />
@@ -535,6 +532,7 @@
     <MESSAGE value="2023 01 31b: save the current last model" />
     <MESSAGE value="2023 01 31c: add one more exp on airway with small network and resolution crop a 256" />
     <MESSAGE value="2023 01 31d: not enough memory for super large volume 448" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31d: not enough memory for super large volume 448" />
+    <MESSAGE value="2023 01 31e: new experiments" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31e: new experiments" />
   </component>
 </project>
