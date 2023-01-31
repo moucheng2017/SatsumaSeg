@@ -137,6 +137,9 @@ def main(args):
             for ema_param, param in zip(model_ema.parameters(), model.parameters()):
                 ema_param.data.add_(param.data)
 
+        save_model_name_full = saved_model_path + '_current.pt'
+        torch.save(model, save_model_name_full)
+
         if validate_acc > best_val:
             save_model_name_full = saved_model_path + '/' + model_name + '_best_val.pt'
             torch.save(model, save_model_name_full)
@@ -158,9 +161,7 @@ def main(args):
     training_time = stop - start
     print('Training Time: ', training_time)
 
-    # save_path = saved_model_path + '/results'
-    # Path(save_path).mkdir(parents=True, exist_ok=True)
-    # print('\nTraining finished and model saved\n')
+
     #
     # # zip all models:
     # shutil.make_archive(saved_model_path, 'zip', saved_model_path)
