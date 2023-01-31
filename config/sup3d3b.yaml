@@ -25,6 +25,7 @@ train:
   temp: 1.0
   contrast: True
   gaussian: True
+  new_size: 256
   crop_aug: False
   batch_u: 0 # this has to be zero in supervised setting
   mu: 0.5
