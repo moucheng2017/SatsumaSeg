@@ -5,15 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/airway3.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/airway6.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/airway4.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/ppfe1.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/ppfe2.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/ppfe3b.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/seg_ppfe.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway3.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway6.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway4.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Dataloader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Dataloader3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Dataloader3D.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -155,13 +148,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00163" summary="2021 09 13 a: adding new stuff">
-      <created>1663089795489</created>
-      <option name="number" value="00163" />
-      <option name="presentableId" value="LOCAL-00163" />
-      <option name="project" value="LOCAL" />
-      <updated>1663089795490</updated>
     </task>
     <task id="LOCAL-00164" summary="2021 10 14a: new method">
       <created>1665766493573</created>
@@ -499,7 +485,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675185409767</updated>
     </task>
-    <option name="localTasksCounter" value="212" />
+    <task id="LOCAL-00212" summary="2023 02 03a: new method">
+      <created>1675433843186</created>
+      <option name="number" value="00212" />
+      <option name="presentableId" value="LOCAL-00212" />
+      <option name="project" value="LOCAL" />
+      <updated>1675433843187</updated>
+    </task>
+    <option name="localTasksCounter" value="213" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -515,7 +508,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 11 17 a before branching out" />
     <MESSAGE value="2021 11 17 b: debugged sup and unsup kl still wrong but that's okay" />
     <MESSAGE value="2022 11 23: unexpected bug on cluster when run the airway segmentation very strange no idea" />
     <MESSAGE value="2022 11 24b: .." />
@@ -540,6 +532,7 @@
     <MESSAGE value="2023 01 31g: new configurations" />
     <MESSAGE value="2023 01 31 h: new saving scheme" />
     <MESSAGE value="2023 01 31 i: new saving scheme" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31 i: new saving scheme" />
+    <MESSAGE value="2023 02 03a: new method" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 03a: new method" />
   </component>
 </project>

@@ -56,7 +56,7 @@ class CustomDataset3D(Dataset):
         image = np.array(image, dtype='float32')
 
         # normalisation:
-        image = norm95(image)
+        # image = norm95(image)
 
         # Extract image name
         _, imagename = os.path.split(imagename)
