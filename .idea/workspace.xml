@@ -5,15 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/config/airway1.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway1.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway2.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway2.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway3.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway3.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway4.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway4.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway5.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway5.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway_local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway_local.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/sup3d3a.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3a.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/sup3d3b.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/sup3d3c.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/sup3d3c.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/airway3.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/airway6.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/airway4.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/ppfe1.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/ppfe2.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/ppfe3b.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/seg_ppfe.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway3.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway6.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway4.yaml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,14 +57,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/config",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/config" />
+      <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/preprocessing" />
@@ -77,7 +77,7 @@
       <recent name="$PROJECT_DIR$/preprocessing/check_raw_data" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.Inference2DOrthogonalEnsemble">
     <configuration name="Inference2DOrthogonalEnsemble" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="MedicalMetaLearning" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -155,13 +155,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00162" summary="2021 08 26 a: started to ensemble the train loop, seems like i might still need to write a few more functions to separate sup and ssl">
-      <created>1661525665865</created>
-      <option name="number" value="00162" />
-      <option name="presentableId" value="LOCAL-00162" />
-      <option name="project" value="LOCAL" />
-      <updated>1661525665865</updated>
     </task>
     <task id="LOCAL-00163" summary="2021 09 13 a: adding new stuff">
       <created>1663089795489</created>
@@ -499,7 +492,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675185270227</updated>
     </task>
-    <option name="localTasksCounter" value="211" />
+    <task id="LOCAL-00211" summary="2023 01 31 i: new saving scheme">
+      <created>1675185409767</created>
+      <option name="number" value="00211" />
+      <option name="presentableId" value="LOCAL-00211" />
+      <option name="project" value="LOCAL" />
+      <updated>1675185409767</updated>
+    </task>
+    <option name="localTasksCounter" value="212" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -515,7 +515,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2021 11 16 a: add validate" />
     <MESSAGE value="2021 11 17 a before branching out" />
     <MESSAGE value="2021 11 17 b: debugged sup and unsup kl still wrong but that's okay" />
     <MESSAGE value="2022 11 23: unexpected bug on cluster when run the airway segmentation very strange no idea" />
@@ -540,6 +539,7 @@
     <MESSAGE value="2023 01 31e: new running" />
     <MESSAGE value="2023 01 31g: new configurations" />
     <MESSAGE value="2023 01 31 h: new saving scheme" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31 h: new saving scheme" />
+    <MESSAGE value="2023 01 31 i: new saving scheme" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 01 31 i: new saving scheme" />
   </component>
 </project>
