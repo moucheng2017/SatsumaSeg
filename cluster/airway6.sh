@@ -1,5 +1,5 @@
 #$ -l tmem=16G
-#$ -l gpu=true,gpu_type=(titanxp|titanx)
+#$ -l gpu=true,gpu_type=(rtx8000|a100)
 #$ -S /bin/bash
 #$ -j y
 #$ -l h_rt=168:00:00
