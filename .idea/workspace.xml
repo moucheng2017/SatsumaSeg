@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/inference/inference_ppfe/connectivity_processing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/airway6.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/airway6.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway6.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/airway6.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +71,7 @@
       <recent name="$PROJECT_DIR$/preprocessing/check_raw_data" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.Inference2DOrthogonalEnsemble">
+  <component name="RunManager">
     <configuration name="Inference2DOrthogonalEnsemble" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="MedicalMetaLearning" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -149,13 +149,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00165" summary="2021 10 14b: refining the augmentation">
-      <created>1665768235450</created>
-      <option name="number" value="00165" />
-      <option name="presentableId" value="LOCAL-00165" />
-      <option name="project" value="LOCAL" />
-      <updated>1665768235450</updated>
     </task>
     <task id="LOCAL-00166" summary="2021 10 18 a: data augmentation done">
       <created>1666116364812</created>
@@ -493,7 +486,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675433929761</updated>
     </task>
-    <option name="localTasksCounter" value="214" />
+    <task id="LOCAL-00214" summary="2023 02 03b: asking to use a100">
+      <created>1675440458513</created>
+      <option name="number" value="00214" />
+      <option name="presentableId" value="LOCAL-00214" />
+      <option name="project" value="LOCAL" />
+      <updated>1675440458513</updated>
+    </task>
+    <option name="localTasksCounter" value="215" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -509,7 +509,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2022 11 23: unexpected bug on cluster when run the airway segmentation very strange no idea" />
     <MESSAGE value="2022 11 24b: .." />
     <MESSAGE value="2022 11 25a: new exps" />
     <MESSAGE value="2022 11 25 b: large gpu for training with unlabelled images" />
@@ -534,6 +533,7 @@
     <MESSAGE value="2023 01 31 i: new saving scheme" />
     <MESSAGE value="2023 02 03a: new method" />
     <MESSAGE value="2023 02 03a: change normalisatoin" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 03a: change normalisatoin" />
+    <MESSAGE value="2023 02 03b: asking to use a100" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 03b: asking to use a100" />
   </component>
 </project>
