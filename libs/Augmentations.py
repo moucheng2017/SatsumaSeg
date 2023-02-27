@@ -72,11 +72,12 @@ class RandomZoom(object):
 
 class RandomCrop(object):
     def __init__(self,
-                 output_shape=(128, 128, 128)
+                 output_shape
                  ):
         self.output_shape = output_shape
 
     def crop_x(self, x):
+        # print(np.shape(x))
         d, h, w = np.shape(x)
         sample_position_d = random.randint(0, d - 1 - self.output_shape[0])
         sample_position_h = random.randint(0, h - 1 - self.output_shape[1])

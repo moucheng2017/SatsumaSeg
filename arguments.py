@@ -73,7 +73,6 @@ def get_args():
         'iterations': args.train.iterations,
         'batch': args.train.batch,
         'stop_iteration': args.train.stop_iteration,
-        'save_ema_start': args.train.save_ema_start,
         'patience': args.train.patience,
         'weight_decay': args.train.optimizer.weight_decay
     }

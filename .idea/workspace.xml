@@ -5,9 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/inference/inference_ppfe/connectivity_processing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/arXiv/MainSup2D.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung1.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung2.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung3.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung4.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSemi2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/arXiv/MainSemi2D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSemi3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSup2D.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSup3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/arguments.py" beforeDir="false" afterPath="$PROJECT_DIR$/arguments.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway2.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung01.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway5.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung04.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway6.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung02.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/airway_local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung03.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Augmentations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/arXiv/Dataloader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Dataloader3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Dataloader3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Loss.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Rampups.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Train.py" beforeDir="false" afterPath="$PROJECT_DIR$/arXiv/Train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Train3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Train3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/test_augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/arXiv/test_augmentations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Models2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/arXiv/Models2D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Models3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/Models3D.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,27 +75,27 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/cluster" />
+      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/preprocessing" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/arXiv" />
       <recent name="$PROJECT_DIR$/libs" />
       <recent name="$PROJECT_DIR$/inference/inference_covid_np" />
       <recent name="$PROJECT_DIR$/preprocessing/data_format_process" />
       <recent name="$PROJECT_DIR$/preprocessing/check_processed_data" />
-      <recent name="$PROJECT_DIR$/preprocessing/check_raw_data" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.Run">
     <configuration name="Inference2DOrthogonalEnsemble" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="MedicalMetaLearning" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -149,13 +173,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00166" summary="2021 10 18 a: data augmentation done">
-      <created>1666116364812</created>
-      <option name="number" value="00166" />
-      <option name="presentableId" value="LOCAL-00166" />
-      <option name="project" value="LOCAL" />
-      <updated>1666116364812</updated>
     </task>
     <task id="LOCAL-00167" summary="2021 10 20 a: debugged semi supervised learning part">
       <created>1666288490708</created>
@@ -493,7 +510,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675440458513</updated>
     </task>
-    <option name="localTasksCounter" value="215" />
+    <task id="LOCAL-00215" summary="2023 02 08 a: new post processing by denoising">
+      <created>1675860706735</created>
+      <option name="number" value="00215" />
+      <option name="presentableId" value="LOCAL-00215" />
+      <option name="project" value="LOCAL" />
+      <updated>1675860706735</updated>
+    </task>
+    <option name="localTasksCounter" value="216" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -509,7 +533,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2022 11 24b: .." />
     <MESSAGE value="2022 11 25a: new exps" />
     <MESSAGE value="2022 11 25 b: large gpu for training with unlabelled images" />
     <MESSAGE value="2022 12 09: adding temp scaling for pseudo loss and adjust the resolution of iamges to fit into the gpus" />
@@ -534,6 +557,7 @@
     <MESSAGE value="2023 02 03a: new method" />
     <MESSAGE value="2023 02 03a: change normalisatoin" />
     <MESSAGE value="2023 02 03b: asking to use a100" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 03b: asking to use a100" />
+    <MESSAGE value="2023 02 08 a: new post processing by denoising" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 08 a: new post processing by denoising" />
   </component>
 </project>
