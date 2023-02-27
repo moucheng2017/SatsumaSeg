@@ -7,15 +7,7 @@ import numpy as np
 import torch.backends.cudnn as cudnn
 import nibabel as nib
 
-# model:
-# from arXiv.Models2D import Unet, UnetBPL
-
-# model
 from models.Models3D import Unet3D, UnetBPL3D
-
-# data:
-# from arXiv.Dataloader import getData
-
 from libs.Dataloader3D import getData3D
 
 # track the training

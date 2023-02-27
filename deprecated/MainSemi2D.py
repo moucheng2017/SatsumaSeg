@@ -1,7 +1,7 @@
 import torch
 import timeit
 
-from arXiv.Train import train_semi
+from deprecated.Train import train_semi
 from libs import Helpers
 
 from libs.Validate import validate
