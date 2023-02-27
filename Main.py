@@ -1,10 +1,7 @@
-from pathlib import Path
 import torch
 import timeit
-
 from libs.Train3D import train_semi, train_sup
 from libs import Helpers
-
 from arguments import get_args
 
 

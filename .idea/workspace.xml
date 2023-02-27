@@ -5,33 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/arXiv/MainSup2D.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/lung1.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/lung2.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/lung3.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/lung4.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung5.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung6.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung7.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung05.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung06.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung07.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSemi2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/arXiv/MainSemi2D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSemi3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSup2D.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSup3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/arguments.py" beforeDir="false" afterPath="$PROJECT_DIR$/arguments.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway2.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung01.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway5.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung04.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway6.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung02.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway_local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung03.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Augmentations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/arXiv/Dataloader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Dataloader3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Dataloader3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/libs/Helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Loss.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Rampups.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Train.py" beforeDir="false" afterPath="$PROJECT_DIR$/arXiv/Train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Train3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Train3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/test_augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/arXiv/test_augmentations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/Models2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/arXiv/Models2D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/Models3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/Models3D.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -173,13 +155,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00167" summary="2021 10 20 a: debugged semi supervised learning part">
-      <created>1666288490708</created>
-      <option name="number" value="00167" />
-      <option name="presentableId" value="LOCAL-00167" />
-      <option name="project" value="LOCAL" />
-      <updated>1666288490709</updated>
     </task>
     <task id="LOCAL-00168" summary="2021 10 21 a: semi supervised part runs now">
       <created>1666377181064</created>
@@ -517,7 +492,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675860706735</updated>
     </task>
-    <option name="localTasksCounter" value="216" />
+    <task id="LOCAL-00216" summary="2023 02 27 a: new experiments for MIA">
+      <created>1677518000562</created>
+      <option name="number" value="00216" />
+      <option name="presentableId" value="LOCAL-00216" />
+      <option name="project" value="LOCAL" />
+      <updated>1677518000562</updated>
+    </task>
+    <option name="localTasksCounter" value="217" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -533,7 +515,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2022 11 25a: new exps" />
     <MESSAGE value="2022 11 25 b: large gpu for training with unlabelled images" />
     <MESSAGE value="2022 12 09: adding temp scaling for pseudo loss and adjust the resolution of iamges to fit into the gpus" />
     <MESSAGE value="2022 12 09b: use larger resolution 480" />
@@ -558,6 +539,7 @@
     <MESSAGE value="2023 02 03a: change normalisatoin" />
     <MESSAGE value="2023 02 03b: asking to use a100" />
     <MESSAGE value="2023 02 08 a: new post processing by denoising" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 08 a: new post processing by denoising" />
+    <MESSAGE value="2023 02 27 a: new experiments for MIA" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 27 a: new experiments for MIA" />
   </component>
 </project>
