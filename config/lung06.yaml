@@ -23,10 +23,8 @@ train:
     weight_decay: 0.0005
   lr: 0.0003
   iterations: 20000
-  stop_iteration: 20000
   batch: 2
   temp: 1.0
-  patience: 10000
   contrast: True
   crop_aug: True
   gaussian: True

@@ -72,8 +72,6 @@ def get_args():
         'lr': args.train.lr,
         'iterations': args.train.iterations,
         'batch': args.train.batch,
-        'stop_iteration': args.train.stop_iteration,
-        'patience': args.train.patience,
         'weight_decay': args.train.optimizer.weight_decay
     }
 
