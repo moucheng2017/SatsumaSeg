@@ -134,8 +134,12 @@ def main(args):
                 writer.add_scalars('loss metrics', {'train loss': loss.item()}, step + 1)
                 writer.add_scalars('ious', {'train iu': train_iou}, step + 1)
 
-        save_model_name_full = saved_model_path + '/' + model_name + '_last.pt'
+        save_model_name_full = saved_model_path + '/' + model_name + '_current.pt'
         torch.save(model, save_model_name_full)
+
+        if step % 10000 == 0 and step > 0:
+            save_model_name_full = saved_model_path + '/' + model_name + 'step' + str(step) + '.pt'
+            torch.save(model, save_model_name_full)
 
         if train_iou > best_train:
             save_model_name_full = saved_model_path + '/' + model_name + '_best_train.pt'

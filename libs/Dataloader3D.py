@@ -224,7 +224,7 @@ def getData3D(data_directory,
                                                    )
 
         train_loader_unlabelled = data.DataLoader(dataset=train_dataset_unlabelled,
-                                                  batch_size=train_batchsize,
+                                                  batch_size=int(train_batchsize*unlabelled),
                                                   shuffle=True,
                                                   drop_last=True)
 

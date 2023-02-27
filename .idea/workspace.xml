@@ -5,15 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/config/lunglocal.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSemi3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSup3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung1.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/lung1.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/lung2.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung3.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/lung3.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung4.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/lung4.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung01.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung01.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung02.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung02.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung03.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung03.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung04.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung04.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lung05.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung05.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lung06.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung06.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lung07.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung07.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lunglocal.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lunglocal.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Dataloader3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Dataloader3D.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -155,13 +160,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00170" summary="2021 10 24 b">
-      <created>1666640461084</created>
-      <option name="number" value="00170" />
-      <option name="presentableId" value="LOCAL-00170" />
-      <option name="project" value="LOCAL" />
-      <updated>1666640461084</updated>
     </task>
     <task id="LOCAL-00171" summary="2021 10 25 a: fixed a few bugs">
       <created>1666709088422</created>
@@ -499,7 +497,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677518717704</updated>
     </task>
-    <option name="localTasksCounter" value="219" />
+    <task id="LOCAL-00219" summary="2023 02 27 d: change directory of data for our code">
+      <created>1677519001310</created>
+      <option name="number" value="00219" />
+      <option name="presentableId" value="LOCAL-00219" />
+      <option name="project" value="LOCAL" />
+      <updated>1677519001310</updated>
+    </task>
+    <option name="localTasksCounter" value="220" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -515,7 +520,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2022 12 09b: use larger resolution 480" />
     <MESSAGE value="2022 12 09c: try to use the 80g gpu" />
     <MESSAGE value="2022 12 12 update" />
     <MESSAGE value="2023 01 20 a: trial 1 on supervised learning with 256 crop on PPFE" />
@@ -540,6 +544,7 @@
     <MESSAGE value="2023 02 27 a: new experiments for MIA" />
     <MESSAGE value="2023 02 27 b: more details" />
     <MESSAGE value="2023 02 27 c: add new details" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 27 c: add new details" />
+    <MESSAGE value="2023 02 27 d: change directory of data for our code" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 27 d: change directory of data for our code" />
   </component>
 </project>

@@ -126,8 +126,12 @@ def main(args):
                                                 'train kl loss': kl_loss.item(),
                                                 'train pseudo loss': pseudo_loss}, step + 1)
 
-        save_model_name_full = saved_model_path + '/' + model_name + '_last.pt'
+        save_model_name_full = saved_model_path + '/' + model_name + '_current.pt'
         torch.save(model, save_model_name_full)
+
+        if step % 10000 == 0 and step > 0:
+            save_model_name_full = saved_model_path + '/' + model_name + 'step' + str(step) + '.pt'
+            torch.save(model, save_model_name_full)
 
         if train_iou > best_train:
             save_model_name_full = saved_model_path + '/' + model_name + '_best_train.pt'
