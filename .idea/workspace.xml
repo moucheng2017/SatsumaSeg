@@ -5,15 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/cluster/lung5.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/lung6.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/lung7.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/lung05.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/lung06.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/lung07.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lunglocal.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung01.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung01.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung02.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung02.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung03.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung03.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung04.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung04.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung05.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung05.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung06.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung06.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung07.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung07.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,14 +57,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/config",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/config" />
+      <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/preprocessing" />
@@ -155,20 +155,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00168" summary="2021 10 21 a: semi supervised part runs now">
-      <created>1666377181064</created>
-      <option name="number" value="00168" />
-      <option name="presentableId" value="LOCAL-00168" />
-      <option name="project" value="LOCAL" />
-      <updated>1666377181065</updated>
-    </task>
-    <task id="LOCAL-00169" summary="2021 10 24 a">
-      <created>1666625903833</created>
-      <option name="number" value="00169" />
-      <option name="presentableId" value="LOCAL-00169" />
-      <option name="project" value="LOCAL" />
-      <updated>1666625903834</updated>
     </task>
     <task id="LOCAL-00170" summary="2021 10 24 b">
       <created>1666640461084</created>
@@ -499,7 +485,21 @@
       <option name="project" value="LOCAL" />
       <updated>1677518000562</updated>
     </task>
-    <option name="localTasksCounter" value="217" />
+    <task id="LOCAL-00217" summary="2023 02 27 b: more details">
+      <created>1677518554629</created>
+      <option name="number" value="00217" />
+      <option name="presentableId" value="LOCAL-00217" />
+      <option name="project" value="LOCAL" />
+      <updated>1677518554629</updated>
+    </task>
+    <task id="LOCAL-00218" summary="2023 02 27 c: add new details">
+      <created>1677518717704</created>
+      <option name="number" value="00218" />
+      <option name="presentableId" value="LOCAL-00218" />
+      <option name="project" value="LOCAL" />
+      <updated>1677518717704</updated>
+    </task>
+    <option name="localTasksCounter" value="219" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -515,8 +515,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2022 11 25 b: large gpu for training with unlabelled images" />
-    <MESSAGE value="2022 12 09: adding temp scaling for pseudo loss and adjust the resolution of iamges to fit into the gpus" />
     <MESSAGE value="2022 12 09b: use larger resolution 480" />
     <MESSAGE value="2022 12 09c: try to use the 80g gpu" />
     <MESSAGE value="2022 12 12 update" />
@@ -540,6 +538,8 @@
     <MESSAGE value="2023 02 03b: asking to use a100" />
     <MESSAGE value="2023 02 08 a: new post processing by denoising" />
     <MESSAGE value="2023 02 27 a: new experiments for MIA" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 27 a: new experiments for MIA" />
+    <MESSAGE value="2023 02 27 b: more details" />
+    <MESSAGE value="2023 02 27 c: add new details" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 27 c: add new details" />
   </component>
 </project>

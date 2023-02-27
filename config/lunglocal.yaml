@@ -1,7 +1,7 @@
 dataset:
   name: lungcancer
   num_workers: 0 # default 0 because we do not use large batch size with 3D model and volumes anyways
-  data_dir: '/SAN/medic/PerceptronHead/data/Task06_Lung'
+  data_dir: '/home/moucheng/projects_data/Task06_Lung'
   data_format: 'nii'
 
 logger:
@@ -29,12 +29,12 @@ train:
   crop_aug: True
   gaussian: True
   new_size_d: 64
-  new_size_w: 420
-  new_size_h: 420
+  new_size_w: 224
+  new_size_h: 224
   batch_u: 2 # this has to be zero in supervised setting
   mu: 0.5
   learn_threshold: 1 # 0 for using fixed mu, 1 for using mu as a prior
-  threshold_flag: 0 # 0 for the original implementation, 1 for new lazy implementation
+  threshold_flag: 1 # 0 for the original implementation, 1 for new lazy implementation
   alpha: 1.0
   warmup: 0.2
   warmup_start: 0.0

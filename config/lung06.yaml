@@ -1,7 +1,7 @@
 dataset:
   name: lungcancer
   num_workers: 0 # default 0 because we do not use large batch size with 3D model and volumes anyways
-  data_dir: '/home/moucheng/projects_data/Task06_Lung'
+  data_dir: '/SAN/medic/PerceptronHead/data/Task06_Lung'
   data_format: 'nii'
 
 logger:
