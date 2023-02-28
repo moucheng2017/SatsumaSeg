@@ -5,20 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/cluster/lung8.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/lung9.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/lung08.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/lung09.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSemi3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/lung6.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/lung6.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/lung7.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/lung7.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lung01.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung01.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung06.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung06.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung07.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung07.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Loss.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Train3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Train3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung08.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung08.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung09.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung09.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -160,13 +151,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00174" summary="2021 10 25 e: trying to push the experiments">
-      <created>1666786058585</created>
-      <option name="number" value="00174" />
-      <option name="presentableId" value="LOCAL-00174" />
-      <option name="project" value="LOCAL" />
-      <updated>1666786058585</updated>
     </task>
     <task id="LOCAL-00175" summary="2021 10 25 f: cluster memory issue">
       <created>1666804127641</created>
@@ -504,7 +488,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677539064011</updated>
     </task>
-    <option name="localTasksCounter" value="223" />
+    <task id="LOCAL-00223" summary="2023 02 28 a: 4 more experiments with large crop area">
+      <created>1677583064329</created>
+      <option name="number" value="00223" />
+      <option name="presentableId" value="LOCAL-00223" />
+      <option name="project" value="LOCAL" />
+      <updated>1677583064330</updated>
+    </task>
+    <option name="localTasksCounter" value="224" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -520,7 +511,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 01 20 b: trying with more foreground voxels" />
     <MESSAGE value="2023 01 27 a: train with 128 x 128 x 128 cubes supervised learning" />
     <MESSAGE value="2023 01 27 b: new training experiments" />
     <MESSAGE value="2023 01 28 a: to do add inference on ppfe, have debugged training for 3d code and now running an airway 3d experiment on local machine" />
@@ -545,6 +535,7 @@
     <MESSAGE value="2023 02 27 c: tidying up a bit" />
     <MESSAGE value="2023 02 27 d: save every 5000 iterations" />
     <MESSAGE value="2023 02 27 d: save every 5000 iterations c" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 27 d: save every 5000 iterations c" />
+    <MESSAGE value="2023 02 28 a: 4 more experiments with large crop area" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 a: 4 more experiments with large crop area" />
   </component>
 </project>

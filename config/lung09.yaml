@@ -28,7 +28,7 @@ train:
   contrast: True
   crop_aug: True
   gaussian: True
-  new_size_d: 16
+  new_size_d: 8
   new_size_w: 448
   new_size_h: 448
   batch_u: 0 # this has to be zero in supervised setting
