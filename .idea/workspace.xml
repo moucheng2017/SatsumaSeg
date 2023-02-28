@@ -5,16 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/cluster/brain1.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/brain2.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/brain3.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/brain4.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/exp.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config_brain/brain1.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config_brain/brain2.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config_brain/brain3.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config_brain/brain4.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Augmentations.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +50,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
+    "last_opened_file_path": "/home/moucheng/projects_codes/MisMatchSSL",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
@@ -156,13 +148,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00177" summary="2021 10 28 b: running some stuff">
-      <created>1666974647555</created>
-      <option name="number" value="00177" />
-      <option name="presentableId" value="LOCAL-00177" />
-      <option name="project" value="LOCAL" />
-      <updated>1666974647555</updated>
     </task>
     <task id="LOCAL-00178" summary="2021 10 28 c: adding new stuff">
       <created>1666983350109</created>
@@ -500,7 +485,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677588295031</updated>
     </task>
-    <option name="localTasksCounter" value="226" />
+    <task id="LOCAL-00226" summary="2023 02 28 d: brain tumour">
+      <created>1677589674144</created>
+      <option name="number" value="00226" />
+      <option name="presentableId" value="LOCAL-00226" />
+      <option name="project" value="LOCAL" />
+      <updated>1677589674144</updated>
+    </task>
+    <option name="localTasksCounter" value="227" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -516,7 +508,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 01 28 a: to do add inference on ppfe, have debugged training for 3d code and now running an airway 3d experiment on local machine" />
     <MESSAGE value="2023 01 30 a: run inference on cluster" />
     <MESSAGE value="2023 01 31a: new airway experiments" />
     <MESSAGE value="2023 01 31b: save the current last model" />
@@ -541,6 +532,7 @@
     <MESSAGE value="2023 02 28 a: 4 more experiments with large crop area" />
     <MESSAGE value="2023 02 28 b: downsample the depth of the volumes" />
     <MESSAGE value="2023 02 28 c: tidying up" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 c: tidying up" />
+    <MESSAGE value="2023 02 28 d: brain tumour" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 d: brain tumour" />
   </component>
 </project>
