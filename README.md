@@ -1,7 +1,7 @@
 ### News
-
+[2023 Feb 28th] 
 ### Introduction
-This repository is an implementation for 3D binary segmentation based on the MICCAI paper Bayesian Pseudo Labels.
+This repository is an exampler implementation of our MICCAI 2022 paper on 3D binary segmentation (Runner-up for the best paper (Young Scientist Award)) '[Bayesian Pseudo Labels: Expectation Maximization and Maximization for Robust and Efficient Semi-Supervised Segmentation](https://arxiv.org/abs/2208.04435)'. This code base was written and maintained by [Moucheng Xu](https://moucheng2017.github.io/)
 
 ### Pseudo Labelling as Expectation Maximization (EM)
 We focus on binary case here that output of a network model is single channel and normalised by Sigmoid function. 
@@ -97,6 +97,9 @@ and "threshold_flag" as 0. The standard deviation prior is approximated as min [
 is still approximated as min [(1 - mu_prior) / 3, mu_prior / 3]. 
 
 Other alternative implementations with suitable assumptions could also be used to simplify the K-L loss.
+
+### On the learnt threshold
+We learn each threshold scalar for each image in the current implementation before we average them across batch. See the output of libs.Train3D.calculate_kl_loss
 
 ### Example Use:
 Task06_Lung from medicaldecathlon.com

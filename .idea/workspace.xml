@@ -5,10 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/config/lung10.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung10.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lung11.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung11.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lung12.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung12.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lung13.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung13.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/brain5.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/brain6.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/brain7.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/brain8.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config_brain/brain5.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config_brain/brain6.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config_brain/brain7.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config_brain/brain8.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Loss.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,9 +66,9 @@
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/cluster" />
-      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/config_brain" />
       <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/models" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -150,13 +157,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00185" summary="2021 11 16 a: add validate">
-      <created>1668634523278</created>
-      <option name="number" value="00185" />
-      <option name="presentableId" value="LOCAL-00185" />
-      <option name="project" value="LOCAL" />
-      <updated>1668634523279</updated>
     </task>
     <task id="LOCAL-00186" summary="2021 11 17 a before branching out">
       <created>1668691561757</created>
@@ -494,7 +494,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677594120151</updated>
     </task>
-    <option name="localTasksCounter" value="234" />
+    <task id="LOCAL-00234" summary="2023 02 28 j: exps x">
+      <created>1677594445473</created>
+      <option name="number" value="00234" />
+      <option name="presentableId" value="LOCAL-00234" />
+      <option name="project" value="LOCAL" />
+      <updated>1677594445473</updated>
+    </task>
+    <option name="localTasksCounter" value="235" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -510,7 +517,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 01 31g: new configurations" />
     <MESSAGE value="2023 01 31 h: new saving scheme" />
     <MESSAGE value="2023 01 31 i: new saving scheme" />
     <MESSAGE value="2023 02 03a: new method" />
@@ -535,6 +541,7 @@
     <MESSAGE value="2023 02 28 h: tune depth to fit into gpu" />
     <MESSAGE value="2023 02 28 h: hacking cluster" />
     <MESSAGE value="2023 02 28 i: exps parameters" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 i: exps parameters" />
+    <MESSAGE value="2023 02 28 j: exps x" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 j: exps x" />
   </component>
 </project>

@@ -16,7 +16,7 @@ import numpy as np
 from scipy.ndimage import distance_transform_edt
 
 
-def kld_loss(raw_output, mu, logvar, mu_prior, flag):
+def kld_loss(raw_output, mu, logvar, mu_prior, flag, clamp=1):
 
     if flag == 0:
         # calculate the prior var:
@@ -28,8 +28,8 @@ def kld_loss(raw_output, mu, logvar, mu_prior, flag):
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
         threshold = eps * std + mu
-        # if threshold > 1. or threshold < 0.:
-        #     threshold = 0.5*torch.ones_like(logvar).cuda()
+        if clamp > 0:
+            threshold = torch.clamp(threshold, min=0., max=1.)
 
     elif flag == 1:
         # we approximate the mean and we don't learn the mean but we still learn the std via log var
@@ -44,9 +44,8 @@ def kld_loss(raw_output, mu, logvar, mu_prior, flag):
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
         threshold = eps * std + mu_prior
-
-        # if threshold > 1. or threshold < 0.:
-        #     threshold = 0.5*torch.ones_like(logvar).cuda()
+        if clamp > 0:
+            threshold = torch.clamp(threshold, min=0., max=1.)
 
     else:
         raise NotImplementedError
