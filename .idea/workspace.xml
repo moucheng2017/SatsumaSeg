@@ -5,10 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/config_brain/brain10.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config_brain/brain11.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config_brain/brain9.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/brain12.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/brain13.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/brain14.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung14.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung15.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung16.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung14.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung15.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung16.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung17.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config_brain/brain12.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config_brain/brain13.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config_brain/brain14.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Loss.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,16 +63,16 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/config_brain",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/config_brain" />
       <recent name="$PROJECT_DIR$/cluster" />
-      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/config" />
+      <recent name="$PROJECT_DIR$/config_brain" />
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/models" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -150,13 +161,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00187" summary="2021 11 17 b: debugged sup and unsup kl still wrong but that's okay">
-      <created>1668714827127</created>
-      <option name="number" value="00187" />
-      <option name="presentableId" value="LOCAL-00187" />
-      <option name="project" value="LOCAL" />
-      <updated>1668714827127</updated>
     </task>
     <task id="LOCAL-00188" summary="2022 11 23: unexpected bug on cluster when run the airway segmentation very strange no idea">
       <created>1669214489476</created>
@@ -494,7 +498,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677596506082</updated>
     </task>
-    <option name="localTasksCounter" value="236" />
+    <task id="LOCAL-00236" summary="2023 02 28 i: 3 more experiments on the mu prior hyper parameter">
+      <created>1677597594207</created>
+      <option name="number" value="00236" />
+      <option name="presentableId" value="LOCAL-00236" />
+      <option name="project" value="LOCAL" />
+      <updated>1677597594207</updated>
+    </task>
+    <option name="localTasksCounter" value="237" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -510,7 +521,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 01 31 i: new saving scheme" />
     <MESSAGE value="2023 02 03a: new method" />
     <MESSAGE value="2023 02 03a: change normalisatoin" />
     <MESSAGE value="2023 02 03b: asking to use a100" />
@@ -535,6 +545,7 @@
     <MESSAGE value="2023 02 28 i: exps parameters" />
     <MESSAGE value="2023 02 28 j: exps x" />
     <MESSAGE value="2023 02 28 h: new experiments with brain" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 h: new experiments with brain" />
+    <MESSAGE value="2023 02 28 i: 3 more experiments on the mu prior hyper parameter" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 i: 3 more experiments on the mu prior hyper parameter" />
   </component>
 </project>
