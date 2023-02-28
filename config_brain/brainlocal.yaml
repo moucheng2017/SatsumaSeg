@@ -1,7 +1,7 @@
 dataset:
   name: brain
   num_workers: 0 # default 0 because we do not use large batch size with 3D model and volumes anyways
-  data_dir: '/SAN/medic/PerceptronHead/data/Task01_BrainTumour'
+  data_dir: '/home/moucheng/projects_data/Task01_BrainTumour'
   data_format: 'nii'
 
 logger:
@@ -20,7 +20,7 @@ train:
   optimizer:
     weight_decay: 0.0005
   lr: 0.001
-  iterations: 20000
+  iterations: 10000
   batch: 2
   temp: 1.0
   contrast: False
@@ -32,10 +32,10 @@ train:
   batch_u: 1 # this has to be zero in supervised setting
   mu: 0.5
   learn_threshold: 1 # 0 for using fixed mu, 1 for using mu as a prior
-  threshold_flag: 0 # 0 for the original implementation, 1 for new lazy implementation
+  threshold_flag: 1 # 0 for the original implementation, 1 for new lazy implementation
   alpha: 1.0
   warmup: 0.1
-  warmup_start: 0.05
+  warmup_start: 0.1
 
 checkpoint:
   resume: False

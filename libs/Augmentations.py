@@ -78,21 +78,17 @@ class RandomCrop(object):
 
     def crop_x(self, x):
 
+        sample_position_d = random.randint(0, np.shape(x)[-3] - 1 - self.output_shape[0])
+        sample_position_h = random.randint(0, np.shape(x)[-2] - 1 - self.output_shape[1])
+        sample_position_w = random.randint(0, np.shape(x)[-1] - 1 - self.output_shape[2])
+
         if len(np.shape(x)) == 3:
-            d, h, w = np.shape(x)
-            sample_position_d = random.randint(0, d - 1 - self.output_shape[0])
-            sample_position_h = random.randint(0, h - 1 - self.output_shape[1])
-            sample_position_w = random.randint(0, w - 1 - self.output_shape[2])
 
             x = x[sample_position_d:sample_position_d+self.output_shape[0],
                   sample_position_h:sample_position_h+self.output_shape[1],
                   sample_position_w:sample_position_w+self.output_shape[2]]
 
         elif len(np.shape(x)) == 4:
-            c, d, h, w = np.shape(x)
-            sample_position_d = random.randint(0, d - 1 - self.output_shape[0])
-            sample_position_h = random.randint(0, h - 1 - self.output_shape[1])
-            sample_position_w = random.randint(0, w - 1 - self.output_shape[2])
 
             x = x[:,
                 sample_position_d:sample_position_d + self.output_shape[0],
@@ -106,11 +102,11 @@ class RandomCrop(object):
 
     def crop_xy(self, x, y):
 
+        sample_position_d = random.randint(0, np.shape(x)[-3] - 1 - self.output_shape[0])
+        sample_position_h = random.randint(0, np.shape(x)[-2] - 1 - self.output_shape[1])
+        sample_position_w = random.randint(0, np.shape(x)[-1] - 1 - self.output_shape[2])
+
         if len(np.shape(x)) == 3:
-            d, h, w = np.shape(x)
-            sample_position_d = random.randint(0, d - 1 - self.output_shape[0])
-            sample_position_h = random.randint(0, h - 1 - self.output_shape[1])
-            sample_position_w = random.randint(0, w - 1 - self.output_shape[2])
 
             x = x[sample_position_d:sample_position_d+self.output_shape[0],
                   sample_position_h:sample_position_h+self.output_shape[1],
@@ -121,10 +117,6 @@ class RandomCrop(object):
                   sample_position_w:sample_position_w+self.output_shape[2]]
 
         elif len(np.shape(x)) == 4:
-            c, d, h, w = np.shape(x)
-            sample_position_d = random.randint(0, d - 1 - self.output_shape[0])
-            sample_position_h = random.randint(0, h - 1 - self.output_shape[1])
-            sample_position_w = random.randint(0, w - 1 - self.output_shape[2])
 
             x = x[:, sample_position_d:sample_position_d + self.output_shape[0],
                 sample_position_h:sample_position_h + self.output_shape[1],

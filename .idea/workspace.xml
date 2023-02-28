@@ -5,12 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/cluster/lung10.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung11.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung12.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung13.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung10.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung11.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung12.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung13.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config_brain/brainlocal.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain1.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain1.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain2.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain3.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain3.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain4.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain4.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config_brain/brain1.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain1.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config_brain/brain2.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain2.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config_brain/brain3.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain3.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config_brain/brain4.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain4.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/libs/Augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Augmentations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Dataloader3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Dataloader3D.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,15 +68,15 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/MisMatchSSL",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/cluster" />
-      <recent name="$PROJECT_DIR$/config_brain" />
       <recent name="$PROJECT_DIR$/config" />
+      <recent name="$PROJECT_DIR$/config_brain" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/models" />
     </key>
@@ -152,13 +166,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00180" summary="2021 11 07 b: norm after augmentation">
-      <created>1667821691137</created>
-      <option name="number" value="00180" />
-      <option name="presentableId" value="LOCAL-00180" />
-      <option name="project" value="LOCAL" />
-      <updated>1667821691137</updated>
     </task>
     <task id="LOCAL-00181" summary="2021 11 08 a: adding a new script for training hip ct">
       <created>1667928878674</created>
@@ -496,7 +503,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677590923858</updated>
     </task>
-    <option name="localTasksCounter" value="229" />
+    <task id="LOCAL-00229" summary="2023 02 28 f: brain debug dimension is annoying because it is 4 d">
+      <created>1677591409661</created>
+      <option name="number" value="00229" />
+      <option name="presentableId" value="LOCAL-00229" />
+      <option name="project" value="LOCAL" />
+      <updated>1677591409661</updated>
+    </task>
+    <option name="localTasksCounter" value="230" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -512,7 +526,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 01 31b: save the current last model" />
     <MESSAGE value="2023 01 31c: add one more exp on airway with small network and resolution crop a 256" />
     <MESSAGE value="2023 01 31d: not enough memory for super large volume 448" />
     <MESSAGE value="2023 01 31e: new experiments" />
@@ -537,6 +550,7 @@
     <MESSAGE value="2023 02 28 d: brain tumour" />
     <MESSAGE value="2023 02 28 e: debugging for brats" />
     <MESSAGE value="2023 02 28 e: debugging for brats cropping bug" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 e: debugging for brats cropping bug" />
+    <MESSAGE value="2023 02 28 f: brain debug dimension is annoying because it is 4 d" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 f: brain debug dimension is annoying because it is 4 d" />
   </component>
 </project>
