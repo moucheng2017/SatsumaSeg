@@ -6,6 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain1.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain1.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain2.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain2.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain3.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain3.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain4.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain4.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/libs/Augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Augmentations.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -148,20 +152,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00178" summary="2021 10 28 c: adding new stuff">
-      <created>1666983350109</created>
-      <option name="number" value="00178" />
-      <option name="presentableId" value="LOCAL-00178" />
-      <option name="project" value="LOCAL" />
-      <updated>1666983350109</updated>
-    </task>
-    <task id="LOCAL-00179" summary="2021 11 07 a: adding new warmup schedule">
-      <created>1667821266680</created>
-      <option name="number" value="00179" />
-      <option name="presentableId" value="LOCAL-00179" />
-      <option name="project" value="LOCAL" />
-      <updated>1667821266682</updated>
     </task>
     <task id="LOCAL-00180" summary="2021 11 07 b: norm after augmentation">
       <created>1667821691137</created>
@@ -492,7 +482,21 @@
       <option name="project" value="LOCAL" />
       <updated>1677589674144</updated>
     </task>
-    <option name="localTasksCounter" value="227" />
+    <task id="LOCAL-00227" summary="2023 02 28 e: debugging for brats">
+      <created>1677590772721</created>
+      <option name="number" value="00227" />
+      <option name="presentableId" value="LOCAL-00227" />
+      <option name="project" value="LOCAL" />
+      <updated>1677590772721</updated>
+    </task>
+    <task id="LOCAL-00228" summary="2023 02 28 e: debugging for brats cropping bug">
+      <created>1677590923858</created>
+      <option name="number" value="00228" />
+      <option name="presentableId" value="LOCAL-00228" />
+      <option name="project" value="LOCAL" />
+      <updated>1677590923858</updated>
+    </task>
+    <option name="localTasksCounter" value="229" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -508,8 +512,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 01 30 a: run inference on cluster" />
-    <MESSAGE value="2023 01 31a: new airway experiments" />
     <MESSAGE value="2023 01 31b: save the current last model" />
     <MESSAGE value="2023 01 31c: add one more exp on airway with small network and resolution crop a 256" />
     <MESSAGE value="2023 01 31d: not enough memory for super large volume 448" />
@@ -533,6 +535,8 @@
     <MESSAGE value="2023 02 28 b: downsample the depth of the volumes" />
     <MESSAGE value="2023 02 28 c: tidying up" />
     <MESSAGE value="2023 02 28 d: brain tumour" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 d: brain tumour" />
+    <MESSAGE value="2023 02 28 e: debugging for brats" />
+    <MESSAGE value="2023 02 28 e: debugging for brats cropping bug" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 e: debugging for brats cropping bug" />
   </component>
 </project>

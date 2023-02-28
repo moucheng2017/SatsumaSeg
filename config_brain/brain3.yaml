@@ -23,9 +23,9 @@ train:
   iterations: 10000
   batch: 2
   temp: 1.0
-  contrast: True
+  contrast: False
   crop_aug: True
-  gaussian: True
+  gaussian: False
   new_size_d: 32
   new_size_w: 96
   new_size_h: 96

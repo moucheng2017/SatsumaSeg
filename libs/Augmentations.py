@@ -256,12 +256,24 @@ class RandomContrast(object):
         augmentation_flag = np.random.rand()
         if augmentation_flag >= 0.5:
             bin = random.randint(self.bin_range[0], self.bin_range[1])
-            c, h, w = np.shape(input)
-            image_histogram, bins = np.histogram(input.flatten(), bin, density=True)
-            cdf = image_histogram.cumsum()  # cumulative distribution function
-            cdf = 255 * cdf / cdf[-1]  # normalize
-            output = np.interp(input.flatten(), bins[:-1], cdf)
-            output = np.reshape(output, (c, h, w))
+
+            if len(np.shape(input)) == 3:
+                c, h, w = np.shape(input)
+                image_histogram, bins = np.histogram(input.flatten(), bin, density=True)
+                cdf = image_histogram.cumsum()  # cumulative distribution function
+                cdf = 255 * cdf / cdf[-1]  # normalize
+                output = np.interp(input.flatten(), bins[:-1], cdf)
+                output = np.reshape(output, (c, h, w))
+            elif len(np.shape(input)) == 4:
+                c, d, h, w = np.shape(input)
+                image_histogram, bins = np.histogram(input.flatten(), bin, density=True)
+                cdf = image_histogram.cumsum()  # cumulative distribution function
+                cdf = 255 * cdf / cdf[-1]  # normalize
+                output = np.interp(input.flatten(), bins[:-1], cdf)
+                output = np.reshape(output, (c, d, h, w))
+            else:
+                raise NotImplementedError
+
         else:
             output = input
 
