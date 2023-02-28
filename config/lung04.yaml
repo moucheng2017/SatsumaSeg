@@ -10,8 +10,6 @@ logger:
 seed: 1024
 
 model:
-  name: u-net
-  use_3d: 1
   input_dim: 1
   output_dim: 1
   width: 8
@@ -43,8 +41,6 @@ checkpoint:
   resume: False
   checkpoint_path: '/some/path/to/saved/model'
 
-eval:
-  batch: 1
 
 
 

@@ -5,11 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/pics/BPL_VAE.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pics/main_method.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/arguments.py" beforeDir="false" afterPath="$PROJECT_DIR$/arguments.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung01.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung01.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung02.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung02.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung03.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung03.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung04.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung04.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung06.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung06.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung07.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung07.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung08.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung08.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung09.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung09.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lunglocal.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lunglocal.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,16 +63,16 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/models" />
-      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/preprocessing" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -151,13 +161,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00175" summary="2021 10 25 f: cluster memory issue">
-      <created>1666804127641</created>
-      <option name="number" value="00175" />
-      <option name="presentableId" value="LOCAL-00175" />
-      <option name="project" value="LOCAL" />
-      <updated>1666804127641</updated>
     </task>
     <task id="LOCAL-00176" summary="2021 10 26 a: memory issue again">
       <created>1666816681067</created>
@@ -495,7 +498,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677583064330</updated>
     </task>
-    <option name="localTasksCounter" value="224" />
+    <task id="LOCAL-00224" summary="2023 02 28 b: downsample the depth of the volumes">
+      <created>1677583612141</created>
+      <option name="number" value="00224" />
+      <option name="presentableId" value="LOCAL-00224" />
+      <option name="project" value="LOCAL" />
+      <updated>1677583612141</updated>
+    </task>
+    <option name="localTasksCounter" value="225" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -511,7 +521,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 01 27 a: train with 128 x 128 x 128 cubes supervised learning" />
     <MESSAGE value="2023 01 27 b: new training experiments" />
     <MESSAGE value="2023 01 28 a: to do add inference on ppfe, have debugged training for 3d code and now running an airway 3d experiment on local machine" />
     <MESSAGE value="2023 01 30 a: run inference on cluster" />
@@ -536,6 +545,7 @@
     <MESSAGE value="2023 02 27 d: save every 5000 iterations" />
     <MESSAGE value="2023 02 27 d: save every 5000 iterations c" />
     <MESSAGE value="2023 02 28 a: 4 more experiments with large crop area" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 a: 4 more experiments with large crop area" />
+    <MESSAGE value="2023 02 28 b: downsample the depth of the volumes" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 b: downsample the depth of the volumes" />
   </component>
 </project>

@@ -52,9 +52,9 @@ def get_args():
 
     set_deterministic(args.seed)
 
-    vars(args)['aug_kwargs'] = {
-        'name': args.model.name
-    }
+    # vars(args)['aug_kwargs'] = {
+    #     'name': args.model.name
+    # }
 
     vars(args)['dataset_kwargs'] = {
         'dataset': args.dataset.name,
@@ -75,9 +75,9 @@ def get_args():
         'weight_decay': args.train.optimizer.weight_decay
     }
 
-    vars(args)['eval_kwargs'] = {
-        'batch': args.checkpoint.checkpoint_path
-    }
+    # vars(args)['eval_kwargs'] = {
+    #     'batch': args.checkpoint.checkpoint_path
+    # }
 
     vars(args)['checkpoint_kwargs'] = {
         'resume': args.checkpoint.resume,

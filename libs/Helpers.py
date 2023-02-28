@@ -99,14 +99,15 @@ def network_intialisation(args):
         model_name = 'BPL3D_l_' + str(args.train.lr) + \
                      '_b' + str(args.train.batch) + \
                      '_w' + str(args.model.width) + \
+                     '_d' + str(args.model.depth) + \
                      '_i' + str(args.train.iterations) + \
                      '_u' + str(args.train.batch_u) + \
                      '_mu' + str(args.train.mu) + \
                      '_thresh' + str(args.train.learn_threshold) + \
                      '_flag' + str(args.train.threshold_flag) + \
-                     '_crop_d' + str(args.train.new_size_d) + \
-                     '_crop_h' + str(args.train.new_size_h) + \
-                     '_crop_w' + str(args.train.new_size_w)
+                     '_cd' + str(args.train.new_size_d) + \
+                     '_ch' + str(args.train.new_size_h) + \
+                     '_cw' + str(args.train.new_size_w)
 
     return model, model_name
 
