@@ -72,10 +72,7 @@ def train_semi(labelled_img,
 
     # get output for the labelled part:
     raw_output = outputs_dict.get('segmentation')
-    # print(raw_output.size())
     raw_output_l, raw_output_u = torch.split(raw_output, [b_l, b_u], dim=0)
-
-    # get output for the unlabelled part:
 
     # supervised loss:
     sup_loss = calculate_sup_loss(raw_output=raw_output_l,

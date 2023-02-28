@@ -21,8 +21,8 @@ train:
   transpose_dim: 1
   optimizer:
     weight_decay: 0.0005
-  lr: 0.01
-  iterations: 40000
+  lr: 0.001
+  iterations: 10000
   batch: 1
   temp: 1.0
   contrast: True
@@ -37,7 +37,7 @@ train:
   threshold_flag: 1 # 0 for the original implementation, 1 for new lazy implementation
   alpha: 1.0
   warmup: 0.1
-  warmup_start: 0.05
+  warmup_start: 0.1
 
 checkpoint:
   resume: False

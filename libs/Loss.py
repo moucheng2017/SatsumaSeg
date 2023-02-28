@@ -9,7 +9,6 @@ get_tp_fp_fn, SoftDiceLoss, and DC_and_CE/TopK_loss are from https://github.com/
 """
 
 import torch
-# from ND_Crossentropy import CrossentropyND, TopKLoss, WeightedCrossEntropyLoss
 from torch import nn
 from torch.autograd import Variable
 from torch import einsum
@@ -29,6 +28,8 @@ def kld_loss(raw_output, mu, logvar, mu_prior, flag):
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
         threshold = eps * std + mu
+        # if threshold > 1. or threshold < 0.:
+        #     threshold = 0.5*torch.ones_like(logvar).cuda()
 
     elif flag == 1:
         # we approximate the mean and we don't learn the mean but we still learn the std via log var
@@ -43,6 +44,9 @@ def kld_loss(raw_output, mu, logvar, mu_prior, flag):
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
         threshold = eps * std + mu_prior
+
+        # if threshold > 1. or threshold < 0.:
+        #     threshold = 0.5*torch.ones_like(logvar).cuda()
 
     else:
         raise NotImplementedError

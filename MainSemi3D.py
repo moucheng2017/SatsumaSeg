@@ -80,10 +80,9 @@ def main(args):
                            flag=args.train.threshold_flag)
 
         sup_loss = loss_.get('supervised losses').get('loss').mean()
-        pseudo_loss = current_alpha*loss_.get('pseudo losses').get('loss').mean()
-        kl_loss = current_alpha*loss_.get('kl losses').get('loss').mean()
-
-        loss = sup_loss + 0.1*pseudo_loss
+        pseudo_loss = 0.1*current_alpha*loss_.get('pseudo losses').get('loss').mean()
+        kl_loss = 0.1*current_alpha*loss_.get('kl losses').get('loss').mean()
+        loss = sup_loss + pseudo_loss + kl_loss
 
         train_iou = loss_.get('supervised losses').get('train iou')
 

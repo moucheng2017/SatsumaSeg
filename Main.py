@@ -72,9 +72,9 @@ def main(args):
                                flag=args.train.threshold_flag)
 
             sup_loss = loss_.get('supervised losses').get('loss').mean()
-            pseudo_loss = current_alpha*loss_.get('pseudo losses').get('loss').mean()
-            kl_loss = current_alpha*loss_.get('kl losses').get('loss').mean()
-            loss = sup_loss + 0.1*pseudo_loss + 0.1*kl_loss
+            pseudo_loss = 0.1*current_alpha*loss_.get('pseudo losses').get('loss').mean()
+            kl_loss = 0.1*current_alpha*loss_.get('kl losses').get('loss').mean()
+            loss = sup_loss + pseudo_loss + kl_loss
 
         else:
             loss_ = train_sup(labelled_img=labelled_dict.get('img'),
@@ -137,7 +137,7 @@ def main(args):
         save_model_name_full = saved_model_path + '/' + model_name + '_current.pt'
         torch.save(model, save_model_name_full)
 
-        if step % 5000 == 0 and step > 0:
+        if step % 1000 == 0 and step > 0:
             save_model_name_full = saved_model_path + '/' + model_name + 'step' + str(step) + '.pt'
             torch.save(model, save_model_name_full)
 

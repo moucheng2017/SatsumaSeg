@@ -5,4 +5,4 @@
 #$ -l h_rt=48:00:00
 #$ -wd /SAN/medic/PerceptronHead/codes/SatsumaSeg/
 
-~/miniconda3/envs/pytorch1.4/bin/python Main.py -c config/lung06.yaml
+~/miniconda3/envs/pytorch1.4/bin/python Main.py -c config/lung08.yaml

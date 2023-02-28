@@ -5,25 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/cluster/lung8.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster/lung9.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung08.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/lung09.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MainSemi3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSemi3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainSup3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainSup3D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/arXiv/Dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/deprecated/Dataloader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/arXiv/MainSemi2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/deprecated/MainSemi2D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/arXiv/MainSup2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/deprecated/MainSup2D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/arXiv/Models2D.py" beforeDir="false" afterPath="$PROJECT_DIR$/deprecated/Models2D.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/arXiv/Train.py" beforeDir="false" afterPath="$PROJECT_DIR$/deprecated/Train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/arXiv/test_augmentations.py" beforeDir="false" afterPath="$PROJECT_DIR$/deprecated/test_augmentations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/lung5.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/lung5.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cluster/lung6.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/lung6.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cluster/lung7.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/lung7.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/airway1.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung05.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung01.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung01.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung06.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung06.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung07.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung07.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/sup3d3a.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/sup3d3c.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Loss.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Train3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Train3D.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,14 +62,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/config",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/cluster" />
+      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/preprocessing" />
@@ -165,20 +160,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00172" summary="2021 10 25 b: new exp added">
-      <created>1666713653345</created>
-      <option name="number" value="00172" />
-      <option name="presentableId" value="LOCAL-00172" />
-      <option name="project" value="LOCAL" />
-      <updated>1666713653346</updated>
-    </task>
-    <task id="LOCAL-00173" summary="2021 10 25 c: adding supervised learning">
-      <created>1666782184080</created>
-      <option name="number" value="00173" />
-      <option name="presentableId" value="LOCAL-00173" />
-      <option name="project" value="LOCAL" />
-      <updated>1666782184081</updated>
     </task>
     <task id="LOCAL-00174" summary="2021 10 25 e: trying to push the experiments">
       <created>1666786058585</created>
@@ -509,7 +490,21 @@
       <option name="project" value="LOCAL" />
       <updated>1677537190334</updated>
     </task>
-    <option name="localTasksCounter" value="221" />
+    <task id="LOCAL-00221" summary="2023 02 27 d: save every 5000 iterations">
+      <created>1677539029717</created>
+      <option name="number" value="00221" />
+      <option name="presentableId" value="LOCAL-00221" />
+      <option name="project" value="LOCAL" />
+      <updated>1677539029717</updated>
+    </task>
+    <task id="LOCAL-00222" summary="2023 02 27 d: save every 5000 iterations c">
+      <created>1677539064011</created>
+      <option name="number" value="00222" />
+      <option name="presentableId" value="LOCAL-00222" />
+      <option name="project" value="LOCAL" />
+      <updated>1677539064011</updated>
+    </task>
+    <option name="localTasksCounter" value="223" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -525,8 +520,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2022 12 12 update" />
-    <MESSAGE value="2023 01 20 a: trial 1 on supervised learning with 256 crop on PPFE" />
     <MESSAGE value="2023 01 20 b: trying with more foreground voxels" />
     <MESSAGE value="2023 01 27 a: train with 128 x 128 x 128 cubes supervised learning" />
     <MESSAGE value="2023 01 27 b: new training experiments" />
@@ -550,6 +543,8 @@
     <MESSAGE value="2023 02 27 c: add new details" />
     <MESSAGE value="2023 02 27 d: change directory of data for our code" />
     <MESSAGE value="2023 02 27 c: tidying up a bit" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 27 c: tidying up a bit" />
+    <MESSAGE value="2023 02 27 d: save every 5000 iterations" />
+    <MESSAGE value="2023 02 27 d: save every 5000 iterations c" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 27 d: save every 5000 iterations c" />
   </component>
 </project>
