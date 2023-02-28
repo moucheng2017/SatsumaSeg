@@ -5,21 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/cluster/brain12.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/brain13.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/brain14.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/lung14.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/lung15.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cluster/lung16.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/lung14.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/lung15.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/lung16.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/lung17.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config_brain/brain12.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config_brain/brain13.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config_brain/brain14.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libs/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Loss.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung14.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung14.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung15.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung15.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung16.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung16.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung17.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung17.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -161,13 +150,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00188" summary="2022 11 23: unexpected bug on cluster when run the airway segmentation very strange no idea">
-      <created>1669214489476</created>
-      <option name="number" value="00188" />
-      <option name="presentableId" value="LOCAL-00188" />
-      <option name="project" value="LOCAL" />
-      <updated>1669214489477</updated>
     </task>
     <task id="LOCAL-00189" summary="2022 11 24b: ..">
       <created>1669300201140</created>
@@ -505,7 +487,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677597594207</updated>
     </task>
-    <option name="localTasksCounter" value="237" />
+    <task id="LOCAL-00237" summary="2023 02 28 j: a coupel of more experiments to figure out why it is not converging on lung">
+      <created>1677613713028</created>
+      <option name="number" value="00237" />
+      <option name="presentableId" value="LOCAL-00237" />
+      <option name="project" value="LOCAL" />
+      <updated>1677613713028</updated>
+    </task>
+    <option name="localTasksCounter" value="238" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -521,7 +510,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 02 03a: new method" />
     <MESSAGE value="2023 02 03a: change normalisatoin" />
     <MESSAGE value="2023 02 03b: asking to use a100" />
     <MESSAGE value="2023 02 08 a: new post processing by denoising" />
@@ -546,6 +534,7 @@
     <MESSAGE value="2023 02 28 j: exps x" />
     <MESSAGE value="2023 02 28 h: new experiments with brain" />
     <MESSAGE value="2023 02 28 i: 3 more experiments on the mu prior hyper parameter" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 i: 3 more experiments on the mu prior hyper parameter" />
+    <MESSAGE value="2023 02 28 j: a coupel of more experiments to figure out why it is not converging on lung" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 j: a coupel of more experiments to figure out why it is not converging on lung" />
   </component>
 </project>
