@@ -12,7 +12,7 @@ seed: 1024
 model:
   input_dim: 4
   output_dim: 1
-  width: 10
+  width: 8
   depth: 3
 
 train:
@@ -26,7 +26,7 @@ train:
   contrast: False
   crop_aug: True
   gaussian: False
-  new_size_d: 32
+  new_size_d: 24
   new_size_w: 96
   new_size_h: 96
   batch_u: 0 # this has to be zero in supervised setting
