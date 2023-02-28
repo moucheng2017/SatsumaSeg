@@ -5,15 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/airway2.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/airway5.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/airway6.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/brain1.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain1.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/brain2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain2.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/brain3.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain3.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/brain4.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain4.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster/covid04.sh" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung10.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung10.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung11.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung11.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/lung12.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung12.yaml" afterDir="false" />
@@ -159,13 +150,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00184" summary="2021 11 08 d: debugging again for the right size of input volume">
-      <created>1667932259184</created>
-      <option name="number" value="00184" />
-      <option name="presentableId" value="LOCAL-00184" />
-      <option name="project" value="LOCAL" />
-      <updated>1667932259184</updated>
     </task>
     <task id="LOCAL-00185" summary="2021 11 16 a: add validate">
       <created>1668634523278</created>
@@ -503,7 +487,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677593627314</updated>
     </task>
-    <option name="localTasksCounter" value="233" />
+    <task id="LOCAL-00233" summary="2023 02 28 i: exps parameters">
+      <created>1677594120151</created>
+      <option name="number" value="00233" />
+      <option name="presentableId" value="LOCAL-00233" />
+      <option name="project" value="LOCAL" />
+      <updated>1677594120151</updated>
+    </task>
+    <option name="localTasksCounter" value="234" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -519,7 +510,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 01 31e: new running" />
     <MESSAGE value="2023 01 31g: new configurations" />
     <MESSAGE value="2023 01 31 h: new saving scheme" />
     <MESSAGE value="2023 01 31 i: new saving scheme" />
@@ -544,6 +534,7 @@
     <MESSAGE value="2023 02 28 g: bug solved for brain now" />
     <MESSAGE value="2023 02 28 h: tune depth to fit into gpu" />
     <MESSAGE value="2023 02 28 h: hacking cluster" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 h: hacking cluster" />
+    <MESSAGE value="2023 02 28 i: exps parameters" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 i: exps parameters" />
   </component>
 </project>
