@@ -130,7 +130,7 @@ class RandomCrop(object):
                 sample_position_h:sample_position_h + self.output_shape[1],
                 sample_position_w:sample_position_w + self.output_shape[2]]
 
-            y = y[:, sample_position_d:sample_position_d + self.output_shape[0],
+            y = y[sample_position_d:sample_position_d + self.output_shape[0],
                 sample_position_h:sample_position_h + self.output_shape[1],
                 sample_position_w:sample_position_w + self.output_shape[2]]
 
