@@ -4,11 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="2023 02 28 g: bug solved for brain now">
-      <change beforePath="$PROJECT_DIR$/config_brain/brain1.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain1.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config_brain/brain2.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain2.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config_brain/brain3.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain3.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config_brain/brain4.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config_brain/brain4.yaml" afterDir="false" />
+    <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/airway2.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/airway5.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/airway6.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain1.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain1.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain2.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain3.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain3.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain4.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain4.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/covid04.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung10.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung10.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung11.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung11.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung12.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung12.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung13.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung13.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -150,20 +159,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00182" summary="2021 11 08 b: debugging01: wrong run file before">
-      <created>1667929535719</created>
-      <option name="number" value="00182" />
-      <option name="presentableId" value="LOCAL-00182" />
-      <option name="project" value="LOCAL" />
-      <updated>1667929535719</updated>
-    </task>
-    <task id="LOCAL-00183" summary="2021 11 08 c: debugging: use randonint for sampling slices now">
-      <created>1667930713136</created>
-      <option name="number" value="00183" />
-      <option name="presentableId" value="LOCAL-00183" />
-      <option name="project" value="LOCAL" />
-      <updated>1667930713136</updated>
     </task>
     <task id="LOCAL-00184" summary="2021 11 08 d: debugging again for the right size of input volume">
       <created>1667932259184</created>
@@ -494,7 +489,21 @@
       <option name="project" value="LOCAL" />
       <updated>1677593251128</updated>
     </task>
-    <option name="localTasksCounter" value="231" />
+    <task id="LOCAL-00231" summary="2023 02 28 h: tune depth to fit into gpu">
+      <created>1677593532317</created>
+      <option name="number" value="00231" />
+      <option name="presentableId" value="LOCAL-00231" />
+      <option name="project" value="LOCAL" />
+      <updated>1677593532317</updated>
+    </task>
+    <task id="LOCAL-00232" summary="2023 02 28 h: hacking cluster">
+      <created>1677593627314</created>
+      <option name="number" value="00232" />
+      <option name="presentableId" value="LOCAL-00232" />
+      <option name="project" value="LOCAL" />
+      <updated>1677593627314</updated>
+    </task>
+    <option name="localTasksCounter" value="233" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -510,8 +519,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 01 31d: not enough memory for super large volume 448" />
-    <MESSAGE value="2023 01 31e: new experiments" />
     <MESSAGE value="2023 01 31e: new running" />
     <MESSAGE value="2023 01 31g: new configurations" />
     <MESSAGE value="2023 01 31 h: new saving scheme" />
@@ -535,6 +542,8 @@
     <MESSAGE value="2023 02 28 e: debugging for brats cropping bug" />
     <MESSAGE value="2023 02 28 f: brain debug dimension is annoying because it is 4 d" />
     <MESSAGE value="2023 02 28 g: bug solved for brain now" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 g: bug solved for brain now" />
+    <MESSAGE value="2023 02 28 h: tune depth to fit into gpu" />
+    <MESSAGE value="2023 02 28 h: hacking cluster" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 h: hacking cluster" />
   </component>
 </project>
