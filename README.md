@@ -1,24 +1,29 @@
 ### News
-[2023 Feb 28th] 
+
 ### Introduction
-This repository is an exampler implementation of our MICCAI 2022 paper on 3D binary segmentation (Runner-up for the best paper (Young Scientist Award)) '[Bayesian Pseudo Labels: Expectation Maximization and Maximization for Robust and Efficient Semi-Supervised Segmentation](https://arxiv.org/abs/2208.04435)'. This code base was written and maintained by [Moucheng Xu](https://moucheng2017.github.io/)
+This repository is an implementation for 3D binary segmentation. This repository is still under construction.
 
-### Pseudo Labelling as Expectation Maximization (EM)
-We focus on binary case here that output of a network model is single channel and normalised by Sigmoid function. 
-We first see pseudo labels as latent variables of a graphical model. 
-The original pseudo labelling is an empirical estimation of E-step for estimating the latent variables, updating model parameter using pseudo labells is the M-step.
-We further simplify the graphical model by using only the confidence threshold as a latent variable.
-See the illustration below:
+[//]: # (### Pseudo Labelling as Expectation Maximization &#40;EM&#41;)
 
-![PL vs EM](pics/main_method.png "Plot.")
+[//]: # (We focus on binary case here that output of a network model is single channel and normalised by Sigmoid function. )
 
+[//]: # (We first see pseudo labels as latent variables of a graphical model. )
 
-### Bayesian Pseudo Labels
-Bayesian pseudo label (BPL) is a probabilistic generalisation of pseudo labelling via Bayes rule. Because the full E-step is intractable (more details in our paper), BPL estimates the maximum likelihood of labels of unlabelled data with variational inference. The comparison between Bayesian pseudo label and Variational auto encoder is illustrated beneath: 
+[//]: # (The original pseudo labelling is an empirical estimation of E-step for estimating the latent variables, updating model parameter using pseudo labells is the M-step.)
 
-![BPL vs VAE](pics/BPL_VAE.png "Plot.")
+[//]: # (We further simplify the graphical model by using only the confidence threshold as a latent variable.)
 
-The two key differences between BPL and VAE are: 1) BPL has only one latent variable which has a clear prior, while VAE has high dimensional latent variables without a clear prior; 2) VAE does MAP estimation of reconstruction of input image, while BPL does MAP estimation of unseen label of input image.
+[//]: # ()
+[//]: # ([//]: # &#40;See the illustration below:&#41;)
+[//]: # ([//]: # &#40;![PL vs EM]&#40;pics/main_method.png "Plot."&#41;&#41;)
+[//]: # ([//]: # &#40;### Bayesian Pseudo Labels&#41;)
+[//]: # ()
+[//]: # (Bayesian pseudo label &#40;BPL&#41; is a probabilistic generalisation of pseudo labelling via Bayes rule. Because the full E-step is intractable &#40;more details in our paper&#41;, BPL estimates the maximum likelihood of labels of unlabelled data with variational inference. The comparison between Bayesian pseudo label and Variational auto encoder is illustrated beneath: )
+
+[//]: # ()
+[//]: # ([//]: # &#40;![BPL vs VAE]&#40;pics/BPL_VAE.png "Plot."&#41;&#41;)
+[//]: # ()
+[//]: # (The two key differences between BPL and VAE are: 1&#41; BPL has only one latent variable which has a clear prior, while VAE has high dimensional latent variables without a clear prior; 2&#41; VAE does MAP estimation of reconstruction of input image, while BPL does MAP estimation of unseen label of input image.)
 
 ### Installation and Usage
 This repository is based on PyTorch 1.4. To use this code, please first clone the repo and install the enviroment.
@@ -88,18 +93,26 @@ checkpoint:
   checkpoint_path: '/some/path/to/saved/model' # checkpoint path
 ```
 
-### Different implementations of K-L loss of Bayesian Pseudo Labels:
-There are two implementations of kl loss of the threshold of the pseudo labels. See the exact KL loss implementations in libs.Loss.kld_loss
-1. The original implementation with hyperparameter searching of prior of mean (mu) (MICCAI version). To use the original Bayesian pseudo labels, set up "learn_threshold" as 1
-and "threshold_flag" as 0. The standard deviation prior is approximated as min [(1 - mu_prior) / 3, mu_prior / 3]. 
+[//]: # (### Different implementations of K-L loss of Bayesian Pseudo Labels:)
 
-2. The simplified Bayesian pseudo label without hyperparameter searching of prior of mean (mu). The mu_prior is approximated as Exp[.] of prediction probability. The standard deviation prior
-is still approximated as min [(1 - mu_prior) / 3, mu_prior / 3]. 
+[//]: # (There are two implementations of kl loss of the threshold of the pseudo labels. See the exact KL loss implementations in libs.Loss.kld_loss)
 
-Other alternative implementations with suitable assumptions could also be used to simplify the K-L loss.
+[//]: # (1. The original implementation with hyperparameter searching of prior of mean &#40;mu&#41; &#40;MICCAI version&#41;. To use the original Bayesian pseudo labels, set up "learn_threshold" as 1)
 
-### On the learnt threshold
-We learn each threshold scalar for each image in the current implementation before we average them across batch. See the output of libs.Train3D.calculate_kl_loss
+[//]: # (and "threshold_flag" as 0. The standard deviation prior is approximated as min [&#40;1 - mu_prior&#41; / 3, mu_prior / 3]. )
+
+[//]: # ()
+[//]: # (2. The simplified Bayesian pseudo label without hyperparameter searching of prior of mean &#40;mu&#41;. The mu_prior is approximated as Exp[.] of prediction probability. The standard deviation prior)
+
+[//]: # (is still approximated as min [&#40;1 - mu_prior&#41; / 3, mu_prior / 3]. )
+
+[//]: # ()
+[//]: # (Other alternative implementations with suitable assumptions could also be used to simplify the K-L loss.)
+
+[//]: # ()
+[//]: # (### On the learnt threshold)
+
+[//]: # (We learn each threshold scalar for each image in the current implementation before we average them across batch. See the output of libs.Train3D.calculate_kl_loss)
 
 ### Example Use:
 Task06_Lung from medicaldecathlon.com
@@ -119,5 +132,6 @@ If you find our paper or code useful for your research, please consider citing:
 Please contact 'xumoucheng28@gmail.com'
 
 
-### Ackwnoledgement
-Massive thanks to my amazing colleagues at UCL and GSK including Yukun Zhou, Jin Chen, Marius de Groot, Fred Wilson, Danny Alexander, Neil Oxtoby, Yipeng Hu and Joe Jacob.
+[//]: # (### Ackwnoledgement)
+
+[//]: # (Massive thanks to my amazing colleagues at UCL and GSK including Yukun Zhou, Jin Chen, Marius de Groot, Fred Wilson, Danny Alexander, Neil Oxtoby, Yipeng Hu and Joe Jacob.)

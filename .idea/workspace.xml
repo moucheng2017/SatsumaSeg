@@ -5,10 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/config/lung14.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung14.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lung15.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung15.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lung16.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung16.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/lung17.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/lung17.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/inference/3D_inference_chopping_multi_channel.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/inference/3D_inference_sliding (it does not work now).py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/Inference2DOrthogonal.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/2D_inference.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/Inference2DOrthogonalEnsemble.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/2D_inference_ensemble.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/Inference3D.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/covid_seg_check.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/covid_seg_check.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/np2nifti.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/np2nifti.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/inference_ppfe/connectivity_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/connectivity_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/3D_inference_chopping.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Loss.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,28 +61,28 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/cluster",
+    "last_opened_file_path": "/home/moucheng/projects_codes/MisMatchSSL",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/inference" />
+      <recent name="$PROJECT_DIR$/inference/inference_mri" />
       <recent name="$PROJECT_DIR$/cluster" />
       <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/config_brain" />
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/models" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tools" />
+      <recent name="$PROJECT_DIR$/inference" />
+      <recent name="$PROJECT_DIR$/preprocessing" />
       <recent name="$PROJECT_DIR$/arXiv" />
       <recent name="$PROJECT_DIR$/libs" />
-      <recent name="$PROJECT_DIR$/inference/inference_covid_np" />
-      <recent name="$PROJECT_DIR$/preprocessing/data_format_process" />
-      <recent name="$PROJECT_DIR$/preprocessing/check_processed_data" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.Run">
-    <configuration name="Inference2DOrthogonalEnsemble" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+  <component name="RunManager">
+    <configuration name="2D_inference_ensemble" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="MedicalMetaLearning" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -85,7 +94,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/inference/Inference2DOrthogonalEnsemble.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/2D_inference_ensemble.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -137,7 +146,7 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.Inference2DOrthogonalEnsemble" />
+      <item itemvalue="Python.2D_inference_ensemble" />
       <item itemvalue="Python.Padding" />
       <item itemvalue="Python.Run" />
     </list>
@@ -150,13 +159,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637759733331</updated>
-    </task>
-    <task id="LOCAL-00189" summary="2022 11 24b: ..">
-      <created>1669300201140</created>
-      <option name="number" value="00189" />
-      <option name="presentableId" value="LOCAL-00189" />
-      <option name="project" value="LOCAL" />
-      <updated>1669300201141</updated>
     </task>
     <task id="LOCAL-00190" summary="2022 11 25a: new exps">
       <created>1669385779359</created>
@@ -494,7 +496,14 @@
       <option name="project" value="LOCAL" />
       <updated>1677613713028</updated>
     </task>
-    <option name="localTasksCounter" value="238" />
+    <task id="LOCAL-00238" summary="2023 02 28 k: new lr for lung">
+      <created>1677613765657</created>
+      <option name="number" value="00238" />
+      <option name="presentableId" value="LOCAL-00238" />
+      <option name="project" value="LOCAL" />
+      <updated>1677613765657</updated>
+    </task>
+    <option name="localTasksCounter" value="239" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -510,7 +519,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="2023 02 03a: change normalisatoin" />
     <MESSAGE value="2023 02 03b: asking to use a100" />
     <MESSAGE value="2023 02 08 a: new post processing by denoising" />
     <MESSAGE value="2023 02 27 a: new experiments for MIA" />
@@ -535,6 +543,7 @@
     <MESSAGE value="2023 02 28 h: new experiments with brain" />
     <MESSAGE value="2023 02 28 i: 3 more experiments on the mu prior hyper parameter" />
     <MESSAGE value="2023 02 28 j: a coupel of more experiments to figure out why it is not converging on lung" />
-    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 j: a coupel of more experiments to figure out why it is not converging on lung" />
+    <MESSAGE value="2023 02 28 k: new lr for lung" />
+    <option name="LAST_COMMIT_MESSAGE" value="2023 02 28 k: new lr for lung" />
   </component>
 </project>

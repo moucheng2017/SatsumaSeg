@@ -84,10 +84,11 @@ def network_intialisation(args):
         model_name = 'Unet3D_l_' + str(args.train.lr) + \
                      '_b' + str(args.train.batch) + \
                      '_w' + str(args.model.width) + \
+                     '_d' + str(args.model.depth) + \
                      '_i' + str(args.train.iterations) + \
-                     '_crop_d' + str(args.train.new_size_d) + \
-                     '_crop_h' + str(args.train.new_size_h) + \
-                     '_crop_w' + str(args.train.new_size_w)
+                     '_cd' + str(args.train.new_size_d) + \
+                     '_ch' + str(args.train.new_size_h) + \
+                     '_cw' + str(args.train.new_size_w)
 
     else:
         model = UnetBPL3D(in_ch=args.model.input_dim,
@@ -103,8 +104,8 @@ def network_intialisation(args):
                      '_i' + str(args.train.iterations) + \
                      '_u' + str(args.train.batch_u) + \
                      '_mu' + str(args.train.mu) + \
-                     '_thresh' + str(args.train.learn_threshold) + \
-                     '_flag' + str(args.train.threshold_flag) + \
+                     '_th' + str(args.train.learn_threshold) + \
+                     '_thf' + str(args.train.threshold_flag) + \
                      '_cd' + str(args.train.new_size_d) + \
                      '_ch' + str(args.train.new_size_h) + \
                      '_cw' + str(args.train.new_size_w)

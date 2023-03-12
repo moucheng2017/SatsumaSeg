@@ -1,8 +1,8 @@
 import nibabel as nib
 from pathlib import Path
 import sys
+sys.path.append("../inference")
 sys.path.append("..")
-sys.path.append("../..")
 import numpy as np
 import os
 
