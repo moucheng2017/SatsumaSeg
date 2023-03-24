@@ -5,19 +5,87 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8e58bba-ab7f-429d-a54e-772893f1f1de" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/inference/3D_inference_chopping_multi_channel.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inference/3D_inference_sliding (it does not work now).py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/configs/brain1.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/configs/brainlocal.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/kl_loss_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/Inference2DOrthogonal.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/2D_inference.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/Inference2DOrthogonalEnsemble.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/2D_inference_ensemble.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/Inference3D.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/covid_seg_check.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/covid_seg_check.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/inference_covid_np/np2nifti.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing/np2nifti.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/inference_ppfe/connectivity_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/connectivity_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inference/inference_ppfe/run_inference.py" beforeDir="false" afterPath="$PROJECT_DIR$/inference/3D_inference_chopping.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSemi3D.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainSup3D.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/arguments.py" beforeDir="false" afterPath="$PROJECT_DIR$/arguments.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/airway1.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain1.sh" beforeDir="false" afterPath="$PROJECT_DIR$/cluster/brain1.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain10.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain11.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain12.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain13.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain14.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain2.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain3.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain4.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain5.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain6.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain7.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain8.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/brain9.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung1.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung10.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung11.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung12.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung13.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung14.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung15.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung16.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung17.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung2.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung3.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung4.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung6.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung7.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung8.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/lung9.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/ppfe3a.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster/ppfe3c.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/exp.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung01.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung02.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung03.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung04.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung06.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung07.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung08.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung09.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung10.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung11.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung12.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung13.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung14.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung15.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung16.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lung17.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/lunglocal.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain1.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain10.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain11.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain12.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain13.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain14.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain2.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain3.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain4.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain5.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain6.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain7.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain8.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brain9.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_brain/brainlocal.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Dataloader3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Dataloader3D.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/libs/Helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Helpers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/libs/Loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Loss.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/deprecated/Test_old.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Train3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Train3D.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/Validate.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/Validate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Models3D.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/Models3D.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,24 +129,24 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/moucheng/projects_codes/MisMatchSSL",
+    "last_opened_file_path": "/home/moucheng/projects_codes/SatsumaSeg/configs_brain",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/configs_brain" />
+      <recent name="$PROJECT_DIR$/configs" />
+      <recent name="$PROJECT_DIR$/config_brain" />
       <recent name="$PROJECT_DIR$/inference" />
       <recent name="$PROJECT_DIR$/inference/inference_mri" />
-      <recent name="$PROJECT_DIR$/cluster" />
-      <recent name="$PROJECT_DIR$/config" />
-      <recent name="$PROJECT_DIR$/config_brain" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/tools" />
+      <recent name="$PROJECT_DIR$/deprecated" />
+      <recent name="$PROJECT_DIR$/configs" />
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/inference" />
-      <recent name="$PROJECT_DIR$/preprocessing" />
-      <recent name="$PROJECT_DIR$/arXiv" />
-      <recent name="$PROJECT_DIR$/libs" />
+      <recent name="$PROJECT_DIR$/config" />
     </key>
   </component>
   <component name="RunManager">
